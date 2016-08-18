@@ -114,9 +114,22 @@ void process(const char* buffer)
         {
             int index;
             const int left = get_int(buffer+1, BUF_SIZE-1, index); 
-            const int right = get_int(buffer+index, BUF_SIZE-1, index); 
+            const int right = get_int(buffer+index, BUF_SIZE-1, index);
+            if ((left < -127) || (left > 127))
+            {
+                Serial.print("ERROR: Invalid power value: ");
+                Serial.println(left);
+                return;
+            }
+            if ((right < -127) || (right > 127))
+            {
+                Serial.print("ERROR: Invalid power value: ");
+                Serial.println(right);
+                return;
+            }
             set_power(0, left);
             set_power(1, right);
+            Serial.println("OK");
         }
         return;
 
@@ -129,6 +142,7 @@ void process(const char* buffer)
                 brake_on();
             else
                 brake_off();
+            Serial.println("OK");
         }
         return;
         
