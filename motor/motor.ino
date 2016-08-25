@@ -15,6 +15,7 @@ const int R_IS_B = A3;
 const int L_IS_B = 13;
 const int BRAKE = 8;
 const int BUF_SIZE = 200;
+const int MAX_IDLE_COUNT = 200;
 
 void setup()
 {
@@ -64,7 +65,7 @@ void brake_off()
 
 void set_power(// 0-1
                int motor,
-               // -127..127
+               // -255..255
                int power)
 {
     if (power != 0)
@@ -75,9 +76,16 @@ void set_power(// 0-1
     const int r_enable_pin = motor ? R_EN_B : R_EN_A;
     digitalWrite(l_enable_pin, power != 0);
     digitalWrite(r_enable_pin, power != 0);
-    const int pwr = power+128;
-    analogWrite(l_pwm_pin, pwr);
-    analogWrite(r_pwm_pin, 255-pwr);
+    if (power >= 0)
+    {
+        analogWrite(l_pwm_pin, power);
+        analogWrite(r_pwm_pin, 0);
+    }
+    else
+    {   
+        analogWrite(l_pwm_pin, 0);
+        analogWrite(r_pwm_pin, power);
+    }
 }
 
 int get_int(const char* buffer, int len, int& next)
@@ -115,13 +123,13 @@ void process(const char* buffer)
             int index;
             const int left = get_int(buffer+1, BUF_SIZE-1, index); 
             const int right = get_int(buffer+index, BUF_SIZE-1, index);
-            if ((left < -127) || (left > 127))
+            if ((left < -255) || (left > 255))
             {
                 Serial.print("ERROR: Invalid power value: ");
                 Serial.println(left);
                 return;
             }
-            if ((right < -127) || (right > 127))
+            if ((right < -255) || (right > 255))
             {
                 Serial.print("ERROR: Invalid power value: ");
                 Serial.println(right);
@@ -176,15 +184,23 @@ void run_test()
     digitalWrite(R_EN_A, HIGH);
     digitalWrite(L_EN_A, HIGH);
     delay(1000);
-    for (int i = MIN_PWR; i < MAX_PWR; i++)
+    for (int i = 0; i < 256; i++)
     {
-        Serial.print("Power ");
+        Serial.print("A L ");
         Serial.println(i);
         analogWrite(R_PWM_A, i);
-        analogWrite(L_PWM_A, 255-i);
+        delay(1000);
+    }
+    delay(1000);
+    for (int i = MIN_PWR; i < MAX_PWR; i++)
+    {
+        Serial.print("A R ");
+        Serial.println(i);
+        analogWrite(L_PWM_A, i);
         delay(100);
     }
     Serial.println("Off");
+#if 0
     Serial.println("Disable");
     digitalWrite(R_EN_A, LOW);
     digitalWrite(L_EN_A, LOW);
@@ -239,39 +255,49 @@ void run_test()
     digitalWrite(L_EN_B, LOW);
     digitalWrite(BRAKE, LOW);
     digitalWrite(INTERNAL_LED, LOW);
+#endif
     delay(5000);
 }
 
 int index = 0;
 char buffer[BUF_SIZE];
+int idle_count = 0;
 
 void loop()
 {
 #if !TEST_MODE
     if (Serial.available())
     {
-       // Command from PC
-       char c = Serial.read();
-       if ((c == '\r') || (c == '\n'))
-       {
-           buffer[index] = 0;
-           index = 0;
-           process(buffer);
-       }
-       else
-       {
-           if (index >= BUF_SIZE)
-           {
-               Serial.println("Error: Line too long");
-               index = 0;
-               return;
-           }
-           buffer[index++] = c;
-       }
+        // Command from PC
+        char c = Serial.read();
+        if ((c == '\r') || (c == '\n'))
+        {
+            buffer[index] = 0;
+            index = 0;
+            process(buffer);
+            idle_count = 0;
+        }
+        else
+        {
+            if (index >= BUF_SIZE)
+            {
+                Serial.println("Error: Line too long");
+                index = 0;
+                return;
+            }
+            buffer[index++] = c;
+        }
     }
     else
     {
         delay(10);
+        if (++idle_count > MAX_IDLE_COUNT)
+        {
+            idle_count = 0;
+            set_power(0, 0);
+            set_power(1, 0);
+            Serial.println("Shut down due to inactivity");
+        }
     }
     delay(10);
 #else

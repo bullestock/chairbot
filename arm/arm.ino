@@ -61,6 +61,9 @@ void process(const char* buffer)
             int index;
             const int axis = get_int(buffer+1, BUF_SIZE-1, index); 
             const int value = get_int(buffer+index, BUF_SIZE-1, index); 
+            Serial.print(axis);
+            Serial.print(": ");
+            Serial.println(value);
             switch (axis)
             {
             case 0:
