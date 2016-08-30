@@ -15,7 +15,9 @@ const int R_IS_B = A3;
 const int L_IS_B = 13;
 const int BRAKE = 8;
 const int BUF_SIZE = 200;
-const int MAX_IDLE_COUNT = 200;
+const int MAX_IDLE_COUNT = 20000;
+
+void run_test();
 
 void setup()
 {
@@ -50,7 +52,7 @@ void setup()
     digitalWrite(BRAKE, LOW);
 
     Serial.begin(57600);
-    Serial.println("Chairbot ready");
+    Serial.println("Chairbot ready 0.1");
 }
 
 void brake_on()
@@ -80,11 +82,16 @@ void set_power(// 0-1
     {
         analogWrite(l_pwm_pin, power);
         analogWrite(r_pwm_pin, 0);
+        Serial.print("L ");
+        Serial.print(power);
+        Serial.println(" R 0");
     }
     else
     {   
         analogWrite(l_pwm_pin, 0);
-        analogWrite(r_pwm_pin, power);
+        analogWrite(r_pwm_pin, -power);
+        Serial.print("L 0 R ");
+        Serial.println(power);
     }
 }
 
@@ -164,6 +171,25 @@ void process(const char* buffer)
 
 void run_test()
 {
+    for (int i = 0; i < 256; i++)
+    {
+        Serial.print("A ");
+        Serial.println(i);
+        set_power(0, i);
+        delay(200);
+    }
+    set_power(0, 0);
+    delay(2000);
+    for (int i = 0; i < 256; i++)
+    {
+        Serial.print("B ");
+        Serial.println(i);
+        set_power(1, i);
+        delay(200);
+    }
+    set_power(1, 0);
+
+#if 0
     const int DELTA = 80;
     const int MAX_PWR = 128+DELTA;
     const int MIN_PWR = 128-DELTA;
@@ -200,7 +226,7 @@ void run_test()
         delay(100);
     }
     Serial.println("Off");
-#if 0
+
     Serial.println("Disable");
     digitalWrite(R_EN_A, LOW);
     digitalWrite(L_EN_A, LOW);
