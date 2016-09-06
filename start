@@ -1,7 +1,16 @@
 #!/bin/bash
+sudo sixad --stop &
 INETADDR=`ifconfig eth0 | grep "inet addr" | cut -d ' ' -f 12 | sed -e s/addr://`
-LCDPORT=/dev/ttyUSB0
+LCDPORT=/dev/lcdsmartie
 LCD="/home/pi/agalanin-smartie-utils-aaa87234f4eb/smartie-cat.tcl -tty $LCDPORT -height 2"
+
+if hcitool dev|grep hci0; then
+  echo -e "$INETADDR\nBluetooth OK" | $LCD
+else
+  echo -e "$INETADDR\nNo Bluetooth device" | $LCD
+  exit
+fi
+
 echo -e "$INETADDR\nStart sixad" | $LCD
 sudo sixad --start &
 echo -e "$INETADDR\nPress PS button" | $LCD
