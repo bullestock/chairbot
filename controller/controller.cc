@@ -62,6 +62,15 @@ int set_interface_attribs(int fd, int speed)
     return 0;
 }
 
+const char* UPDATELCD = "/home/pi/updatelcd";
+
+void show_voltage(const string& v)
+{
+    ostringstream s;
+    s << UPDATELCD << " " << v;
+    system(s.str().c_str());
+}
+
 int main(int argc, char** argv)
 {
     // Create an instance of Joystick
@@ -94,8 +103,9 @@ int main(int argc, char** argv)
     int y = 0;
     int powerL = 0;
     int powerR = 0;
-    struct timespec last_tick;
-    if (clock_gettime(CLOCK_MONOTONIC, &last_tick))
+    struct timespec last_tick, last_voltage_update_tick;
+    if (clock_gettime(CLOCK_MONOTONIC, &last_tick) ||
+        clock_gettime(CLOCK_MONOTONIC, &last_voltage_update_tick))
     {
         cout << "clock_gettime() failed: " << errno << endl;
         return 1;
@@ -194,6 +204,27 @@ int main(int argc, char** argv)
             s << "M " << powerL << " " << powerR << endl;
             write(fd, s.str().c_str(), s.str().size());
             last_tick = cur_tick;
+        }
+        const auto since_last_voltage_update = (cur_tick.tv_sec - last_voltage_update_tick.tv_sec) + (cur_tick.tv_nsec - last_voltage_update_tick.tv_nsec)/1000000000.0;
+        if (since_last_voltage_update >= 60)
+        {
+            ostringstream s;
+            s << "V" << endl;
+            tcflush(fd, TCIOFLUSH);
+            write(fd, s.str().c_str(), s.str().size());
+            char buf[30] = { 0 };
+            const auto nbytes = read(fd, buf, sizeof(buf)-1);
+            if (nbytes < 1)
+            {
+                cout << "Error reading battery voltage" << endl;
+            }
+            else
+            {
+                buf[nbytes] = 0;
+                cout << "Battery voltage " << buf << endl;
+                show_voltage(buf);
+            }
+            last_voltage_update_tick = cur_tick;
         }
     }
 }
