@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         }
     }
 
-    const char* portname = "/dev/ttyUSB0";
+    const char* portname = "/dev/ardumotor";
     int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
     if (fd < 0)
     {
