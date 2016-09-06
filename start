@@ -1,26 +1,25 @@
 #!/bin/bash
+UPDATELCD=/home/pi/updatelcd
+
 sudo sixad --stop &
-INETADDR=`ifconfig eth0 | grep "inet addr" | cut -d ' ' -f 12 | sed -e s/addr://`
-LCDPORT=/dev/lcdsmartie
-LCD="/home/pi/agalanin-smartie-utils-aaa87234f4eb/smartie-cat.tcl -tty $LCDPORT -height 2"
 
 if hcitool dev|grep hci0; then
-  echo -e "$INETADDR\nBluetooth OK" | $LCD
+  $UPDATELCD "Bluetooth OK"
 else
-  echo -e "$INETADDR\nNo Bluetooth device" | $LCD
+  $UPDATELCD "No Bluetooth device"
   exit
 fi
 
-echo -e "$INETADDR\nStart sixad" | $LCD
+$UPDATELCD "Start sixad"
 sudo sixad --start &
-echo -e "$INETADDR\nPress PS button" | $LCD
+$UPDATELCD "Press PS button"
 
 while true; do
   if dmesg |grep "Sony Computer"; then
-    echo -e "$INETADDR\nConnected" | $LCD
+    $UPDATELCD "Connected"
     break
   fi
 done
 
-echo -e "$INETADDR\nStart controller" | $LCD
+$UPDATELCD "Start controller"
 /home/pi/chairbot/controller/controller > /dev/null &
