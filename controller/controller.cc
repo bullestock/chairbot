@@ -65,13 +65,20 @@ int set_interface_attribs(int fd, int speed)
 int main(int argc, char** argv)
 {
     // Create an instance of Joystick
-    Joystick joystick("/dev/input/js0");
+    Joystick* js = nullptr;
 
-    // Ensure that it was found and that we can use it
-    if (!joystick.isFound())
+    while (!js)
     {
-        printf("open failed.\n");
-        exit(1);
+        js = new Joystick("/dev/input/js0");
+
+        // Ensure that it was found and that we can use it
+        if (!js->isFound())
+        {
+            delete js;
+            js = nullptr;
+            cerr << "Failed to open joystick device" << endl;
+            sleep(2);
+        }
     }
 
     const char* portname = "/dev/ttyUSB0";
@@ -101,7 +108,7 @@ int main(int argc, char** argv)
 
         // Attempt to sample an event from the joystick
         JoystickEvent event;
-        if (joystick.sample(&event))
+        if (js->sample(&event))
         {
             if (event.isButton())
             {
