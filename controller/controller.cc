@@ -62,13 +62,18 @@ int set_interface_attribs(int fd, int speed)
     return 0;
 }
 
-const char* UPDATELCD = "/home/pi/updatelcd";
+const char* UPDATELCD = "/home/pi/chairbot/updatelcd";
+
+void updatelcd(const string& msg)
+{
+    ostringstream s;
+    s << UPDATELCD << " \"" << msg << '"';
+    system(s.str().c_str());
+}
 
 void show_voltage(const string& v)
 {
-    ostringstream s;
-    s << UPDATELCD << " " << v;
-    system(s.str().c_str());
+   updatelcd(v);
 }
 
 int main(int argc, char** argv)
@@ -94,6 +99,7 @@ int main(int argc, char** argv)
     int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
     if (fd < 0)
     {
+        updatelcd("No motor driver");
         printf("Error opening %s: %s\n", portname, strerror(errno));
         return -1;
     }

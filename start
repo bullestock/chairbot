@@ -1,5 +1,5 @@
 #!/bin/bash
-UPDATELCD=/home/pi/updatelcd
+UPDATELCD=/home/pi/chairbot/updatelcd
 
 sudo sixad --stop &
 
