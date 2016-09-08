@@ -104,6 +104,7 @@ int main(int argc, char** argv)
         return -1;
     }
     set_interface_attribs(fd, B57600);
+    usleep(100000);
     char buf[30] = { 0 };
     const auto nbytes = read(fd, buf, sizeof(buf)-1);
     buf[nbytes] = 0;
@@ -113,9 +114,10 @@ int main(int argc, char** argv)
     int y = 0;
     int powerL = 0;
     int powerR = 0;
-    struct timespec last_tick, last_voltage_update_tick;
+    struct timespec last_tick, last_voltage_update_tick, last_event_tick;
     if (clock_gettime(CLOCK_MONOTONIC, &last_tick) ||
-        clock_gettime(CLOCK_MONOTONIC, &last_voltage_update_tick))
+        clock_gettime(CLOCK_MONOTONIC, &last_voltage_update_tick) ||
+        clock_gettime(CLOCK_MONOTONIC, &last_event_tick))
     {
         cout << "clock_gettime() failed: " << errno << endl;
         return 1;
@@ -124,7 +126,14 @@ int main(int argc, char** argv)
     while (true)
     {
         // Restrict rate
-        usleep(1000);
+        usleep(10000);
+
+        struct timespec cur_tick;
+        if (clock_gettime(CLOCK_MONOTONIC, &cur_tick))
+        {
+            cout << "clock_gettime() failed: " << errno << endl;
+            return 1;
+        }
 
         // Attempt to sample an event from the joystick
         JoystickEvent event;
@@ -136,11 +145,6 @@ int main(int argc, char** argv)
                        event.number,
                        event.value == 0 ? "up" : "down");
             }
-            else if (event.isAxis() && ((event.number < 4) ||
-                                        ((event.number >= 8) && (event.number < 20))))
-            {
-                //printf("Axis %u is at position %d\n", event.number, event.value);
-            }
             if (event.isAxis())
             {
                 const int maxRange = 32767;
@@ -149,10 +153,12 @@ int main(int argc, char** argv)
                 case 2:
                     // X
                     x = event.value;
+                    last_event_tick = cur_tick;
                     break;
                 case 3:
                     // Y
                     y = event.value;
+                    last_event_tick = cur_tick;
                     break;
                 }
 
@@ -200,25 +206,29 @@ int main(int argc, char** argv)
             }
         }
 
-        struct timespec cur_tick;
-        if (clock_gettime(CLOCK_MONOTONIC, &cur_tick))
-        {
-            cout << "clock_gettime() failed: " << errno << endl;
-            return 1;
-        }
         const auto elapsed = (cur_tick.tv_sec - last_tick.tv_sec) + (cur_tick.tv_nsec - last_tick.tv_nsec)/1000000000.0;
-        if (elapsed >= 0.2)
+        if (elapsed >= 0.5)
         {
             cout << "X " << setw(3) << x << " Y " << setw(3) << y << " L " << setw(3) << powerL << " R " << setw(3) << powerR << endl;
             ostringstream s;
             s << "M " << powerL << " " << powerR << endl;
             write(fd, s.str().c_str(), s.str().size());
+            cout << s.str();
             char buf[30] = { 0 };
             const auto nbytes = read(fd, buf, sizeof(buf)-1);
             buf[nbytes] = 0;
-            cout << "RESPONSE: " << buf << endl;
+            //cout << "RESPONSE: " << buf << endl;
             last_tick = cur_tick;
         }
+
+        const auto since_last_event = (cur_tick.tv_sec - last_event_tick.tv_sec) + (cur_tick.tv_nsec - last_event_tick.tv_nsec)/1000000000.0;
+        if (since_last_event >= 2)
+        {
+            cout << "STOP" << endl;
+            powerL = powerR = 0;
+            last_event_tick = cur_tick;
+        }
+
         const auto since_last_voltage_update = (cur_tick.tv_sec - last_voltage_update_tick.tv_sec) + (cur_tick.tv_nsec - last_voltage_update_tick.tv_nsec)/1000000000.0;
         if (since_last_voltage_update >= 60)
         {
