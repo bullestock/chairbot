@@ -104,6 +104,10 @@ int main(int argc, char** argv)
         return -1;
     }
     set_interface_attribs(fd, B57600);
+    char buf[30] = { 0 };
+    const auto nbytes = read(fd, buf, sizeof(buf)-1);
+    buf[nbytes] = 0;
+    cout << "BANNER: " << buf << endl;
   
     int x = 0;
     int y = 0;
@@ -209,6 +213,10 @@ int main(int argc, char** argv)
             ostringstream s;
             s << "M " << powerL << " " << powerR << endl;
             write(fd, s.str().c_str(), s.str().size());
+            char buf[30] = { 0 };
+            const auto nbytes = read(fd, buf, sizeof(buf)-1);
+            buf[nbytes] = 0;
+            cout << "RESPONSE: " << buf << endl;
             last_tick = cur_tick;
         }
         const auto since_last_voltage_update = (cur_tick.tv_sec - last_voltage_update_tick.tv_sec) + (cur_tick.tv_nsec - last_voltage_update_tick.tv_nsec)/1000000000.0;
