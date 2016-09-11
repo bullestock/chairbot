@@ -1,5 +1,9 @@
 #!/bin/bash
 INETADDR=`ifconfig eth0 | grep "inet addr" | cut -d ' ' -f 12 | sed -e s/addr://`
+if [ -z "$INETADDR" ]; then
+   INETADDR=`ifconfig wlan0 | grep "inet addr" | cut -d ' ' -f 12 | sed -e s/addr://`
+fi
+echo $INETADDR
 LCDPORT=/dev/lcdsmartie
 LCD="/home/pi/agalanin-smartie-utils-aaa87234f4eb/smartie-cat.tcl -tty $LCDPORT -height 2"
 echo -e "$INETADDR\n$1" | $LCD
