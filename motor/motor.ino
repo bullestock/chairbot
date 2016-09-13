@@ -160,7 +160,7 @@ void process(const char* buffer)
 
     case 'v':
     case 'V':
-        Serial.println(analogRead(V_SENSE)/1023.0*5*4);
+        Serial.println(analogRead(V_SENSE)/1023.0*5*5);
         break;
         
     default:
