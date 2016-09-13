@@ -78,6 +78,10 @@ void show_voltage(const string& v)
 
 int main(int argc, char** argv)
 {
+    updatelcd("Ready");
+
+    int max_power = 255;
+    
     // Create an instance of Joystick
     Joystick* js = nullptr;
 
@@ -206,6 +210,10 @@ int main(int argc, char** argv)
             }
         }
 
+        // Limit power
+        powerL = max(-max_power, min(powerL, max_power));
+        powerR = max(-max_power, min(powerR, max_power));
+       
         const auto elapsed = (cur_tick.tv_sec - last_tick.tv_sec) + (cur_tick.tv_nsec - last_tick.tv_nsec)/1000000000.0;
         if (elapsed >= 0.5)
         {
