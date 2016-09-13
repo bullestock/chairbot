@@ -21,5 +21,9 @@ while true; do
   fi
 done
 
-$UPDATELCD "Start controller"
-/home/pi/chairbot/controller/controller > /dev/null &
+if [ -e /home/pi/chairbot/noautostart ]; then
+    $UPDATELCD "NO AUTOSTART"    
+else
+    $UPDATELCD "Start controller"
+    /home/pi/chairbot/controller/controller > /dev/null &
+fi
