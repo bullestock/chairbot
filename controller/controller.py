@@ -2,7 +2,7 @@
 # Based on information from:
 # https://www.kernel.org/doc/Documentation/input/joystick-api.txt
 
-import os, struct, array, serial, time
+import os, struct, array, serial, time, sys
 from fcntl import ioctl
 
 # Iterate over the joystick devices.
@@ -11,9 +11,6 @@ print('Available devices:')
 for fn in os.listdir('/dev/input'):
     if fn.startswith('js'):
         print('  /dev/input/%s' % (fn))
-
-# We'll store the states here.
-button_states = {}
 
 # These constants were borrowed from linux/input.h
 axis_names = {
@@ -90,13 +87,13 @@ button_names = {
 axis_map = []
 button_map = []
 
+#!! handle failure
 # Open the joystick device.
 fn = '/dev/input/js0'
 print('Opening %s...' % fn)
 jsdev = open(fn, 'rb')
 
 # Get the device name.
-#buf = bytearray(63)
 buf = array.array('c', ['\0'] * 64)
 ioctl(jsdev, 0x80006a13 + (0x10000 * len(buf)), buf) # JSIOCGNAME(len)
 js_name = buf.tostring()
@@ -126,7 +123,6 @@ ioctl(jsdev, 0x80406a34, buf) # JSIOCGBTNMAP
 for btn in buf[:num_buttons]:
     btn_name = button_names.get(btn, 'unknown(0x%03x)' % btn)
     button_map.append(btn_name)
-    button_states[btn_name] = 0
 
 print '%d axes found: %s' % (num_axes, ', '.join(axis_map))
 print '%d buttons found: %s' % (num_buttons, ', '.join(button_map))
@@ -159,7 +155,27 @@ def Writeline(data, line):
       lcd.write(item)
    time.sleep(wait)
 
-Writeline("START", 2)
+def UpdateLcd(s):
+    Writeline(s, 2)
+    
+def ShowVoltage(v):
+    UpdateLcd(v)
+
+Writeline("Starting", 2)
+
+try:
+    motor = serial.Serial("/dev/ardumotor", 57600,
+                          serial.EIGHTBITS,
+                          serial.PARITY_NONE,
+                          serial.STOPBITS_ONE,
+                          timeout = 5,
+                          rtscts = False)
+except serial.serialutil.SerialException:
+    print "Could not open motor driver"
+    UpdateLcd("No motor driver")
+    sys.exit()
+
+max_power = 255
 
 # Main event loop
 while True:
@@ -173,7 +189,6 @@ while True:
         if type & 0x01:
             button = button_map[number]
             if button:
-                button_states[button] = value
                 if value:
                     print "%s pressed" % (button)
                 else:
