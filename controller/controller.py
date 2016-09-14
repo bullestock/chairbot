@@ -2,7 +2,7 @@
 # Based on information from:
 # https://www.kernel.org/doc/Documentation/input/joystick-api.txt
 
-import os, struct, array
+import os, struct, array, serial, time
 from fcntl import ioctl
 
 # Iterate over the joystick devices.
@@ -130,6 +130,36 @@ for btn in buf[:num_buttons]:
 
 print '%d axes found: %s' % (num_axes, ', '.join(axis_map))
 print '%d buttons found: %s' % (num_buttons, ', '.join(button_map))
+
+lcd = serial.Serial("/dev/lcdsmartie", 9600,
+                    serial.EIGHTBITS,
+                    serial.PARITY_NONE,
+                    serial.STOPBITS_ONE,
+                    timeout=5,
+                    rtscts = False)
+wait = 0.04
+
+def BacklightOff():
+   command = ["\xFE","\x46","\xFE","\x46"]
+   for item in command:
+      lcd.write(item)
+   time.sleep(wait)
+   
+def BacklightOn():
+   command = ["\xFE","\x42","\x00","\xFE","\x42","\x00"]
+   for item in command:
+      lcd.write(item)   
+   time.sleep(wait)
+   
+def Writeline(data, line):
+   data = data.ljust(16)
+   data = data [:16]
+   command = ["\xFE", "\x47", "\x01", "\x01" if line == 1 else "\x02", data]   
+   for item in command:
+      lcd.write(item)
+   time.sleep(wait)
+
+Writeline("START", 2)
 
 # Main event loop
 while True:
