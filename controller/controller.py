@@ -124,8 +124,8 @@ for btn in buf[:num_buttons]:
     btn_name = button_names.get(btn, 'unknown(0x%03x)' % btn)
     button_map.append(btn_name)
 
-print '%d axes found: %s' % (num_axes, ', '.join(axis_map))
-print '%d buttons found: %s' % (num_buttons, ', '.join(button_map))
+print('%d axes found: %s' % (num_axes, ', '.join(axis_map)))
+print('%d buttons found: %s' % (num_buttons, ', '.join(button_map)))
 
 lcd = serial.Serial("/dev/lcdsmartie", 9600,
                     serial.EIGHTBITS,
@@ -171,7 +171,7 @@ try:
                           timeout = 5,
                           rtscts = False)
 except serial.serialutil.SerialException:
-    print "Could not open motor driver"
+    print("Could not open motor driver")
     UpdateLcd("No motor driver")
     sys.exit()
 
@@ -184,19 +184,19 @@ while True:
         time, value, type, number = struct.unpack('IhBB', evbuf)
 
         if type & 0x80:
-             print "(initial)",
+            print("(initial)")
 
         if type & 0x01:
             button = button_map[number]
             if button:
                 if value:
-                    print "%s pressed" % (button)
+                    print("%s pressed" % (button))
                 else:
-                    print "%s released" % (button)
+                    print("%s released" % (button))
 
         if type & 0x02:
             axis = axis_map[number]
             if axis == 'z':
-                print "X: %d" % value
+                print("X: %d" % value)
             if axis == 'rz':
-                print "Y: %d" % value
+                print("Y: %d" % value)
