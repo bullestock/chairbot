@@ -2,7 +2,7 @@
 # Based on information from:
 # https://www.kernel.org/doc/Documentation/input/joystick-api.txt
 
-import os, struct, array, serial, time, sys
+import os, struct, array, serial, time, sys, getopt
 from fcntl import ioctl
 
 # Iterate over the joystick devices.
@@ -127,33 +127,42 @@ for btn in buf[:num_buttons]:
 print('%d axes found' % num_axes)
 print('%d buttons found' % num_buttons)
 
-lcd = serial.Serial("/dev/lcdsmartie", 9600,
-                    serial.EIGHTBITS,
-                    serial.PARITY_NONE,
-                    serial.STOPBITS_ONE,
-                    timeout=5,
-                    rtscts = False)
+global no_display
+no_display = False
 wait = 0.04
 
+def init_lcd():
+    global lcd
+    if not no_display:
+        lcd = serial.Serial("/dev/lcdsmartie", 9600,
+                            serial.EIGHTBITS,
+                            serial.PARITY_NONE,
+                            serial.STOPBITS_ONE,
+                            timeout=5,
+                            rtscts = False)
+
 def BacklightOff():
-   command = ["\xFE","\x46","\xFE","\x46"]
-   for item in command:
-      lcd.write(item)
-   time.sleep(wait)
+    if not no_display:
+        command = ["\xFE","\x46","\xFE","\x46"]
+        for item in command:
+            lcd.write(item)
+        time.sleep(wait)
    
 def BacklightOn():
-   command = ["\xFE","\x42","\x00","\xFE","\x42","\x00"]
-   for item in command:
-      lcd.write(item)   
-   time.sleep(wait)
+    if not no_display:
+        command = ["\xFE","\x42","\x00","\xFE","\x42","\x00"]
+        for item in command:
+            lcd.write(item)   
+        time.sleep(wait)
    
 def Writeline(data, line):
-   data = data.ljust(16)
-   data = data [:16]
-   command = ["\xFE", "\x47", "\x01", "\x01" if line == 1 else "\x02", data]   
-   for item in command:
-      lcd.write(item)
-   time.sleep(wait)
+    if not no_display:
+        data = data.ljust(16)
+        data = data [:16]
+        command = ["\xFE", "\x47", "\x01", "\x01" if line == 1 else "\x02", data]   
+        for item in command:
+            lcd.write(item)
+        time.sleep(wait)
 
 def UpdateLcd(s):
     Writeline(s, 2)
@@ -161,125 +170,154 @@ def UpdateLcd(s):
 def show_voltage(v):
     UpdateLcd(v)
 
-Writeline("Starting", 2)
+global no_motor
+no_motor = False
 
-try:
-    motor = serial.Serial("/dev/ardumotor", 57600,
-                          serial.EIGHTBITS,
-                          serial.PARITY_NONE,
-                          serial.STOPBITS_ONE,
-                          timeout = 5,
-                          rtscts = False)
-except serial.serialutil.SerialException:
-    print("Could not open motor driver")
-    UpdateLcd("No motor driver")
-    sys.exit()
+def main(argv):
+    try:                                
+        opts, args = getopt.getopt(argv, "hdm", ["help", "nodisplay", "nomotor"])
+    except getopt.GetoptError:
+        usage() 
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage() 
+            sys.exit() 
+        elif opt == '-d':
+            global no_display
+            no_display = True
+        elif opt == '-m':
+            global no_motor
+            no_motor = True
 
-banner = motor.readline()
-print("Banner: %s" % banner)
+    init_lcd()
+    Writeline("Starting", 2)
 
-max_power = 255
-x = 0
-y = 0
-powerL = 0
-powerR = 0
+    if not no_motor:
+        try:
+            motor = serial.Serial("/dev/ardumotor", 57600,
+                                  serial.EIGHTBITS,
+                                  serial.PARITY_NONE,
+                                  serial.STOPBITS_ONE,
+                                  timeout = 5,
+                                  rtscts = False)
+        except serial.serialutil.SerialException:
+            print("Could not open motor driver")
+            UpdateLcd("No motor driver")
+            sys.exit()
 
-# The threshold at which the pivot action starts
-# This threshold is measured in units on the Y-axis
-# away from the X-axis (Y=0). A greater value will assign
-# more of the joystick's range to pivot actions.
-pivot = 8192.0
+        banner = motor.readline()
+        print("Banner: %s" % banner)
 
-pivot_min = 100
-pivot_max = 32767-100
-pivot_step = 128
+    max_power = 255
+    x = 0
+    y = 0
+    powerL = 0
+    powerR = 0
 
-#struct timespec last_loop
-first = True
-max_loop_time = 0
+    # The threshold at which the pivot action starts
+    # This threshold is measured in units on the Y-axis
+    # away from the X-axis (Y=0). A greater value will assign
+    # more of the joystick's range to pivot actions.
+    pivot = 8192.0
 
-max_range = 32767
+    pivot_min = 100
+    pivot_max = 32767-100
+    pivot_step = 128
 
-last_tick = time.time()
-last_voltage_update_tick = time.time()
+    #struct timespec last_loop
+    first = True
+    max_loop_time = 0
 
-# Main event loop
-while True:
-    time.sleep(0.1)
+    max_range = 32767
 
-    evbuf = jsdev.read(8)
-    if evbuf:
-        time_stamp, value, type, number = struct.unpack('IhBB', evbuf)
+    last_motor_update_time = time.time()
+    last_voltage_update_time = time.time()
 
-        is_initial = type & 0x80
+    # Main event loop
+    while True:
+        time.sleep(0.01)
 
-        if type & 0x01:
-            button = button_map[number]
-            # if button:
-            #     if value:
-            #         print("%s pressed" % (button))
-            #     else:
-            #         print("%s released" % (button))
+        evbuf = jsdev.read(8)
+        if evbuf:
+            time_stamp, value, type, number = struct.unpack('IhBB', evbuf)
 
-        if type & 0x02:
-            # Axis event
-            axis = axis_map[number]
-            if axis == 'z':
-                print("X: %d" % value)
-                x = value
-            if axis == 'rz':
-                print("Y: %d" % value)
-                y = value
+            is_initial = type & 0x80
 
-            # Calculate Drive Turn output due to Joystick X input
-            if y >= 0:
-                # Forward
-                nMotPremixL = max_range if x >= 0 else max_range + x
-                nMotPremixR = max_range - x if x >= 0 else max_range
+            if type & 0x01:
+                button = button_map[number]
+                # if button:
+                #     if value:
+                #         print("%s pressed" % (button))
+                #     else:
+                #         print("%s released" % (button))
+
+            if type & 0x02:
+                # Axis event
+                axis = axis_map[number]
+                if axis == 'z':
+                    print("X: %d" % value)
+                    x = value
+                if axis == 'rz':
+                    print("Y: %d" % value)
+                    y = value
+
+                # Calculate Drive Turn output due to Joystick X input
+                if y >= 0:
+                    # Forward
+                    nMotPremixL = max_range if x >= 0 else max_range + x
+                    nMotPremixR = max_range - x if x >= 0 else max_range
+                else:
+                    # Reverse
+                    nMotPremixL = max_range - x if x >= 0 else max_range
+                    nMotPremixR = max_range if x >= 0 else max_range + x
+
+                # Scale Drive output due to Joystick Y input (throttle)
+                nMotPremixL = nMotPremixL * y/(max_range+1.0)
+                nMotPremixR = nMotPremixR * y/(max_range+1.0)
+
+                # Now calculate pivot amount
+                # - Strength of pivot (nPivSpeed) based on Joystick X input
+                # - Blending of pivot vs drive (fPivScale) based on Joystick Y input
+                nPivSpeed = x
+                fPivScale = 0.0 if abs(y) > pivot else 1.0 - abs(y)/pivot
+
+                # Calculate final mix of Drive and Pivot and convert to motor PWM range
+                powerL = -((1.0-fPivScale)*nMotPremixL + fPivScale*( nPivSpeed))/float(max_range)*255
+                powerR = -((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*255
+
+        # Done every time   
+
+        # Limit power
+        powerL = max(-max_power, min(powerL, max_power))
+        powerR = max(-max_power, min(powerR, max_power))
+
+        cur_time = time.time()
+        elapsed = cur_time - last_motor_update_time
+        if elapsed >= 0.1:
+            print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
+            cmd = "M %d %d\n" % (powerL, powerR)
+            if no_motor:
+                print("MOTOR: %s" % cmd)
             else:
-                # Reverse
-                nMotPremixL = max_range - x if x >= 0 else max_range
-                nMotPremixR = max_range if x >= 0 else max_range + x
+                motor.write(cmd)
+                response = motor.readline()
+                #print("RESPONSE: %s" % response)
+            last_motor_update_time = cur_time
 
-            # Scale Drive output due to Joystick Y input (throttle)
-            nMotPremixL = nMotPremixL * y/(max_range+1.0)
-            nMotPremixR = nMotPremixR * y/(max_range+1.0)
+        if not no_motor:
+            since_last_voltage_update = cur_time - last_voltage_update_time
+            if since_last_voltage_update >= 60:
+                motor.write("V\n")
+                v_reply = motor.readline().rstrip()
+                if not v_reply:
+                    print("Error reading battery voltage")
+                else:
+                    print("Battery voltage %s\n" % v_reply)
+                    show_voltage(v_reply)
+                last_voltage_update_time = cur_time
 
-            # Now calculate pivot amount
-            # - Strength of pivot (nPivSpeed) based on Joystick X input
-            # - Blending of pivot vs drive (fPivScale) based on Joystick Y input
-            nPivSpeed = x
-            fPivScale = 0.0 if abs(y) > pivot else 1.0 - abs(y)/pivot
-
-            # Calculate final mix of Drive and Pivot and convert to motor PWM range
-            powerL = -((1.0-fPivScale)*nMotPremixL + fPivScale*( nPivSpeed))/float(max_range)*255
-            powerR = -((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*255
-
-    # Done every time   
-
-    # Limit power
-    powerL = max(-max_power, min(powerL, max_power))
-    powerR = max(-max_power, min(powerR, max_power))
-
-    cur_tick = time.time()
-    elapsed = cur_tick - last_tick
-    if elapsed >= 0.5:
-        print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
-        cmd = "M %d %d\n" % (powerL, powerR)
-        motor.write(cmd)
-        response = motor.readline()
-        #print("RESPONSE: %s" % response)
-        last_tick = cur_tick
-
-    since_last_voltage_update = cur_tick - last_voltage_update_tick
-    if since_last_voltage_update >= 60:
-        motor.write("V\n")
-        v_reply = motor.readline().rstrip()
-        if not v_reply:
-            print("Error reading battery voltage")
-        else:
-            print("Battery voltage %s\n" % v_reply)
-            show_voltage(v_reply)
-        last_voltage_update_tick = cur_tick
+if __name__ == "__main__":
+    main(sys.argv[1:])
 
     
