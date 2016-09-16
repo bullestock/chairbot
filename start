@@ -1,4 +1,5 @@
 #!/bin/bash
+
 UPDATELCD=/home/pi/chairbot/updatelcd
 
 sudo sixad --stop &
@@ -18,6 +19,7 @@ while true; do
   if dmesg |grep "Sony Computer"; then
     $UPDATELCD "Connected"
     break
+    sleep 1
   fi
 done
 
@@ -25,5 +27,5 @@ if [ -e /home/pi/chairbot/noautostart ]; then
     $UPDATELCD "NO AUTOSTART"    
 else
     $UPDATELCD "Start controller"
-    /home/pi/chairbot/controller/controller > /dev/null &
+    python /home/pi/chairbot/controller/controller.py > /dev/null &
 fi
