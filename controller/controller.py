@@ -4,6 +4,7 @@
 
 import os, struct, array, serial, time, sys, getopt
 from fcntl import ioctl
+from lcddriver import LcdDriver
 
 # Iterate over the joystick devices.
 print('Available devices:')
@@ -127,53 +128,18 @@ for btn in buf[:num_buttons]:
 print('%d axes found' % num_axes)
 print('%d buttons found' % num_buttons)
 
-global no_display
-no_display = False
-wait = 0.04
 
-def init_lcd():
-    global lcd
-    if not no_display:
-        lcd = serial.Serial("/dev/lcdsmartie", 9600,
-                            serial.EIGHTBITS,
-                            serial.PARITY_NONE,
-                            serial.STOPBITS_ONE,
-                            timeout=5,
-                            rtscts = False)
-
-def BacklightOff():
-    if not no_display:
-        command = ["\xFE","\x46","\xFE","\x46"]
-        for item in command:
-            lcd.write(item)
-        time.sleep(wait)
-   
-def BacklightOn():
-    if not no_display:
-        command = ["\xFE","\x42","\x00","\xFE","\x42","\x00"]
-        for item in command:
-            lcd.write(item)   
-        time.sleep(wait)
-   
-def Writeline(data, line):
-    if not no_display:
-        data = data.ljust(16)
-        data = data [:16]
-        command = ["\xFE", "\x47", "\x01", "\x01" if line == 1 else "\x02", data]   
-        for item in command:
-            lcd.write(item)
-        time.sleep(wait)
-
-def UpdateLcd(s):
-    Writeline(s, 2)
+def update_lcd(lcd, s):
+    lcd.write_line(s, 2)
     
-def show_voltage(v):
-    UpdateLcd(v)
+def show_voltage(lcd, v):
+    update_lcd(v)
 
 global no_motor
 no_motor = False
 
 def main(argv):
+    no_display = False
     try:                                
         opts, args = getopt.getopt(argv, "hdm", ["help", "nodisplay", "nomotor"])
     except getopt.GetoptError:
@@ -184,14 +150,13 @@ def main(argv):
             usage() 
             sys.exit() 
         elif opt == '-d':
-            global no_display
             no_display = True
         elif opt == '-m':
             global no_motor
             no_motor = True
 
-    init_lcd()
-    Writeline("Starting", 2)
+    lcd = LcdDriver(no_display)
+    update_lcd(lcd, "Starting")
 
     if not no_motor:
         try:
@@ -203,7 +168,7 @@ def main(argv):
                                   rtscts = False)
         except serial.serialutil.SerialException:
             print("Could not open motor driver")
-            UpdateLcd("No motor driver")
+            update_lcd(lcd, "No motor driver")
             sys.exit()
 
         banner = motor.readline()
