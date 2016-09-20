@@ -9,6 +9,9 @@ class LcdDriver:
 
     def __init__(self, disabled, serial_port = "/dev/lcdsmartie"):
         self.disabled = disabled
+        self.progress_counter = 0
+        self.progress_chars = '|/-\\'
+        self.last_progress_time = time.time()
         if not self.disabled:
             self.lcd = serial.Serial(serial_port, 9600,
                                      serial.EIGHTBITS,
@@ -39,6 +42,18 @@ class LcdDriver:
             for item in command:
                 self.lcd.write(item)
             time.sleep(self.WAIT_TIME)
+
+    def update(line):
+        now = time.time()
+        elapsed = now - self.last_progress_time
+        if elapsed > 1:
+            self.last_progress_time = now
+            ++self.progress_counter
+            if self.progress_counter > self.progress_chars.size():
+                self.progress_counter = 0
+        pc = self.progress_chars[self.progress_counter]
+        write_line(pc + ' ' +  line)
+        
 
 if __name__ == "__main__":
     l = LcdDriver(False)

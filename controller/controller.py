@@ -7,7 +7,7 @@ from lcddriver import LcdDriver
 from sixaxis import Joystick
 
 def update_lcd(lcd, s):
-    lcd.write_line(s, 2)
+    lcd.update(s)
     
 def show_voltage(lcd, v):
     update_lcd(v)

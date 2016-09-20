@@ -16,7 +16,7 @@ const int L_IS_B = 13;
 const int BRAKE = 8;
 const int V_SENSE = A0;
 const int BUF_SIZE = 200;
-const int MAX_IDLE_COUNT = 20000;
+const int MAX_IDLE_COUNT = 200;
 
 void run_test();
 
