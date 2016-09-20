@@ -152,7 +152,7 @@ def main(argv):
                     print("Error reading battery voltage")
                 else:
                     print("Battery voltage %s\n" % v_reply)
-                    show_voltage(v_reply)
+                    show_voltage(lcd, v_reply)
                 last_voltage_update_time = cur_time
 
 if __name__ == "__main__":
