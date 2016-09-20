@@ -26,6 +26,27 @@ done
 if [ -e /home/pi/chairbot/noautostart ]; then
     $UPDATELCD "NO AUTOSTART"    
 else
+    $UPDATELCD "Wait 10"
+    sleep 1
+    $UPDATELCD "Wait 9"
+    sleep 1
+    $UPDATELCD "Wait 8"
+    sleep 1
+    $UPDATELCD "Wait 7"
+    sleep 1
+    $UPDATELCD "Wait 6"
+    sleep 1
+    $UPDATELCD "Wait 5"
+    sleep 1
+    $UPDATELCD "Wait 4"
+    sleep 1
+    $UPDATELCD "Wait 3"
+    sleep 1
+    $UPDATELCD "Wait 2"
+    sleep 1
+    $UPDATELCD "Wait 1"
+    sleep 1
     $UPDATELCD "Start controller"
-    python /home/pi/chairbot/controller/controller.py > /dev/null &
+    /usr/bin/python /home/pi/chairbot/controller/controller.py
+    $UPDATELCD "Failed!"
 fi
