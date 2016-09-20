@@ -1,4 +1,4 @@
-import array, serial, time, struct
+import array, serial, time, struct, select
 from fcntl import ioctl
 
 class Joystick:
@@ -138,27 +138,9 @@ class Joystick:
             return False, '', 0
         
     def get_event(self):
-        evbuf = self.jsdev.read(8)
-        event = self.Event(self, evbuf)
-        return event
-
-        if evbuf:
-            time_stamp, value, type, number = struct.unpack('IhBB', evbuf)
-
-            if type & 0x01:
-                button = button_map[number]
-                # if button:
-                #     if value:
-                #         print("%s pressed" % (button))
-                #     else:
-                #         print("%s released" % (button))
-
-            if type & 0x02:
-                # Axis event
-                axis = axis_map[number]
-                if axis == 'z':
-                    print("X: %d" % value)
-                    x = value
-                if axis == 'rz':
-                    print("Y: %d" % value)
-                    y = value
+        readable, writable, exceptional = select.select([self.jsdev], [], [], 0.1)
+        if readable:
+            evbuf = self.jsdev.read(8)
+            event = self.Event(self, evbuf)
+            return event
+        return None
