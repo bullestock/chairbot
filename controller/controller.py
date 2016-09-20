@@ -54,7 +54,7 @@ def main(argv):
         banner = motor.readline()
         print("Banner: %s" % banner)
 
-    max_power = 255
+    max_power = 64
     min_power = 5
     x = 0
     y = 0
@@ -95,10 +95,10 @@ def main(argv):
             is_axis, axis_name, value = event.get_axis()
             if is_axis:
                 if axis_name == 'z':
-                    print("X: %d" % value)
+                    #print("X: %d" % value)
                     x = value
                 if axis_name == 'rz':
-                    print("Y: %d" % value)
+                    #print("Y: %d" % value)
                     y = value
 
                 # Calculate Drive Turn output due to Joystick X input
@@ -132,13 +132,15 @@ def main(argv):
         powerR = max(-max_power, min(powerR, max_power))
 
         if (abs(powerL) < min_power) and (abs(powerR) < min_power):
+            if (abs(powerL) > 0) or (abs(powerR) > 0):
+                print("Below minimum: %d/%d" % (powerL, powerR))
             powerL = 0
             powerR = 0
             
         cur_time = time.time()
         elapsed = cur_time - last_motor_update_time
-        if elapsed >= 0.5:
-            #print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
+        if elapsed >= 0.08:
+            print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
             cmd = "M %d %d" % (powerL, powerR)
             if no_motor:
                 print("MOTOR: %s" % cmd)
