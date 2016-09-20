@@ -10,13 +10,14 @@ def update_lcd(lcd, s):
     lcd.update(s)
     
 def show_voltage(lcd, v):
-    update_lcd(v)
+    update_lcd(lcd, v)
 
 global no_motor
 no_motor = False
 
 def main(argv):
     no_display = False
+    voltage = ''
     try:                                
         opts, args = getopt.getopt(argv, "hdm", ["help", "nodisplay", "nomotor"])
     except getopt.GetoptError:
@@ -43,7 +44,7 @@ def main(argv):
                                   serial.EIGHTBITS,
                                   serial.PARITY_NONE,
                                   serial.STOPBITS_ONE,
-                                  timeout = 5,
+                                  timeout = 2,
                                   rtscts = False)
         except serial.serialutil.SerialException:
             print("Could not open motor driver")
@@ -54,6 +55,7 @@ def main(argv):
         print("Banner: %s" % banner)
 
     max_power = 255
+    min_power = 5
     x = 0
     y = 0
     powerL = 0
@@ -79,10 +81,10 @@ def main(argv):
 
     # Main event loop
     while True:
-        time.sleep(0.01)
+        #time.sleep(0.01)
 
         event = js.get_event()
-        if event.is_valid():
+        if event and event.is_valid():
             is_button, button_name, pressed = event.get_button()
             if is_button:
                 if pressed:
@@ -129,10 +131,14 @@ def main(argv):
         powerL = max(-max_power, min(powerL, max_power))
         powerR = max(-max_power, min(powerR, max_power))
 
+        if (abs(powerL) < min_power) and (abs(powerR) < min_power):
+            powerL = 0
+            powerR = 0
+            
         cur_time = time.time()
         elapsed = cur_time - last_motor_update_time
-        if elapsed >= 0.1:
-            print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
+        if elapsed >= 0.5:
+            #print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
             cmd = "M %d %d" % (powerL, powerR)
             if no_motor:
                 print("MOTOR: %s" % cmd)
@@ -142,6 +148,7 @@ def main(argv):
                 response = motor.readline()
                 #print("RESPONSE: %s" % response)
             last_motor_update_time = cur_time
+            show_voltage(lcd, voltage)
 
         if not no_motor:
             since_last_voltage_update = cur_time - last_voltage_update_time
@@ -152,7 +159,7 @@ def main(argv):
                     print("Error reading battery voltage")
                 else:
                     print("Battery voltage %s\n" % v_reply)
-                    show_voltage(lcd, v_reply)
+                    voltage = v_reply
                 last_voltage_update_time = cur_time
 
 if __name__ == "__main__":
