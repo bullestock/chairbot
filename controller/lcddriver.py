@@ -1,4 +1,4 @@
-import serial, time
+import serial, time, socket
 
 class LcdDriver:
     
@@ -12,6 +12,9 @@ class LcdDriver:
         self.progress_counter = 0
         self.progress_chars = '.oOo'
         self.last_progress_time = time.time()
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 0))  # connecting to a UDP address doesn't send packets
+        self.ip = s.getsockname()[0]
         if not self.disabled:
             self.lcd = serial.Serial(serial_port, 9600,
                                      serial.EIGHTBITS,
@@ -43,7 +46,7 @@ class LcdDriver:
                 self.lcd.write(item)
             time.sleep(self.WAIT_TIME)
 
-    def update(self, line):
+    def update(self, status, line):
         now = time.time()
         elapsed = now - self.last_progress_time
         if elapsed > 1:
@@ -52,6 +55,7 @@ class LcdDriver:
             if self.progress_counter >= len(self.progress_chars):
                 self.progress_counter = 0
         pc = self.progress_chars[self.progress_counter]
+        self.write_line(self.ip + ' ' + status, 1)
         self.write_line(pc + ' ' + line, 2)
         
 
