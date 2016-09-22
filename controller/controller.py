@@ -6,8 +6,12 @@ import os, serial, time, sys, getopt
 from lcddriver import LcdDriver
 from sixaxis import Joystick
 
+global status
+status = '---'
+
 def update_lcd(lcd, s):
-    lcd.update(s)
+    global status
+    lcd.update(status, s)
     
 def show_voltage(lcd, v):
     update_lcd(lcd, v)
@@ -58,6 +62,8 @@ def main(argv):
     min_power = 5
     x = 0
     y = 0
+    last_x = 0
+    last_y = 0
     powerL = 0
     powerR = 0
 
@@ -78,19 +84,32 @@ def main(argv):
 
     last_motor_update_time = time.time()
     last_voltage_update_time = time.time()
+    last_event_time = time.time()
+
+    global status
+    status = 'RUN'
 
     # Main event loop
     while True:
-        #time.sleep(0.01)
+        cur_time = time.time()
 
+        elapsed = cur_time - last_event_time
+        if (elapsed > 2) and ((x != 0) or (y != 0)):
+            status = 'STOP'
+            x = 0
+            y = 0
+            print('STOP')
+            
         event = js.get_event()
         if event and event.is_valid():
+            status = 'RUN'
+            last_event_time = cur_time
             is_button, button_name, pressed = event.get_button()
-            if is_button:
-                if pressed:
-                    print("%s pressed" % (button_name))
-                else:
-                    print("%s released" % (button_name))
+            # if is_button:
+            #     if pressed:
+            #         print("%s pressed" % (button_name))
+            #     else:
+            #         print("%s released" % (button_name))
             
             is_axis, axis_name, value = event.get_axis()
             if is_axis:
@@ -101,35 +120,35 @@ def main(argv):
                     #print("Y: %d" % value)
                     y = value
 
-                # Calculate Drive Turn output due to Joystick X input
-                if y >= 0:
-                    # Forward
-                    nMotPremixL = max_range if x >= 0 else max_range + x
-                    nMotPremixR = max_range - x if x >= 0 else max_range
-                else:
-                    # Reverse
-                    nMotPremixL = max_range - x if x >= 0 else max_range
-                    nMotPremixR = max_range if x >= 0 else max_range + x
+        if (last_x != x) or (last_y != y):
+            last_x = x
+            last_y = y
+            
+            # Calculate Drive Turn output due to Joystick X input
+            if y >= 0:
+                # Forward
+                nMotPremixL = max_range if x >= 0 else max_range + x
+                nMotPremixR = max_range - x if x >= 0 else max_range
+            else:
+                # Reverse
+                nMotPremixL = max_range - x if x >= 0 else max_range
+                nMotPremixR = max_range if x >= 0 else max_range + x
 
-                # Scale Drive output due to Joystick Y input (throttle)
-                nMotPremixL = nMotPremixL * y/(max_range+1.0)
-                nMotPremixR = nMotPremixR * y/(max_range+1.0)
+            # Scale Drive output due to Joystick Y input (throttle)
+            nMotPremixL = nMotPremixL * y/(max_range+1.0)
+            nMotPremixR = nMotPremixR * y/(max_range+1.0)
 
-                # Now calculate pivot amount
-                # - Strength of pivot (nPivSpeed) based on Joystick X input
-                # - Blending of pivot vs drive (fPivScale) based on Joystick Y input
-                nPivSpeed = x
-                fPivScale = 0.0 if abs(y) > pivot else 1.0 - abs(y)/pivot
+            # Now calculate pivot amount
+            # - Strength of pivot (nPivSpeed) based on Joystick X input
+            # - Blending of pivot vs drive (fPivScale) based on Joystick Y input
+            nPivSpeed = x
+            fPivScale = 0.0 if abs(y) > pivot else 1.0 - abs(y)/pivot
 
-                # Calculate final mix of Drive and Pivot and convert to motor PWM range
-                powerL = -((1.0-fPivScale)*nMotPremixL + fPivScale*( nPivSpeed))/float(max_range)*255
-                powerR = -((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*255
+            # Calculate final mix of Drive and Pivot and convert to motor PWM range
+            powerL = -((1.0-fPivScale)*nMotPremixL + fPivScale*( nPivSpeed))/float(max_range)*max_power
+            powerR = -((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*max_power
 
         # Done every time   
-
-        # Limit power
-        powerL = max(-max_power, min(powerL, max_power))
-        powerR = max(-max_power, min(powerR, max_power))
 
         if (abs(powerL) < min_power) and (abs(powerR) < min_power):
             if (abs(powerL) > 0) or (abs(powerR) > 0):
@@ -137,9 +156,8 @@ def main(argv):
             powerL = 0
             powerR = 0
             
-        cur_time = time.time()
         elapsed = cur_time - last_motor_update_time
-        if elapsed >= 0.08:
+        if elapsed >= 0.2:
             print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
             cmd = "M %d %d" % (powerL, powerR)
             if no_motor:
@@ -166,5 +184,3 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-    
