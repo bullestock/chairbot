@@ -1,26 +1,27 @@
 #include <Servo.h>
 
-const int SERVO_OUT = 3;
+const int SERVO_PINS[] = { 3, 5, 6 };
 
 const int BUF_SIZE = 200;
+
+const int INITIAL_ANGLES[] = { 30, 150, 150 };
 
 Servo servo1;
 Servo servo2;
 Servo servo3;
-Servo servo4;
-Servo servo5;
 
+Servo* servos[] = { &servo1, &servo2, &servo3 };
 int index = 0;
 char buffer[BUF_SIZE];
 
 void setup()
 {
-    pinMode(SERVO_OUT, OUTPUT);
-    servo1.attach(SERVO_OUT);
-    servo2.attach(SERVO_OUT+1);
-    servo3.attach(SERVO_OUT+2);
-    servo4.attach(SERVO_OUT+3);
-    servo5.attach(SERVO_OUT+4);
+    for (size_t i = 0; i < sizeof(servos)/sizeof(servos[0]); ++i)
+    {
+        pinMode(SERVO_PINS[i], OUTPUT);
+        servos[i]->write(INITIAL_ANGLES[i]);
+        servos[i]->attach(SERVO_PINS[i]);
+    }
     Serial.begin(57600);
 }
 
@@ -57,6 +58,7 @@ void process(const char* buffer)
     switch (buffer[0])
     {
     case 'S':
+    case 's':
         {
             int index;
             const int axis = get_int(buffer+1, BUF_SIZE-1, index); 
@@ -67,20 +69,18 @@ void process(const char* buffer)
             switch (axis)
             {
             case 0:
-                servo1.write(value);
-                break;
             case 1:
-                servo2.write(value);
-                break;
             case 2:
-                servo3.write(value);
+                servos[axis]->write(value);
                 break;
+#if 0
             case 3:
                 servo4.write(value);
                 break;
             case 4:
                 servo5.write(value);
                 break;
+#endif
             default:
                 Serial.println("ERROR: Invalid parameters to 'S'");
                 break;
