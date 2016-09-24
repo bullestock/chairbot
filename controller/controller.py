@@ -6,17 +6,22 @@ import os, serial, time, sys, getopt
 from lcddriver import LcdDriver
 from sixaxis import Joystick
 
+global status
+status = '---'
+
 def update_lcd(lcd, s):
-    lcd.update(s)
+    global status
+    lcd.update(status, s)
     
 def show_voltage(lcd, v):
-    update_lcd(v)
+    update_lcd(lcd, v)
 
 global no_motor
 no_motor = False
 
 def main(argv):
     no_display = False
+    voltage = ''
     try:                                
         opts, args = getopt.getopt(argv, "hdm", ["help", "nodisplay", "nomotor"])
     except getopt.GetoptError:
@@ -43,7 +48,7 @@ def main(argv):
                                   serial.EIGHTBITS,
                                   serial.PARITY_NONE,
                                   serial.STOPBITS_ONE,
-                                  timeout = 5,
+                                  timeout = 2,
                                   rtscts = False)
         except serial.serialutil.SerialException:
             print("Could not open motor driver")
@@ -53,9 +58,12 @@ def main(argv):
         banner = motor.readline()
         print("Banner: %s" % banner)
 
-    max_power = 255
+    max_power = 64
+    min_power = 5
     x = 0
     y = 0
+    last_x = 0
+    last_y = 0
     powerL = 0
     powerR = 0
 
@@ -76,62 +84,80 @@ def main(argv):
 
     last_motor_update_time = time.time()
     last_voltage_update_time = time.time()
+    last_event_time = time.time()
+
+    global status
+    status = 'RUN'
 
     # Main event loop
     while True:
-        time.sleep(0.01)
+        cur_time = time.time()
 
+        elapsed = cur_time - last_event_time
+        if (elapsed > 2) and ((x != 0) or (y != 0)):
+            status = 'STOP'
+            x = 0
+            y = 0
+            print('STOP')
+            
         event = js.get_event()
-        if event.is_valid():
+        if event and event.is_valid():
+            status = 'RUN'
+            last_event_time = cur_time
             is_button, button_name, pressed = event.get_button()
-            if is_button:
-                if pressed:
-                    print("%s pressed" % (button_name))
-                else:
-                    print("%s released" % (button_name))
+            # if is_button:
+            #     if pressed:
+            #         print("%s pressed" % (button_name))
+            #     else:
+            #         print("%s released" % (button_name))
             
             is_axis, axis_name, value = event.get_axis()
             if is_axis:
                 if axis_name == 'z':
-                    print("X: %d" % value)
+                    #print("X: %d" % value)
                     x = value
                 if axis_name == 'rz':
-                    print("Y: %d" % value)
+                    #print("Y: %d" % value)
                     y = value
 
-                # Calculate Drive Turn output due to Joystick X input
-                if y >= 0:
-                    # Forward
-                    nMotPremixL = max_range if x >= 0 else max_range + x
-                    nMotPremixR = max_range - x if x >= 0 else max_range
-                else:
-                    # Reverse
-                    nMotPremixL = max_range - x if x >= 0 else max_range
-                    nMotPremixR = max_range if x >= 0 else max_range + x
+        if (last_x != x) or (last_y != y):
+            last_x = x
+            last_y = y
+            
+            # Calculate Drive Turn output due to Joystick X input
+            if y >= 0:
+                # Forward
+                nMotPremixL = max_range if x >= 0 else max_range + x
+                nMotPremixR = max_range - x if x >= 0 else max_range
+            else:
+                # Reverse
+                nMotPremixL = max_range - x if x >= 0 else max_range
+                nMotPremixR = max_range if x >= 0 else max_range + x
 
-                # Scale Drive output due to Joystick Y input (throttle)
-                nMotPremixL = nMotPremixL * y/(max_range+1.0)
-                nMotPremixR = nMotPremixR * y/(max_range+1.0)
+            # Scale Drive output due to Joystick Y input (throttle)
+            nMotPremixL = nMotPremixL * y/(max_range+1.0)
+            nMotPremixR = nMotPremixR * y/(max_range+1.0)
 
-                # Now calculate pivot amount
-                # - Strength of pivot (nPivSpeed) based on Joystick X input
-                # - Blending of pivot vs drive (fPivScale) based on Joystick Y input
-                nPivSpeed = x
-                fPivScale = 0.0 if abs(y) > pivot else 1.0 - abs(y)/pivot
+            # Now calculate pivot amount
+            # - Strength of pivot (nPivSpeed) based on Joystick X input
+            # - Blending of pivot vs drive (fPivScale) based on Joystick Y input
+            nPivSpeed = x
+            fPivScale = 0.0 if abs(y) > pivot else 1.0 - abs(y)/pivot
 
-                # Calculate final mix of Drive and Pivot and convert to motor PWM range
-                powerL = -((1.0-fPivScale)*nMotPremixL + fPivScale*( nPivSpeed))/float(max_range)*255
-                powerR = -((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*255
+            # Calculate final mix of Drive and Pivot and convert to motor PWM range
+            powerL = -((1.0-fPivScale)*nMotPremixL + fPivScale*( nPivSpeed))/float(max_range)*max_power
+            powerR = -((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*max_power
 
         # Done every time   
 
-        # Limit power
-        powerL = max(-max_power, min(powerL, max_power))
-        powerR = max(-max_power, min(powerR, max_power))
-
-        cur_time = time.time()
+        if (abs(powerL) < min_power) and (abs(powerR) < min_power):
+            if (abs(powerL) > 0) or (abs(powerR) > 0):
+                print("Below minimum: %d/%d" % (powerL, powerR))
+            powerL = 0
+            powerR = 0
+            
         elapsed = cur_time - last_motor_update_time
-        if elapsed >= 0.1:
+        if elapsed >= 0.2:
             print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
             cmd = "M %d %d" % (powerL, powerR)
             if no_motor:
@@ -142,6 +168,7 @@ def main(argv):
                 response = motor.readline()
                 #print("RESPONSE: %s" % response)
             last_motor_update_time = cur_time
+            show_voltage(lcd, voltage)
 
         if not no_motor:
             since_last_voltage_update = cur_time - last_voltage_update_time
@@ -152,10 +179,8 @@ def main(argv):
                     print("Error reading battery voltage")
                 else:
                     print("Battery voltage %s\n" % v_reply)
-                    show_voltage(v_reply)
+                    voltage = v_reply
                 last_voltage_update_time = cur_time
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
-    

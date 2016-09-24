@@ -16,9 +16,49 @@ const int L_IS_B = 13;
 const int BRAKE = 8;
 const int V_SENSE = A0;
 const int BUF_SIZE = 200;
-const int MAX_IDLE_COUNT = 200;
+const int MAX_IDLE_COUNT = 500;
 
 void run_test();
+
+void setPwmFrequency(int pin, int divisor)
+{
+    byte mode;
+    if (pin == 5 || pin == 6 || pin == 9 || pin == 10)
+    {
+        switch (divisor)
+        {
+        case 1: mode = 0x01; break;
+        case 8: mode = 0x02; break;
+        case 64: mode = 0x03; break;
+        case 256: mode = 0x04; break;
+        case 1024: mode = 0x05; break;
+        default: return;
+        }
+        if (pin == 5 || pin == 6)
+        {
+            TCCR0B = TCCR0B & 0b11111000 | mode;
+        }
+        else
+        {
+            TCCR1B = TCCR1B & 0b11111000 | mode;
+        }
+    }
+    else if (pin == 3 || pin == 11)
+    {
+        switch (divisor)
+        {
+        case 1: mode = 0x01; break;
+        case 8: mode = 0x02; break;
+        case 32: mode = 0x03; break;
+        case 64: mode = 0x04; break;
+        case 128: mode = 0x05; break;
+        case 256: mode = 0x06; break;
+        case 1024: mode = 0x7; break;
+        default: return;
+        }
+        TCCR2B = TCCR2B & 0b11111000 | mode;
+    }
+}
 
 void setup()
 {
@@ -53,6 +93,20 @@ void setup()
 
     digitalWrite(BRAKE, LOW);
 
+    // 1024 - brum
+    // 64 - hyl
+    // 8 - piv
+    const int divisor = 8;
+    // Pin 5: 1, 8, 64, 256, 1024 - base frequency 62500 Hz
+    setPwmFrequency(R_PWM_A, divisor);
+    // Pin 9: Base frequency 31250 Hz
+    setPwmFrequency(R_PWM_B, divisor);
+
+    // Pin 3+11: 1, 8, 32, 64, 128, 256, 1024 - base frequency 31250 Hz
+    const int divisor2 = divisor;
+    setPwmFrequency(L_PWM_A, divisor2); 
+    setPwmFrequency(L_PWM_B, divisor2); 
+    
     Serial.begin(57600);
     Serial.println("Chairbot ready 0.1");
 }
@@ -225,7 +279,7 @@ void loop()
     else
     {
         delay(10);
-        if (++idle_count > MAX_IDLE_COUNT)
+        if (MAX_IDLE_COUNT && (++idle_count > MAX_IDLE_COUNT))
         {
             idle_count = 0;
             set_power(0, 0);
