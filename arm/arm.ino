@@ -4,7 +4,7 @@ const int SERVO_PINS[] = { 3, 5, 6 };
 
 const int BUF_SIZE = 200;
 
-const int INITIAL_ANGLES[] = { 30, 150, 150 };
+int curr_pos[] = { 30, 150, 150 };
 
 Servo servo1;
 Servo servo2;
@@ -19,7 +19,7 @@ void setup()
     for (size_t i = 0; i < sizeof(servos)/sizeof(servos[0]); ++i)
     {
         pinMode(SERVO_PINS[i], OUTPUT);
-        servos[i]->write(INITIAL_ANGLES[i]);
+        servos[i]->write(curr_pos[i]);
         servos[i]->attach(SERVO_PINS[i]);
     }
     Serial.begin(57600);
@@ -57,8 +57,9 @@ void process(const char* buffer)
 {
     switch (buffer[0])
     {
-    case 'S':
-    case 's':
+        // G: Go to absolute position
+    case 'G':
+    case 'g':
         {
             int index;
             const int axis = get_int(buffer+1, BUF_SIZE-1, index); 
@@ -72,6 +73,47 @@ void process(const char* buffer)
             case 1:
             case 2:
                 servos[axis]->write(value);
+                curr_pos[axis] = value;
+                break;
+#if 0
+            case 3:
+                servo4.write(value);
+                break;
+            case 4:
+                servo5.write(value);
+                break;
+#endif
+            default:
+                Serial.println("ERROR: Invalid parameters to 'S'");
+                break;
+            }
+        }
+        break;
+
+        // M: Move to absolute position
+    case 'M':
+    case 'm':
+        {
+            int index;
+            const int axis = get_int(buffer+1, BUF_SIZE-1, index); 
+            const int value = get_int(buffer+index, BUF_SIZE-1, index); 
+            Serial.print(axis);
+            Serial.print(": ");
+            Serial.println(value);
+            switch (axis)
+            {
+            case 0:
+            case 1:
+            case 2:
+                {
+                    const int step = (value > curr_pos[axis]) ? 1 : -1;
+                    for (int i = curr_pos[axis]; i != value; i += step)
+                    {
+                        servos[axis]->write(i);
+                        delay(20);
+                    }
+                    curr_pos[axis] = value;
+                }
                 break;
 #if 0
             case 3:
