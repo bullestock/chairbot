@@ -16,8 +16,8 @@ def update_lcd(lcd, s):
 def show_voltage(lcd, v):
     update_lcd(lcd, v)
 
-global no_motor
-no_motor = False
+global no_serial
+no_serial = False
 
 def main(argv):
     no_display = False
@@ -34,29 +34,60 @@ def main(argv):
         elif opt == '-d':
             no_display = True
         elif opt == '-m':
-            global no_motor
-            no_motor = True
+            global no_serial
+            no_serial = True
 
     js = Joystick()
 
     lcd = LcdDriver(no_display)
     update_lcd(lcd, "Starting")
 
-    if not no_motor:
+    motor = None
+    arm = None
+    if not no_serial:
         try:
-            motor = serial.Serial("/dev/ardumotor", 57600,
+            port1 = serial.Serial("/dev/ttyUSB1", 57600,
+                                  serial.EIGHTBITS,
+                                  serial.PARITY_NONE,
+                                  serial.STOPBITS_ONE,
+                                  timeout = 2,
+                                  rtscts = False,
+                                  dsrdtr = True)
+        except serial.serialutil.SerialException:
+            print("Could not open ttyUSB1")
+            update_lcd(lcd, "No ttyUSB1")
+            sys.exit()
+
+        banner1 = port1.readline()
+        print("ttyUSB1 banner: %s" % banner1)
+        
+        try:
+            port2 = serial.Serial("/dev/ttyUSB2", 57600,
                                   serial.EIGHTBITS,
                                   serial.PARITY_NONE,
                                   serial.STOPBITS_ONE,
                                   timeout = 2,
                                   rtscts = False)
         except serial.serialutil.SerialException:
-            print("Could not open motor driver")
-            update_lcd(lcd, "No motor driver")
+            print("Could not open ttyUSB2")
+            update_lcd(lcd, "No ttyUSB2")
             sys.exit()
 
-        banner = motor.readline()
-        print("Banner: %s" % banner)
+        banner2 = port2.readline()
+        print("ttyUSB2 banner: %s" % banner2)
+
+        if banner1.find("MOTOR") >= 0:
+            print "ttyUSB1 is motor controller"
+            motor = port1
+            arm = port2
+        elif banner2.find("MOTOR") >= 0:
+            print "ttyUSB1 is motor controller"
+            motor = port2
+            arm = port1
+        else:
+            print "No banner found"
+            update_lcd(lcd, "No motor")
+            sys.exit()
 
     max_power = 64
     min_power = 5
@@ -160,7 +191,7 @@ def main(argv):
         if elapsed >= 0.2:
             print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
             cmd = "M %d %d" % (powerL, powerR)
-            if no_motor:
+            if no_serial:
                 print("MOTOR: %s" % cmd)
                 update_lcd(lcd, "MOTOR: %d %d" % (powerL, powerR))
             else:
@@ -170,7 +201,7 @@ def main(argv):
             last_motor_update_time = cur_time
             show_voltage(lcd, voltage)
 
-        if not no_motor:
+        if not no_serial:
             since_last_voltage_update = cur_time - last_voltage_update_time
             if since_last_voltage_update >= 60:
                 motor.write("V\n")
