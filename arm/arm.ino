@@ -4,7 +4,13 @@ const int SERVO_PINS[] = { 3, 5, 6 };
 
 const int BUF_SIZE = 200;
 
-int curr_pos[] = { 30, 150, 150 };
+int curr_pos[] = { 50, 150, 50 };
+int limits[][2] = {
+    // Base
+    { 0, 100},
+    { 70, 150 },
+    { 20, 90 }
+};
 
 Servo servo1;
 Servo servo2;
@@ -63,7 +69,7 @@ void process(const char* buffer)
         {
             int index;
             const int axis = get_int(buffer+1, BUF_SIZE-1, index); 
-            const int value = get_int(buffer+index, BUF_SIZE-1, index); 
+            int value = get_int(buffer+index, BUF_SIZE-1, index); 
             Serial.print(axis);
             Serial.print(": ");
             Serial.println(value);
@@ -72,6 +78,10 @@ void process(const char* buffer)
             case 0:
             case 1:
             case 2:
+                if (value > limits[axis][0])
+                    value = limits[axis][0];
+                if (value < limits[axis][1])
+                    value = limits[axis][1];
                 servos[axis]->write(value);
                 curr_pos[axis] = value;
                 break;
@@ -96,7 +106,19 @@ void process(const char* buffer)
         {
             int index;
             const int axis = get_int(buffer+1, BUF_SIZE-1, index); 
-            const int value = get_int(buffer+index, BUF_SIZE-1, index); 
+            int value = get_int(buffer+index, BUF_SIZE-1, index); 
+            if (value < limits[axis][0])
+            {
+                Serial.print("ARM: Above ");
+                Serial.println(limits[axis][0]);
+                value = limits[axis][0];
+            }
+            if (value > limits[axis][1])
+            {
+                Serial.print("ARM: Below ");
+                Serial.println(limits[axis][1]);
+                value = limits[axis][1];
+            }
             Serial.print(axis);
             Serial.print(": ");
             Serial.println(value);
@@ -110,7 +132,7 @@ void process(const char* buffer)
                     for (int i = curr_pos[axis]; i != value; i += step)
                     {
                         servos[axis]->write(i);
-                        delay(20);
+                        delay(10);
                     }
                     curr_pos[axis] = value;
                 }

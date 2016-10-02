@@ -16,8 +16,8 @@ def update_lcd(lcd, s):
 def show_voltage(lcd, v):
     update_lcd(lcd, v)
 
-global no_motor
-no_motor = False
+global no_serial
+no_serial = False
 
 def main(argv):
     no_display = False
@@ -34,36 +34,69 @@ def main(argv):
         elif opt == '-d':
             no_display = True
         elif opt == '-m':
-            global no_motor
-            no_motor = True
+            global no_serial
+            no_serial = True
 
     js = Joystick()
 
     lcd = LcdDriver(no_display)
     update_lcd(lcd, "Starting")
 
-    if not no_motor:
+    motor = None
+    arm = None
+    if not no_serial:
         try:
-            motor = serial.Serial("/dev/ardumotor", 57600,
+            port1 = serial.Serial("/dev/ttyUSB1", 57600,
+                                  serial.EIGHTBITS,
+                                  serial.PARITY_NONE,
+                                  serial.STOPBITS_ONE,
+                                  timeout = 2,
+                                  rtscts = False,
+                                  dsrdtr = True)
+        except serial.serialutil.SerialException:
+            print("Could not open ttyUSB1")
+            update_lcd(lcd, "No ttyUSB1")
+            sys.exit()
+
+        banner1 = port1.readline()
+        print("ttyUSB1 banner: %s" % banner1)
+        
+        try:
+            port2 = serial.Serial("/dev/ttyUSB2", 57600,
                                   serial.EIGHTBITS,
                                   serial.PARITY_NONE,
                                   serial.STOPBITS_ONE,
                                   timeout = 2,
                                   rtscts = False)
         except serial.serialutil.SerialException:
-            print("Could not open motor driver")
-            update_lcd(lcd, "No motor driver")
+            print("Could not open ttyUSB2")
+            update_lcd(lcd, "No ttyUSB2")
             sys.exit()
 
-        banner = motor.readline()
-        print("Banner: %s" % banner)
+        banner2 = port2.readline()
+        print("ttyUSB2 banner: %s" % banner2)
+
+        if banner1.find("MOTOR") >= 0:
+            print "ttyUSB1 is motor controller"
+            motor = port1
+            arm = port2
+        elif banner2.find("MOTOR") >= 0:
+            print "ttyUSB1 is motor controller"
+            motor = port2
+            arm = port1
+        else:
+            print "No banner found"
+            update_lcd(lcd, "No motor")
+            sys.exit()
 
     max_power = 64
     min_power = 5
-    x = 0
-    y = 0
-    last_x = 0
-    last_y = 0
+    rx = 0
+    ry = 0
+    last_rx = 0
+    last_ry = 0
+    lx = 0
+    ly = 0
     powerL = 0
     powerR = 0
 
@@ -81,6 +114,10 @@ def main(argv):
     max_loop_time = 0
 
     max_range = 32767
+    turn_range = 50
+    turn_zero = 50
+    arm_range = (150-70)/2
+    arm_zero = (70+150)/2
 
     last_motor_update_time = time.time()
     last_voltage_update_time = time.time()
@@ -94,10 +131,10 @@ def main(argv):
         cur_time = time.time()
 
         elapsed = cur_time - last_event_time
-        if (elapsed > 2) and ((x != 0) or (y != 0)):
+        if (elapsed > 2) and ((rx != 0) or (ry != 0)):
             status = 'STOP'
-            x = 0
-            y = 0
+            rx = 0
+            ry = 0
             print('STOP')
             
         event = js.get_event()
@@ -115,34 +152,42 @@ def main(argv):
             if is_axis:
                 if axis_name == 'z':
                     #print("X: %d" % value)
-                    x = value
-                if axis_name == 'rz':
+                    rx = value
+                elif axis_name == 'rz':
                     #print("Y: %d" % value)
-                    y = value
+                    ry = value
+                elif axis_name == 'x':
+                    print("LX: %d" % value)
+                    lx = value
+                if axis_name == 'y':
+                    print("LY: %d" % value)
+                    ly = value
+                else:
+                    print(axis_name)
 
-        if (last_x != x) or (last_y != y):
-            last_x = x
-            last_y = y
+        if (last_rx != rx) or (last_ry != ry):
+            last_rx = rx
+            last_ry = ry
             
             # Calculate Drive Turn output due to Joystick X input
-            if y >= 0:
+            if ry >= 0:
                 # Forward
-                nMotPremixL = max_range if x >= 0 else max_range + x
-                nMotPremixR = max_range - x if x >= 0 else max_range
+                nMotPremixL = max_range if rx >= 0 else max_range + rx
+                nMotPremixR = max_range - rx if rx >= 0 else max_range
             else:
                 # Reverse
-                nMotPremixL = max_range - x if x >= 0 else max_range
-                nMotPremixR = max_range if x >= 0 else max_range + x
+                nMotPremixL = max_range - rx if rx >= 0 else max_range
+                nMotPremixR = max_range if rx >= 0 else max_range + rx
 
             # Scale Drive output due to Joystick Y input (throttle)
-            nMotPremixL = nMotPremixL * y/(max_range+1.0)
-            nMotPremixR = nMotPremixR * y/(max_range+1.0)
+            nMotPremixL = nMotPremixL * ry/(max_range+1.0)
+            nMotPremixR = nMotPremixR * ry/(max_range+1.0)
 
             # Now calculate pivot amount
             # - Strength of pivot (nPivSpeed) based on Joystick X input
             # - Blending of pivot vs drive (fPivScale) based on Joystick Y input
-            nPivSpeed = x
-            fPivScale = 0.0 if abs(y) > pivot else 1.0 - abs(y)/pivot
+            nPivSpeed = rx
+            fPivScale = 0.0 if abs(ry) > pivot else 1.0 - abs(ry)/pivot
 
             # Calculate final mix of Drive and Pivot and convert to motor PWM range
             powerL = -((1.0-fPivScale)*nMotPremixL + fPivScale*( nPivSpeed))/float(max_range)*max_power
@@ -158,9 +203,9 @@ def main(argv):
             
         elapsed = cur_time - last_motor_update_time
         if elapsed >= 0.2:
-            print("X %3d Y %3d L %3d R %3d" % (x, y, powerL, powerR))
+            #print("X %3d Y %3d L %3d R %3d" % (rx, ry, powerL, powerR))
             cmd = "M %d %d" % (powerL, powerR)
-            if no_motor:
+            if no_serial:
                 print("MOTOR: %s" % cmd)
                 update_lcd(lcd, "MOTOR: %d %d" % (powerL, powerR))
             else:
@@ -170,7 +215,25 @@ def main(argv):
             last_motor_update_time = cur_time
             show_voltage(lcd, voltage)
 
-        if not no_motor:
+            turn = lx/(max_range+1.0) * turn_range + turn_zero
+            cmd = "M 0 %d" % turn
+            if no_serial:
+                print("ARM: %s" % cmd)
+            else:
+                arm.write("%s\n" % cmd)
+                response = arm.readline()
+                print("RESPONSE: %s" % response)
+
+            arm_angle = ly/(max_range+1.0) * arm_range + arm_zero
+            cmd = "M 1 %d" % arm_angle
+            if no_serial:
+                print("ARM: %s" % cmd)
+            else:
+                arm.write("%s\n" % cmd)
+                response = arm.readline()
+                print("RESPONSE: %s" % response)
+
+        if not no_serial:
             since_last_voltage_update = cur_time - last_voltage_update_time
             if since_last_voltage_update >= 60:
                 motor.write("V\n")

@@ -108,7 +108,7 @@ void setup()
     setPwmFrequency(L_PWM_B, divisor2); 
     
     Serial.begin(57600);
-    Serial.println("Chairbot ready 0.1");
+    Serial.println("MOTOR: Controller v 0.1");
 }
 
 void brake_on()
@@ -183,13 +183,13 @@ void process(const char* buffer)
             const int right = get_int(buffer+index, BUF_SIZE-1, index);
             if ((left < -255) || (left > 255))
             {
-                Serial.print("ERROR: Invalid power value: ");
+                Serial.print("MOTOR: ERROR: Invalid power value: ");
                 Serial.println(left);
                 return;
             }
             if ((right < -255) || (right > 255))
             {
-                Serial.print("ERROR: Invalid power value: ");
+                Serial.print("MOTOR: ERROR: Invalid power value: ");
                 Serial.println(right);
                 return;
             }
@@ -218,7 +218,7 @@ void process(const char* buffer)
         break;
         
     default:
-        Serial.print("Error: Unknown command '");
+        Serial.print("MOTOR: Error: Unknown command '");
         Serial.print(buffer[0]);
         Serial.println("'");
         return;
@@ -269,7 +269,7 @@ void loop()
         {
             if (index >= BUF_SIZE)
             {
-                Serial.println("Error: Line too long");
+                Serial.println("MOTOR: Error: Line too long");
                 index = 0;
                 return;
             }
@@ -284,7 +284,7 @@ void loop()
             idle_count = 0;
             set_power(0, 0);
             set_power(1, 0);
-            Serial.println("Shut down due to inactivity");
+            Serial.println("MOTOR: Shut down due to inactivity");
         }
     }
     delay(10);
