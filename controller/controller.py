@@ -40,7 +40,7 @@ def main(argv):
     js = Joystick()
 
     lcd = LcdDriver(no_display)
-    update_lcd(lcd, "Starting")
+    update_lcd(lcd, "Starting!")
 
     motor = None
     arm = None
@@ -96,18 +96,24 @@ def main(argv):
             print "ttyUSB0 is motor controller, ttyUSB2 is arm"
             motor = port0
             arm = port2
+            port1.close
         elif banner1.find("MOTOR") >= 0:
             print "ttyUSB1 is motor controller, ttyUSB2 is arm"
             motor = port1
             arm = port2
+            port0.close
         elif banner2.find("MOTOR") >= 0:
             print "ttyUSB1 is motor controller, ttyUSB1 is arm"
             motor = port2
             arm = port1
+            port0.close
         else:
             print "No banner found"
             update_lcd(lcd, "No motor")
             sys.exit()
+
+    # Reopen LCD port
+    lcd = LcdDriver(no_display)
 
     max_power = 64
     min_power = 5
@@ -116,16 +122,23 @@ def main(argv):
     arm_rotation_min = 0
     arm_rotation_max = 160
     arm_rotation = 87
-    arm_lift_min = 0#50
-    arm_lift_max = 180#150
-    arm_lift = (arm_lift_min+arm_lift_max)/2
+    arm_lift1_min = 30
+    arm_lift1_max = 180
+    arm_lift1 = (arm_lift1_min+arm_lift1_max)/2
+    arm_lift2_min = 0#20
+    arm_lift2_max = 180#90
+    arm_lift2 = (arm_lift2_min+arm_lift2_max)/2
 
     if not no_serial:
         cmd = "G 0 %d" % arm_rotation
         arm.write("%s\n" % cmd)
         response = arm.readline()
         print("RESPONSE: %s" % response)
-        cmd = "G 1 %d" % arm_lift
+        cmd = "G 1 %d" % arm_lift1
+        arm.write("%s\n" % cmd)
+        response = arm.readline()
+        print("RESPONSE: %s" % response)
+        cmd = "G 2 %d" % arm_lift2
         arm.write("%s\n" % cmd)
         response = arm.readline()
         print("RESPONSE: %s" % response)
@@ -157,6 +170,10 @@ def main(argv):
     last_voltage_update_time = time.time()
     last_event_time = time.time()
 
+    turn_left_pressed = False
+    turn_right_pressed = False
+    turn_pressed_time = None
+
     global status
     status = 'RUN'
 
@@ -175,12 +192,21 @@ def main(argv):
         if event and event.is_valid():
             status = 'RUN'
             last_event_time = cur_time
+
+            # -- BUTTONS --
+            
             is_button, button_name, pressed = event.get_button()
-            # if is_button:
-            #     if pressed:
-            #         print("%s pressed" % (button_name))
-            #     else:
-            #         print("%s released" % (button_name))
+            if is_button:
+                if button_name == 'base2':
+                    turn_left_pressed = pressed
+                    if pressed:
+                        turn_pressed_time = time.time()
+                elif button_name == 'pinkie':
+                    turn_right_pressed = pressed
+                    if pressed:
+                        turn_pressed_time = time.time()
+
+            # -- AXES --
             
             is_axis, axis_name, value = event.get_axis()
             if is_axis:
@@ -191,54 +217,49 @@ def main(argv):
                     #print("Y: %d" % value)
                     ry = value
                 elif axis_name == 'x':
-                    # Turn arm
-                    old_rot = arm_rotation
+                    # Lift arm
+                    # Lift or raise arm
+                    old_lift = arm_lift2
                     step = value/(max_range*0.2)
                     if value > 0:
-                        arm_rotation = arm_rotation - step
-                        if arm_rotation < arm_rotation_min:
-                            arm_rotation = arm_rotation_min
+                        arm_lift2 = arm_lift2 - step
+                        if arm_lift2 < arm_lift2_min:
+                            arm_lift2 = arm_lift2_min
                     elif value < 0:
-                        arm_rotation = arm_rotation - step
-                        if arm_rotation > arm_rotation_max:
-                            arm_rotation = arm_rotation_max
-                    if arm_rotation != old_rot:
-                        cmd = "G 0 %d" % arm_rotation
+                        arm_lift2 = arm_lift2 - step
+                        if arm_lift2 > arm_lift2_max:
+                            arm_lift2 = arm_lift2_max
+                    if arm_lift2 != old_lift:
+                        cmd = "G 2 %d" % arm_lift2
+                        print("ARM 2: %d" % arm_lift2)
                         if no_serial:
                             print("ARM: %s" % cmd)
                         else:
                             arm.write("%s\n" % cmd)
                             response = arm.readline()
-                            #print("RESPONSE: %s" % response)
+                            #print("RESPONSE]: %s" % response)
 
                 elif axis_name == 'y':
                     # Lift or raise arm
-                    old_lift = arm_lift
+                    old_lift = arm_lift1
                     step = value/(max_range*0.2)
                     if value > 0:
-                        arm_lift = arm_lift - step
-                        if arm_lift < arm_lift_min:
-                            arm_lift = arm_lift_min
+                        arm_lift1 = arm_lift1 - step
+                        if arm_lift1 < arm_lift1_min:
+                            arm_lift1 = arm_lift1_min
                     elif value < 0:
-                        arm_lift = arm_lift - step
-                        if arm_lift > arm_lift_max:
-                            arm_lift = arm_lift_max
-                    if arm_lift != old_lift:
-                        cmd = "G 1 %d" % arm_lift
+                        arm_lift1 = arm_lift1 - step
+                        if arm_lift1 > arm_lift1_max:
+                            arm_lift1 = arm_lift1_max
+                    if arm_lift1 != old_lift:
+                        cmd = "G 1 %d" % arm_lift1
+                        print("ARM 1: %d" % arm_lift1)
                         if no_serial:
                             print("ARM: %s" % cmd)
                         else:
                             arm.write("%s\n" % cmd)
                             response = arm.readline()
                             #print("RESPONSE: %s" % response)
-                        if False:
-                            cmd = "G 2 %d" % arm_lift
-                            if no_serial:
-                                print("ARM: %s" % cmd)
-                            else:
-                                arm.write("%s\n" % cmd)
-                                response = arm.readline()
-                                #print("RESPONSE: %s" % response)
 
                 else:
                     print("Axis: %s" % axis_name)
@@ -292,6 +313,27 @@ def main(argv):
                 #print("RESPONSE: %s" % response)
             last_motor_update_time = cur_time
             show_voltage(lcd, voltage)
+
+        if turn_left_pressed or turn_right_pressed:
+            # Turn arm
+            old_rot = arm_rotation
+            step = 1 if turn_left_pressed else -1
+            elapsed = cur_time - turn_pressed_time
+            if elapsed > 1:
+                step = step * 3
+            arm_rotation = arm_rotation + step
+            if arm_rotation < arm_rotation_min:
+                arm_rotation = arm_rotation_min
+            if arm_rotation > arm_rotation_max:
+                arm_rotation = arm_rotation_max
+            if arm_rotation != old_rot:
+                cmd = "G 0 %d" % arm_rotation
+                if no_serial:
+                    print("ARM: %s" % cmd)
+                else:
+                    arm.write("%s\n" % cmd)
+                    response = arm.readline()
+                    #print("RESPONSE: %s" % response)
 
         if not no_serial:
             since_last_voltage_update = cur_time - last_voltage_update_time
