@@ -125,8 +125,8 @@ def main(argv):
     arm_lift1_min = 30
     arm_lift1_max = 180
     arm_lift1 = (arm_lift1_min+arm_lift1_max)/2
-    arm_lift2_min = 0#20
-    arm_lift2_max = 180#90
+    arm_lift2_min = 20
+    arm_lift2_max = 120
     arm_lift2 = (arm_lift2_min+arm_lift2_max)/2
 
     if not no_serial:
@@ -231,13 +231,34 @@ def main(argv):
                             arm_lift2 = arm_lift2_max
                     if arm_lift2 != old_lift:
                         cmd = "G 2 %d" % arm_lift2
-                        print("ARM 2: %d" % arm_lift2)
+                        #print("ARM 2: %d" % arm_lift2)
                         if no_serial:
                             print("ARM: %s" % cmd)
                         else:
                             arm.write("%s\n" % cmd)
                             response = arm.readline()
                             #print("RESPONSE]: %s" % response)
+                        if arm_lift2 <= 35:
+                            arm_lift1_min = 90
+                            arm_lift1_max = 180
+                        elif arm_lift2 <= 70:
+                            arm_lift1_min = 50
+                            arm_lift1_max = 180
+                        else:
+                            arm_lift1_min = 30
+                            arm_lift1_max = 150
+                        old_lift = arm_lift1
+                        if arm_lift1 < arm_lift1_min:
+                            arm_lift1 = arm_lift1_min
+                        if arm_lift1 > arm_lift1_max:
+                            arm_lift1 = arm_lift1_max
+                        if arm_lift1 != old_lift:
+                            cmd = "G 1 %d" % arm_lift1
+                            print("Restricting arm 1: %d" % arm_lift1)
+                            if not no_serial:
+                                arm.write("%s\n" % cmd)
+                                response = arm.readline()
+                                #print("RESPONSE: %s" % response)
 
                 elif axis_name == 'y':
                     # Lift or raise arm
@@ -253,7 +274,7 @@ def main(argv):
                             arm_lift1 = arm_lift1_max
                     if arm_lift1 != old_lift:
                         cmd = "G 1 %d" % arm_lift1
-                        print("ARM 1: %d" % arm_lift1)
+                        #print("ARM 1: %d" % arm_lift1)
                         if no_serial:
                             print("ARM: %s" % cmd)
                         else:
@@ -295,8 +316,8 @@ def main(argv):
         # Done every time   
 
         if (abs(powerL) < min_power) and (abs(powerR) < min_power):
-            if (abs(powerL) > 0) or (abs(powerR) > 0):
-                print("Below minimum: %d/%d" % (powerL, powerR))
+            #if (abs(powerL) > 0) or (abs(powerR) > 0):
+            #   print("Below minimum: %d/%d" % (powerL, powerR))
             powerL = 0
             powerR = 0
             
