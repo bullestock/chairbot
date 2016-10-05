@@ -9,7 +9,7 @@ int limits[][2] = {
     // Base
     { 0, 180},
     { 30, 180 },
-    { 20, 90 }
+    { 0, 125 }  // 125: Horizontal
 };
 
 Servo servo1;
