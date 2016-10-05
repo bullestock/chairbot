@@ -46,6 +46,22 @@ def main(argv):
     arm = None
     if not no_serial:
         try:
+            port0 = serial.Serial("/dev/ttyUSB0", 57600,
+                                  serial.EIGHTBITS,
+                                  serial.PARITY_NONE,
+                                  serial.STOPBITS_ONE,
+                                  timeout = 2,
+                                  rtscts = False,
+                                  dsrdtr = True)
+        except serial.serialutil.SerialException:
+            print("Could not open ttyUSB0")
+            update_lcd(lcd, "No ttyUSB0")
+            sys.exit()
+
+        banner0 = port0.readline()
+        print("ttyUSB0 banner: %s" % banner0)
+        
+        try:
             port1 = serial.Serial("/dev/ttyUSB1", 57600,
                                   serial.EIGHTBITS,
                                   serial.PARITY_NONE,
@@ -76,12 +92,16 @@ def main(argv):
         banner2 = port2.readline()
         print("ttyUSB2 banner: %s" % banner2)
 
-        if banner1.find("MOTOR") >= 0:
-            print "ttyUSB1 is motor controller"
+        if banner0.find("MOTOR") >= 0:
+            print "ttyUSB0 is motor controller, ttyUSB2 is arm"
+            motor = port0
+            arm = port2
+        elif banner1.find("MOTOR") >= 0:
+            print "ttyUSB1 is motor controller, ttyUSB2 is arm"
             motor = port1
             arm = port2
         elif banner2.find("MOTOR") >= 0:
-            print "ttyUSB1 is motor controller"
+            print "ttyUSB1 is motor controller, ttyUSB1 is arm"
             motor = port2
             arm = port1
         else:
@@ -91,12 +111,30 @@ def main(argv):
 
     max_power = 64
     min_power = 5
+
+    # Arm state
+    arm_rotation_min = 0
+    arm_rotation_max = 160
+    arm_rotation = 87
+    arm_lift_min = 0#50
+    arm_lift_max = 180#150
+    arm_lift = (arm_lift_min+arm_lift_max)/2
+
+    if not no_serial:
+        cmd = "G 0 %d" % arm_rotation
+        arm.write("%s\n" % cmd)
+        response = arm.readline()
+        print("RESPONSE: %s" % response)
+        cmd = "G 1 %d" % arm_lift
+        arm.write("%s\n" % cmd)
+        response = arm.readline()
+        print("RESPONSE: %s" % response)
+
+    # Right X/Y (motors)
     rx = 0
     ry = 0
     last_rx = 0
     last_ry = 0
-    lx = 0
-    ly = 0
     powerL = 0
     powerR = 0
 
@@ -114,10 +152,6 @@ def main(argv):
     max_loop_time = 0
 
     max_range = 32767
-    turn_range = 50
-    turn_zero = 50
-    arm_range = (150-70)/2
-    arm_zero = (70+150)/2
 
     last_motor_update_time = time.time()
     last_voltage_update_time = time.time()
@@ -157,13 +191,57 @@ def main(argv):
                     #print("Y: %d" % value)
                     ry = value
                 elif axis_name == 'x':
-                    print("LX: %d" % value)
-                    lx = value
-                if axis_name == 'y':
-                    print("LY: %d" % value)
-                    ly = value
+                    # Turn arm
+                    old_rot = arm_rotation
+                    step = value/(max_range*0.2)
+                    if value > 0:
+                        arm_rotation = arm_rotation - step
+                        if arm_rotation < arm_rotation_min:
+                            arm_rotation = arm_rotation_min
+                    elif value < 0:
+                        arm_rotation = arm_rotation - step
+                        if arm_rotation > arm_rotation_max:
+                            arm_rotation = arm_rotation_max
+                    if arm_rotation != old_rot:
+                        cmd = "G 0 %d" % arm_rotation
+                        if no_serial:
+                            print("ARM: %s" % cmd)
+                        else:
+                            arm.write("%s\n" % cmd)
+                            response = arm.readline()
+                            #print("RESPONSE: %s" % response)
+
+                elif axis_name == 'y':
+                    # Lift or raise arm
+                    old_lift = arm_lift
+                    step = value/(max_range*0.2)
+                    if value > 0:
+                        arm_lift = arm_lift - step
+                        if arm_lift < arm_lift_min:
+                            arm_lift = arm_lift_min
+                    elif value < 0:
+                        arm_lift = arm_lift - step
+                        if arm_lift > arm_lift_max:
+                            arm_lift = arm_lift_max
+                    if arm_lift != old_lift:
+                        cmd = "G 1 %d" % arm_lift
+                        if no_serial:
+                            print("ARM: %s" % cmd)
+                        else:
+                            arm.write("%s\n" % cmd)
+                            response = arm.readline()
+                            #print("RESPONSE: %s" % response)
+                        if False:
+                            cmd = "G 2 %d" % arm_lift
+                            if no_serial:
+                                print("ARM: %s" % cmd)
+                            else:
+                                arm.write("%s\n" % cmd)
+                                response = arm.readline()
+                                #print("RESPONSE: %s" % response)
+
                 else:
-                    print(axis_name)
+                    print("Axis: %s" % axis_name)
 
         if (last_rx != rx) or (last_ry != ry):
             last_rx = rx
@@ -214,24 +292,6 @@ def main(argv):
                 #print("RESPONSE: %s" % response)
             last_motor_update_time = cur_time
             show_voltage(lcd, voltage)
-
-            turn = lx/(max_range+1.0) * turn_range + turn_zero
-            cmd = "M 0 %d" % turn
-            if no_serial:
-                print("ARM: %s" % cmd)
-            else:
-                arm.write("%s\n" % cmd)
-                response = arm.readline()
-                print("RESPONSE: %s" % response)
-
-            arm_angle = ly/(max_range+1.0) * arm_range + arm_zero
-            cmd = "M 1 %d" % arm_angle
-            if no_serial:
-                print("ARM: %s" % cmd)
-            else:
-                arm.write("%s\n" % cmd)
-                response = arm.readline()
-                print("RESPONSE: %s" % response)
 
         if not no_serial:
             since_last_voltage_update = cur_time - last_voltage_update_time
