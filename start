@@ -14,13 +14,14 @@ fi
 $UPDATELCD "Start sixad"
 sudo sixad --start &
 
+$UPDATELCD "Press PS button"
+
 while true; do
-  $UPDATELCD "Press PS button"
   if dmesg |grep "Sony Computer"; then
     $UPDATELCD "Connected"
     break
   fi
-  sleep 1
+  sleep 0.1
 done
 
 if [ -e /home/pi/chairbot/noautostart ]; then
