@@ -4,11 +4,11 @@ const int SERVO_PINS[] = { 3, 5, 6 };
 
 const int BUF_SIZE = 200;
 
-int curr_pos[] = { 50, 150, 50 };
+int curr_pos[] = { 80, 150, 50 };
 int limits[][2] = {
     // Base
     { 0, 180},
-    { 70, 150 },
+    { 30, 180 },
     { 20, 90 }
 };
 
@@ -80,13 +80,13 @@ void process(const char* buffer)
             case 2:
                 if (value < limits[axis][0])
                 {
-                    Serial.print("Hit upper limit ");
+                    Serial.print("Hit lower limit ");
                     Serial.println(limits[axis][0]);
                     value = limits[axis][0];
                 }
                 if (value > limits[axis][1])
                 {
-                    Serial.print("Hit lower limit ");
+                    Serial.print("Hit upper limit ");
                     Serial.println(limits[axis][1]);
                     value = limits[axis][1];
                 }
