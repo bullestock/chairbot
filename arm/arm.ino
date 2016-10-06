@@ -1,22 +1,24 @@
 #include <Servo.h>
 
-const int SERVO_PINS[] = { 3, 5, 6 };
+const int SERVO_PINS[] = { 3, 5, 6, 9 };
 
 const int BUF_SIZE = 200;
 
-int curr_pos[] = { 80, 150, 50 };
+int curr_pos[] = { 150, 80, 50, 90 };
 int limits[][2] = {
+    { 30, 180 },
     // Base
     { 0, 180},
-    { 30, 180 },
-    { 0, 125 }  // 125: Horizontal
+    { 0, 125 },  // 125: Horizontal
+    { 0, 180 }
 };
 
 Servo servo1;
 Servo servo2;
 Servo servo3;
+Servo servo4;
 
-Servo* servos[] = { &servo1, &servo2, &servo3 };
+Servo* servos[] = { &servo1, &servo2, &servo3, &servo4 };
 int index = 0;
 char buffer[BUF_SIZE];
 
@@ -78,6 +80,7 @@ void process(const char* buffer)
             case 0:
             case 1:
             case 2:
+            case 3:
                 if (value < limits[axis][0])
                 {
                     Serial.print("Hit lower limit ");
@@ -93,14 +96,7 @@ void process(const char* buffer)
                 servos[axis]->write(value);
                 curr_pos[axis] = value;
                 break;
-#if 0
-            case 3:
-                servo4.write(value);
-                break;
-            case 4:
-                servo5.write(value);
-                break;
-#endif
+
             default:
                 Serial.println("ERROR: Invalid parameters to 'S'");
                 break;
@@ -135,6 +131,7 @@ void process(const char* buffer)
             case 0:
             case 1:
             case 2:
+            case 3:
                 {
                     const int step = (value > curr_pos[axis]) ? 1 : -1;
                     for (int i = curr_pos[axis]; i != value; i += step)
@@ -145,15 +142,8 @@ void process(const char* buffer)
                     curr_pos[axis] = value;
                 }
                 break;
-#if 0
-            case 3:
-                servo4.write(value);
-                break;
-            case 4:
-                servo5.write(value);
-                break;
-#endif
-            default:
+
+default:
                 Serial.println("ERROR: Invalid parameters to 'S'");
                 break;
             }
