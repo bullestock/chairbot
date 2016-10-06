@@ -128,13 +128,16 @@ def main(argv):
     arm_lift2_min = 20
     arm_lift2_max = 120
     arm_lift2 = (arm_lift2_min+arm_lift2_max)/2
+    gripper = 90
+    gripper_min = 75
+    gripper_max = 150
 
     if not no_serial:
-        cmd = "G 0 %d" % arm_rotation
+        cmd = "G 1 %d" % arm_rotation
         arm.write("%s\n" % cmd)
         response = arm.readline()
         print("RESPONSE: %s" % response)
-        cmd = "G 1 %d" % arm_lift1
+        cmd = "G 0 %d" % arm_lift1
         arm.write("%s\n" % cmd)
         response = arm.readline()
         print("RESPONSE: %s" % response)
@@ -174,6 +177,9 @@ def main(argv):
     turn_right_pressed = False
     turn_pressed_time = None
 
+    open_pressed = False
+    close_pressed = False
+    
     global status
     status = 'RUN'
 
@@ -205,6 +211,10 @@ def main(argv):
                     turn_right_pressed = pressed
                     if pressed:
                         turn_pressed_time = time.time()
+                elif button_name == 'top2':
+                    open_pressed = pressed
+                elif button_name == 'base':
+                    close_pressed = pressed
 
             # -- AXES --
             
@@ -253,7 +263,7 @@ def main(argv):
                         if arm_lift1 > arm_lift1_max:
                             arm_lift1 = arm_lift1_max
                         if arm_lift1 != old_lift:
-                            cmd = "G 1 %d" % arm_lift1
+                            cmd = "G 0 %d" % arm_lift1
                             print("Restricting arm 1: %d" % arm_lift1)
                             if not no_serial:
                                 arm.write("%s\n" % cmd)
@@ -273,7 +283,7 @@ def main(argv):
                         if arm_lift1 > arm_lift1_max:
                             arm_lift1 = arm_lift1_max
                     if arm_lift1 != old_lift:
-                        cmd = "G 1 %d" % arm_lift1
+                        cmd = "G 0 %d" % arm_lift1
                         #print("ARM 1: %d" % arm_lift1)
                         if no_serial:
                             print("ARM: %s" % cmd)
@@ -348,7 +358,25 @@ def main(argv):
             if arm_rotation > arm_rotation_max:
                 arm_rotation = arm_rotation_max
             if arm_rotation != old_rot:
-                cmd = "G 0 %d" % arm_rotation
+                cmd = "G 1 %d" % arm_rotation
+                if no_serial:
+                    print("ARM: %s" % cmd)
+                else:
+                    arm.write("%s\n" % cmd)
+                    response = arm.readline()
+                    #print("RESPONSE: %s" % response)
+
+        if open_pressed or close_pressed:
+            # Move gripper
+            old_gripper = gripper
+            step = 3 if open_pressed else -3
+            gripper = gripper + step
+            if gripper < gripper_min:
+                gripper = gripper_min
+            if gripper > gripper_max:
+                gripper = gripper_max
+            if gripper != old_gripper:
+                cmd = "G 3 %d" % gripper
                 if no_serial:
                     print("ARM: %s" % cmd)
                 else:
