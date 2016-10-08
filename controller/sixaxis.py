@@ -138,9 +138,11 @@ class Joystick:
             return False, '', 0
         
     def get_event(self):
-        readable, writable, exceptional = select.select([self.jsdev], [], [], 0.01)
-        if readable:
-            evbuf = self.jsdev.read(8)
-            event = self.Event(self, evbuf)
-            return event
-        return None
+        try:
+            readable, writable, exceptional = select.select([self.jsdev], [], [], 0.01)
+            if readable:
+                evbuf = self.jsdev.read(8)
+                event = self.Event(self, evbuf)
+                return event
+        except:
+            return None
