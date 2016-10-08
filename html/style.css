@@ -74,7 +74,7 @@ www.cloudfour.com/css-media-query-for-mobile-is-fools-gold/ */
   height: 30px;
 }
 					    
-.stop-btn {
+.red-btn {
   width: 120px;
   height: 40px;
   background: #ff0000;
@@ -82,10 +82,17 @@ www.cloudfour.com/css-media-query-for-mobile-is-fools-gold/ */
   display:block;
 }
 
-.pwrup-btn {
+.green-btn {
   width: 120px;
   height: 40px;
   background: #00e000;
+  font-size: 32px;
+}
+
+.orange-btn {
+  width: 120px;
+  height: 40px;
+  background: #ffa500;
   font-size: 32px;
 }
 

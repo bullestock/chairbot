@@ -184,8 +184,20 @@ def main(argv):
     global status
     status = 'RUN'
 
+    stop_mode_active = False
+    
     # Main event loop
     while True:
+        if stop_mode_active:
+            if not os.path.exists('../html/files/STOP'):
+                update_lcd(lcd, "Resuming")
+                stop_mode_active = False
+            update_lcd(lcd, "* STOPPED *")
+            continue
+        elif os.path.exists('../html/files/STOP'):
+            update_lcd(lcd, "* STOPPED *")
+            stop_mode_active = True
+
         cur_time = time.time()
 
         elapsed = cur_time - last_event_time
