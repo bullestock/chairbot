@@ -1,25 +1,28 @@
-<html>
-<head>
-<script type="text/javascript">
-setTimeout(function() {
-    window.location.href = "http://<?php echo $_SERVER['SERVER_ADDR']; ?>/index.html";
-  }, 3000);
-</script>
-</head>
-<body>
 <?php
-if (isset($_POST['stop']))
+if (!isset($_GET['action']))
 {
-    echo "STOP!";
+    echo "Error: No action";
+    die();
 }
-elseif (isset($_POST['powerup']))
+$action = $_GET['action'];
+if ($action == 'stop')
 {
-    echo "Yay!";
+    echo "STOP\n";
+    $f = fopen("files/STOP", "w");
+    if (!$f)
+    {
+        echo "fopen failed: ";
+    }
 }
-else
+else if ($action == 'resume')
 {
-    echo "Huh?";
+    echo "Resume";
+    unlink("files/STOP");
+}
+else if ($action == 'powerup')
+{
+    echo "Go!";
+    $f = fopen("files/POWERUP", "w");
 }
 ?>
-</body>
-</html>
+

@@ -189,7 +189,8 @@ def main(argv):
         cur_time = time.time()
 
         elapsed = cur_time - last_event_time
-        if (elapsed > 2) and ((rx != 0) or (ry != 0)):
+        limit = 0.5 if ry == 0 else 2.0
+        if (elapsed >= limit) and ((rx != 0) or (ry != 0)):
             status = 'STOP'
             rx = 0
             ry = 0
