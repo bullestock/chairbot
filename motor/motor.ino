@@ -1,3 +1,5 @@
+#include <Wire.h>
+
 #define TEST_MODE       0
 
 const int INTERNAL_LED = 13;
@@ -17,6 +19,7 @@ const int BRAKE = 8;
 const int V_SENSE = A0;
 const int BUF_SIZE = 200;
 const int MAX_IDLE_COUNT = 1000;
+const int SLAVE_ADDRESS = 0x04;
 
 void run_test();
 
@@ -57,6 +60,46 @@ void setPwmFrequency(int pin, int divisor)
         default: return;
         }
         TCCR2B = TCCR2B & 0b11111000 | mode;
+    }
+}
+
+int i2c_index = 0;
+char i2c_buffer[BUF_SIZE];
+const char* i2c_reply = nullptr;
+
+int idle_count = 0;
+
+void receiveData(int byteCount)
+{
+    while (Wire.available())
+    {
+        char c = Wire.read();
+        if ((c == '\r') || (c == '\n'))
+        {
+            i2c_buffer[i2c_index] = 0;
+            i2c_index = 0;
+            process(i2c_buffer, true);
+            idle_count = 0;
+        }
+        else
+        {
+            if (i2c_index >= BUF_SIZE)
+            {
+                Serial.println("MOTOR: Error: Line too long");
+                i2c_index = 0;
+                return;
+            }
+            i2c_buffer[i2c_index++] = c;
+        }
+    }
+}
+
+void sendData()
+{
+    if (i2c_reply)
+    {
+        Wire.write(i2c_reply);
+        i2c_reply = nullptr;
     }
 }
 
@@ -108,7 +151,13 @@ void setup()
     setPwmFrequency(L_PWM_B, divisor2); 
     
     Serial.begin(57600);
-    Serial.println("MOTOR: Controller v 0.1");
+    Serial.println("MOTOR: Controller v 0.2");
+
+    Wire.begin(SLAVE_ADDRESS);
+
+    // define callbacks for i2c communication
+    Wire.onReceive(receiveData);
+    Wire.onRequest(sendData);
 }
 
 void brake_on()
@@ -166,7 +215,9 @@ int get_int(const char* buffer, int len, int& next)
     return atoi(intbuf);
 }
 
-void process(const char* buffer)
+char v_buf[20];
+
+void process(const char* buffer, bool i2c)
 {
     switch (buffer[0])
     {
@@ -195,7 +246,10 @@ void process(const char* buffer)
             }
             set_power(0, left);
             set_power(1, right);
-            Serial.println("OK");
+            if (i2c)
+                i2c_reply = "OK\n";
+            else
+                Serial.println("OK");
         }
         return;
 
@@ -208,13 +262,22 @@ void process(const char* buffer)
                 brake_on();
             else
                 brake_off();
-            Serial.println("OK");
+            if (i2c)
+                i2c_reply = "OK\n";
+            else
+                Serial.println("OK");
         }
         return;
 
     case 'v':
     case 'V':
-        Serial.println(analogRead(V_SENSE)/1023.0*5*5);
+        {
+            sprintf(v_buf, "%f", analogRead(V_SENSE)/1023.0*5*5);
+            if (i2c)
+                i2c_reply = v_buf;
+            else
+                Serial.println(v_buf);
+        }
         break;
         
     default:
@@ -249,7 +312,6 @@ void run_test()
 
 int index = 0;
 char buffer[BUF_SIZE];
-int idle_count = 0;
 
 void loop()
 {
@@ -262,7 +324,7 @@ void loop()
         {
             buffer[index] = 0;
             index = 0;
-            process(buffer);
+            process(buffer, false);
             idle_count = 0;
         }
         else
