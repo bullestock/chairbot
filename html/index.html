@@ -3,7 +3,7 @@
 <title>Chairbot</title>
 <link rel="stylesheet" href="style.css" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script language="JavaScript">
+<script language="javascript" type="text/javascript">
 function createRequest() {
     var result = null;
     if (window.XMLHttpRequest) {
@@ -38,12 +38,25 @@ function sendRequest(action)
     request.addEventListener("error", transferFailed);
     request.open("GET", url, true);
     request.send(null);
+    playSound(action);
+}
+
+function playSound(soundfile) {
+  document.getElementById(soundfile).play();
 }
 </script>
+<audio id="stop" autobuffer nocontrols noautoplay>
+    <source src="stop.mp3" />
+</audio>
+<audio id="resume" autobuffer nocontrols noautoplay>
+    <source src="resume.mp3" />
+</audio>
+<audio id="powerup" autobuffer nocontrols noautoplay>
+    <source src="powerup.mp3" />
+</audio>
 </head>
 <body>
-Chairbot control panel
-<p>
+  Chairbot control panel
 <div class="centerButtons">
   <a href="#" onclick="sendRequest('stop');"><span id=stop>
   <div class="button red-btn">STOP</div></span>
