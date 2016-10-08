@@ -22,6 +22,7 @@ const int MAX_IDLE_COUNT = 1000;
 const int SLAVE_ADDRESS = 0x04;
 
 void run_test();
+void set_power(int motor, int power);
 
 void setPwmFrequency(int pin, int divisor)
 {
@@ -64,42 +65,56 @@ void setPwmFrequency(int pin, int divisor)
 }
 
 int i2c_index = 0;
-char i2c_buffer[BUF_SIZE];
-const char* i2c_reply = nullptr;
+const char* i2c_reply = 0;
 
 int idle_count = 0;
+// 0: Command
+// 1: Command = Control Motor
+// 2: Got Power L
+int i2c_state = 0;
+
+int i2c_power_left = 0;
 
 void receiveData(int byteCount)
 {
     while (Wire.available())
     {
-        char c = Wire.read();
-        if ((c == '\r') || (c == '\n'))
+        int c = Wire.read();
+        switch (i2c_state)
         {
-            i2c_buffer[i2c_index] = 0;
-            i2c_index = 0;
-            process(i2c_buffer, true);
-            idle_count = 0;
-        }
-        else
-        {
-            if (i2c_index >= BUF_SIZE)
+        case 0:
+            switch (c)
             {
-                Serial.println("MOTOR: Error: Line too long");
-                i2c_index = 0;
-                return;
+            case 0:
+                // Not implemented
+                break;
+            case 1:
+                // Control motors
+                i2c_state = 1;
+                break;
             }
-            i2c_buffer[i2c_index++] = c;
+
+        case 1:
+            i2c_power_left = c;
+            i2c_state = 2;
+            break;
+
+        case 2:
+            set_power(0, i2c_power_left);
+            set_power(1, c);
+            i2c_reply = "OK\n";
+            idle_count = 0;
+            i2c_state = 0;
+            break;
         }
     }
 }
 
 void sendData()
 {
-    if (i2c_reply)
+    if (i2c_reply && *i2c_reply)
     {
-        Wire.write(i2c_reply);
-        i2c_reply = nullptr;
+        Wire.write(*i2c_reply++);
     }
 }
 
@@ -217,7 +232,7 @@ int get_int(const char* buffer, int len, int& next)
 
 char v_buf[20];
 
-void process(const char* buffer, bool i2c)
+void process(const char* buffer)
 {
     switch (buffer[0])
     {
@@ -246,10 +261,7 @@ void process(const char* buffer, bool i2c)
             }
             set_power(0, left);
             set_power(1, right);
-            if (i2c)
-                i2c_reply = "OK\n";
-            else
-                Serial.println("OK");
+            Serial.println("OK");
         }
         return;
 
@@ -262,10 +274,7 @@ void process(const char* buffer, bool i2c)
                 brake_on();
             else
                 brake_off();
-            if (i2c)
-                i2c_reply = "OK\n";
-            else
-                Serial.println("OK");
+            Serial.println("OK");
         }
         return;
 
@@ -273,10 +282,7 @@ void process(const char* buffer, bool i2c)
     case 'V':
         {
             sprintf(v_buf, "%f", analogRead(V_SENSE)/1023.0*5*5);
-            if (i2c)
-                i2c_reply = v_buf;
-            else
-                Serial.println(v_buf);
+            Serial.println(v_buf);
         }
         break;
         
@@ -324,7 +330,7 @@ void loop()
         {
             buffer[index] = 0;
             index = 0;
-            process(buffer, false);
+            process(buffer);
             idle_count = 0;
         }
         else
