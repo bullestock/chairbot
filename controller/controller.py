@@ -116,6 +116,9 @@ def main(argv):
 
     max_power = 100
     min_power = 5
+    # Powerup levels
+    powerup_map = [ 100, 150, 200, 255 ]
+    powerup_duration = 30 # seconds
 
     # Arm state
     arm_rotation_min = 0
@@ -185,10 +188,18 @@ def main(argv):
     status = 'RUN'
 
     stop_mode_active = False
+    powerup_level = 0
+    powerup_level_max = 2
+    powerup_time = time.time()
     
     # Main event loop
     while True:
+        cur_time = time.time()
+
+        # Check signal files from web server
+        
         if stop_mode_active:
+            print("In stop mode")
             if not os.path.exists('../html/files/STOP'):
                 update_lcd(lcd, "Resuming")
                 stop_mode_active = False
@@ -197,8 +208,28 @@ def main(argv):
         elif os.path.exists('../html/files/STOP'):
             update_lcd(lcd, "* STOPPED *")
             stop_mode_active = True
+            print("Entering stop mode")
 
-        cur_time = time.time()
+        if os.path.exists('../html/files/POWERUP'):
+            update_lcd(lcd, "* POWERUP! *")
+            print("Powerup")
+            os.remove('../html/files/POWERUP')
+            if powerup_level < len(powerup_map)-1:
+                powerup_level = powerup_level + 1
+                powerup_time = cur_time
+                print("Powerup level: %d" % powerup_level)
+
+        if powerup_level > 0:
+            powerup_left = powerup_duration - (cur_time - powerup_time)
+            if powerup_left > 0:
+                update_lcd(lcd, "POWERUP: %d %d" % (powerup_level, int(powerup_left)))
+            else:
+                update_lcd(lcd, "POWERUP END")
+                powerup_level = 0
+            old_max = max_power
+            max_power = powerup_map[powerup_level]
+            if max_power != old_max:
+                print("Max power now %d" % max_power)
 
         elapsed = cur_time - last_event_time
         limit = 0.5 if ry == 0 else 2.0
@@ -207,7 +238,7 @@ def main(argv):
             rx = 0
             ry = 0
             print('STOP')
-            
+
         event = js.get_event()
         if event and event.is_valid():
             status = 'RUN'
@@ -361,7 +392,8 @@ def main(argv):
                 response = motor.readline()
                 #print("RESPONSE: %s" % response)
             last_motor_update_time = cur_time
-            show_voltage(lcd, voltage)
+            if powerup_level == 0:
+                show_voltage(lcd, voltage)
 
         if turn_left_pressed or turn_right_pressed:
             # Turn arm
