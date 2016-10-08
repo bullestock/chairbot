@@ -40,7 +40,6 @@ def main(argv):
     js = Joystick()
 
     lcd = LcdDriver(no_display)
-    update_lcd(lcd, "Starting!")
 
     motor = None
     arm = None
@@ -115,7 +114,7 @@ def main(argv):
     # Reopen LCD port
     lcd = LcdDriver(no_display)
 
-    max_power = 64
+    max_power = 100
     min_power = 5
 
     # Arm state
@@ -158,7 +157,7 @@ def main(argv):
     # This threshold is measured in units on the Y-axis
     # away from the X-axis (Y=0). A greater value will assign
     # more of the joystick's range to pivot actions.
-    pivot = 8192.0
+    pivot = 9000
 
     pivot_min = 100
     pivot_max = 32767-100
@@ -179,6 +178,8 @@ def main(argv):
 
     open_pressed = False
     close_pressed = False
+    pivot_down_pressed = False
+    pivot_up_pressed = False
     
     global status
     status = 'RUN'
@@ -215,6 +216,10 @@ def main(argv):
                     open_pressed = pressed
                 elif button_name == 'base':
                     close_pressed = pressed
+                elif button_name == 'base3':
+                    pivot_down_pressed = pressed
+                elif button_name == 'base4':
+                    pivot_up_pressed = pressed
 
             # -- AXES --
             
@@ -317,7 +322,7 @@ def main(argv):
             # - Strength of pivot (nPivSpeed) based on Joystick X input
             # - Blending of pivot vs drive (fPivScale) based on Joystick Y input
             nPivSpeed = rx
-            fPivScale = 0.0 if abs(ry) > pivot else 1.0 - abs(ry)/pivot
+            fPivScale = 0.0 if abs(ry) > pivot else 1.0 - abs(ry)/float(pivot)
 
             # Calculate final mix of Drive and Pivot and convert to motor PWM range
             powerL = -((1.0-fPivScale)*nMotPremixL + fPivScale*( nPivSpeed))/float(max_range)*max_power
@@ -383,6 +388,19 @@ def main(argv):
                     arm.write("%s\n" % cmd)
                     response = arm.readline()
                     #print("RESPONSE: %s" % response)
+
+        if False:
+            if pivot_down_pressed or pivot_up_pressed:
+                # Adjust pivot
+                if pivot_down_pressed:
+                    pivot = pivot - pivot_step
+                    if pivot < pivot_min:
+                        pivot = pivot_min
+                if pivot_up_pressed:
+                    pivot = pivot + pivot_step
+                    if pivot > pivot_max:
+                        pivot = pivot_max
+                update_lcd(lcd, "PIVOT %d" % pivot)
 
         if not no_serial:
             since_last_voltage_update = cur_time - last_voltage_update_time
