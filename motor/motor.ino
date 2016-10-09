@@ -40,11 +40,11 @@ void setPwmFrequency(int pin, int divisor)
         }
         if (pin == 5 || pin == 6)
         {
-            TCCR0B = TCCR0B & 0b11111000 | mode;
+            TCCR0B = (TCCR0B & 0b11111000) | mode;
         }
         else
         {
-            TCCR1B = TCCR1B & 0b11111000 | mode;
+            TCCR1B = (TCCR1B & 0b11111000) | mode;
         }
     }
     else if (pin == 3 || pin == 11)
@@ -60,62 +60,93 @@ void setPwmFrequency(int pin, int divisor)
         case 1024: mode = 0x7; break;
         default: return;
         }
-        TCCR2B = TCCR2B & 0b11111000 | mode;
+        TCCR2B = (TCCR2B & 0b11111000) | mode;
     }
 }
 
-int i2c_index = 0;
-const char* i2c_reply = 0;
+enum State
+{
+    STATE_OK = 0,
+    STATE_UNKNOWN_COMMAND,
+    STATE_WRONG_BYTECOUNT
+};
+
+int i2c_state = STATE_OK;
+uint16_t i2c_voltage = 0;
+bool reading_voltage = false;
 
 int idle_count = 0;
-// 0: Command
-// 1: Command = Control Motor
-// 2: Got Power L
-int i2c_state = 0;
-
-int i2c_power_left = 0;
 
 void receiveData(int byteCount)
 {
-    while (Wire.available())
+    idle_count = 0;
+    int c = Wire.read();
+    switch (c)
     {
-        int c = Wire.read();
-        switch (i2c_state)
+    case 0:
+        // Read status
+        if (byteCount != 1)
         {
-        case 0:
-            switch (c)
-            {
-            case 0:
-                // Not implemented
-                break;
-            case 1:
-                // Control motors
-                i2c_state = 1;
-                break;
-            }
-
-        case 1:
-            i2c_power_left = c;
-            i2c_state = 2;
-            break;
-
-        case 2:
-            set_power(0, i2c_power_left);
-            set_power(1, c);
-            i2c_reply = "OK\n";
-            idle_count = 0;
-            i2c_state = 0;
-            break;
+            Serial.print("ERROR: Cmd 00 expected 1 byte, got ");
+            Serial.println(byteCount);
+            while (--byteCount)
+                Wire.read();
+            i2c_state = STATE_WRONG_BYTECOUNT;
         }
+        break;
+
+    case 1:
+        {
+            // Control motors
+            if (byteCount != 4)
+            {
+                Serial.print("ERROR: Cmd 01 expected 4 bytes, got ");
+                Serial.println(byteCount);
+                while (--byteCount)
+                    Wire.read();
+                i2c_state = STATE_WRONG_BYTECOUNT;
+                return;
+            }
+            const int signs = Wire.read();
+            int power_left = Wire.read();
+            int power_right = Wire.read();
+            if (signs & 0x01)
+                power_left = -power_left;
+            if (signs & 0x02)
+                power_right = -power_right;
+            set_power(0, power_left);
+            set_power(1, power_right);
+            i2c_state = STATE_OK;
+        }
+        break;
+
+    case 2:
+        // Read battery voltage
+        {
+            const float v = analogRead(V_SENSE)/1023.0*5*5;
+            i2c_voltage = static_cast<uint16_t>(v*100);
+            reading_voltage = true;
+        }
+        break;
+        
+    default:
+        Serial.print("ERROR: Unknown command ");
+        Serial.println(c);
+        while (--byteCount)
+            Wire.read();
+        i2c_state = STATE_UNKNOWN_COMMAND;
+        break;
     }
 }
 
 void sendData()
 {
-    if (i2c_reply && *i2c_reply)
+    if (reading_voltage)
     {
-        Wire.write(*i2c_reply++);
+        Wire.write(reinterpret_cast<const uint8_t*>(&i2c_voltage), sizeof(i2c_voltage));
+        reading_voltage = false;
     }
+    Wire.write(i2c_state);
 }
 
 void setup()
@@ -166,7 +197,7 @@ void setup()
     setPwmFrequency(L_PWM_B, divisor2); 
     
     Serial.begin(57600);
-    Serial.println("MOTOR: Controller v 0.2");
+    Serial.println("MOTOR: Controller v 0.3");
 
     Wire.begin(SLAVE_ADDRESS);
 
