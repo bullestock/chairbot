@@ -1,8 +1,11 @@
 #include <Servo.h>
+#include <Wire.h>
 
 const int SERVO_PINS[] = { 3, 5, 6, 9 };
 
 const int BUF_SIZE = 200;
+
+const int SLAVE_ADDRESS = 0x05;
 
 int curr_pos[] = { 150, 80, 50, 90 };
 int limits[][2] = {
@@ -19,8 +22,78 @@ Servo servo3;
 Servo servo4;
 
 Servo* servos[] = { &servo1, &servo2, &servo3, &servo4 };
+
+const int NOF_AXES = sizeof(servos)/sizeof(servos[0]);
+
 int index = 0;
 char buffer[BUF_SIZE];
+
+enum State
+{
+    STATE_OK = 0,
+    STATE_UNKNOWN_COMMAND,
+    STATE_WRONG_BYTECOUNT,
+    STATE_INVALID_AXIS
+};
+
+int i2c_state = STATE_OK;
+
+void receiveData(int byteCount)
+{
+    int c = Wire.read();
+    switch (c)
+    {
+    case 0:
+        // Read status
+        if (byteCount != 1)
+        {
+            while (--byteCount)
+                Wire.read();
+            i2c_state = STATE_WRONG_BYTECOUNT;
+        }
+        break;
+
+    case 1:
+        {
+            // Move to position
+            if (byteCount != 3)
+            {
+                while (--byteCount)
+                    Wire.read();
+                return;
+            }
+            const int axis = Wire.read();
+            if (axis >= NOF_AXES)
+            {
+                i2c_state = STATE_INVALID_AXIS;
+                return;
+            }
+            int value = Wire.read();
+            if (value < limits[axis][0])
+            {
+                value = limits[axis][0];
+            }
+            if (value > limits[axis][1])
+            {
+                value = limits[axis][1];
+            }
+            curr_pos[axis] = value;
+            i2c_state = STATE_OK;
+        }
+        break;
+
+    default:
+        while (--byteCount)
+            Wire.read();
+        i2c_state = STATE_UNKNOWN_COMMAND;
+        break;
+    }
+}
+
+void sendData()
+{
+    Wire.write(i2c_state);
+}
 
 void setup()
 {
@@ -31,6 +104,10 @@ void setup()
         servos[i]->attach(SERVO_PINS[i]);
     }
     Serial.begin(57600);
+
+    Wire.begin(SLAVE_ADDRESS);
+    Wire.onReceive(receiveData);
+    Wire.onRequest(sendData);
 }
 
 int get_int(const char* buffer, int len)
@@ -98,53 +175,7 @@ void process(const char* buffer)
                 break;
 
             default:
-                Serial.println("ERROR: Invalid parameters to 'S'");
-                break;
-            }
-        }
-        break;
-
-        // M: Move to absolute position
-    case 'M':
-    case 'm':
-        {
-            int index;
-            const int axis = get_int(buffer+1, BUF_SIZE-1, index); 
-            int value = get_int(buffer+index, BUF_SIZE-1, index); 
-            if (value < limits[axis][0])
-            {
-                Serial.print("ARM: Above ");
-                Serial.println(limits[axis][0]);
-                value = limits[axis][0];
-            }
-            if (value > limits[axis][1])
-            {
-                Serial.print("ARM: Below ");
-                Serial.println(limits[axis][1]);
-                value = limits[axis][1];
-            }
-            Serial.print(axis);
-            Serial.print(": ");
-            Serial.println(value);
-            switch (axis)
-            {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-                {
-                    const int step = (value > curr_pos[axis]) ? 1 : -1;
-                    for (int i = curr_pos[axis]; i != value; i += step)
-                    {
-                        servos[axis]->write(i);
-                        delay(10);
-                    }
-                    curr_pos[axis] = value;
-                }
-                break;
-
-default:
-                Serial.println("ERROR: Invalid parameters to 'S'");
+                Serial.println("ERROR: Invalid parameters to 'G'");
                 break;
             }
         }
@@ -182,5 +213,12 @@ void loop()
     else
     {
         delay(10);
+    }
+    for (size_t i = 0; i < sizeof(servos)/sizeof(servos[0]); ++i)
+    {
+        Serial.print(i);
+        Serial.print(": ");
+        Serial.println(curr_pos[i]);
+        servos[i]->write(curr_pos[i]);
     }
 }
