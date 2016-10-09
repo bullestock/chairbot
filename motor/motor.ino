@@ -87,8 +87,6 @@ void receiveData(int byteCount)
         // Read status
         if (byteCount != 1)
         {
-            Serial.print("ERROR: Cmd 00 expected 1 byte, got ");
-            Serial.println(byteCount);
             while (--byteCount)
                 Wire.read();
             i2c_state = STATE_WRONG_BYTECOUNT;
@@ -100,8 +98,6 @@ void receiveData(int byteCount)
             // Control motors
             if (byteCount != 4)
             {
-                Serial.print("ERROR: Cmd 01 expected 4 bytes, got ");
-                Serial.println(byteCount);
                 while (--byteCount)
                     Wire.read();
                 i2c_state = STATE_WRONG_BYTECOUNT;
@@ -130,8 +126,6 @@ void receiveData(int byteCount)
         break;
         
     default:
-        Serial.print("ERROR: Unknown command ");
-        Serial.println(c);
         while (--byteCount)
             Wire.read();
         i2c_state = STATE_UNKNOWN_COMMAND;
