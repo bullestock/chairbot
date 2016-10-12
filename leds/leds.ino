@@ -329,23 +329,28 @@ void FillLEDsFromPaletteColors(uint8_t colorIndex)
 
 void ChangePalettePeriodically()
 {
-    uint8_t secondHand = (millis() / 1000) % 60;
-    static uint8_t lastSecond = 99;
+  // Change palette every 8 seconds
+  const int secondHand = millis()/8000;
+  static int lastSecond = 999;
     
-    if(lastSecond != secondHand) {
-        lastSecond = secondHand;
-        if(secondHand ==  0)  { currentPalette = RainbowColors_p;         currentBlending = LINEARBLEND; }
-        if(secondHand == 10)  { currentPalette = RainbowStripeColors_p;   currentBlending = NOBLEND;  }
-        if(secondHand == 15)  { currentPalette = RainbowStripeColors_p;   currentBlending = LINEARBLEND; }
-        if(secondHand == 20)  { SetupPurpleAndGreenPalette();             currentBlending = LINEARBLEND; }
-        if(secondHand == 25)  { SetupTotallyRandomPalette();              currentBlending = LINEARBLEND; }
-        if(secondHand == 30)  { SetupBlackAndWhiteStripedPalette();       currentBlending = NOBLEND; }
-        if(secondHand == 35)  { SetupBlackAndWhiteStripedPalette();       currentBlending = LINEARBLEND; }
-        if(secondHand == 40)  { currentPalette = CloudColors_p;           currentBlending = LINEARBLEND; }
-        if(secondHand == 45)  { currentPalette = PartyColors_p;           currentBlending = LINEARBLEND; }
-        if(secondHand == 50)  { currentPalette = myRedWhiteBluePalette_p; currentBlending = NOBLEND;  }
-        if(secondHand == 55)  { currentPalette = myRedWhiteBluePalette_p; currentBlending = LINEARBLEND; }
+  if(lastSecond != secondHand) {
+    lastSecond = secondHand;
+    const int pal = random(11);
+    switch (pal)
+    {
+    case 0:  currentPalette = RainbowColors_p;         currentBlending = LINEARBLEND; break;
+    case 1:  currentPalette = RainbowStripeColors_p;   currentBlending = NOBLEND;  break;
+    case 2:  currentPalette = RainbowStripeColors_p;   currentBlending = LINEARBLEND; break;
+    case 3:  SetupPurpleAndGreenPalette();             currentBlending = LINEARBLEND; break;
+    case 4:  SetupTotallyRandomPalette();              currentBlending = LINEARBLEND; break;
+    case 5:  SetupBlackAndWhiteStripedPalette();       currentBlending = NOBLEND; break;
+    case 6:  SetupBlackAndWhiteStripedPalette();       currentBlending = LINEARBLEND; break;
+    case 7:  currentPalette = CloudColors_p;           currentBlending = LINEARBLEND; break;
+    case 8:  currentPalette = PartyColors_p;           currentBlending = LINEARBLEND; break;
+    case 9:  currentPalette = myRedWhiteBluePalette_p; currentBlending = NOBLEND;  break;
+    case 10: currentPalette = myRedWhiteBluePalette_p; currentBlending = LINEARBLEND; break;
     }
+  }
 }
 
 // This function fills the palette with totally random colors.
