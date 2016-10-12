@@ -40,16 +40,24 @@ void setup()
 
 enum Mode
 {
-   MODE_CYCLE,
-   MODE_GROWING_BARS,
-   MODE_FADE,
-   MODE_CHASE,
-   MODE_CHASE_MULTI,
-   MODE_PERIODIC_PALETTE,
-   MODE_RAINBOW,
-   MODE_CYLON,
-   MODE_BOUNCE
+  MODE_CYCLE,              // 0
+  MODE_GROWING_BARS,
+  MODE_FADE,
+  MODE_CHASE,
+  MODE_CHASE_MULTI,
+  MODE_PERIODIC_PALETTE,   // 5
+  MODE_RAINBOW,
+  MODE_RAINBOW_GLITTER,
+  MODE_CYLON,
+  MODE_BOUNCE,
+  MODE_CONFETTI,           // 10
+  MODE_SINELON,
+  MODE_BPM,
+  MODE_JUGGLE,
+  MODE_FIRE
 };
+
+uint8_t BeatsPerMinute = 62;
 
 Mode mode = MODE_PERIODIC_PALETTE;
 
@@ -63,6 +71,14 @@ void fadeall()
     leds[i].nscale8(250);
 }
 
+void addGlitter(fract8 chanceOfGlitter) 
+{
+  if (random8() < chanceOfGlitter)
+  {
+    leds[random16(NUM_LEDS)] += CRGB::White;
+  }
+}
+
 const int BUF_SIZE = 20;
 int index = 0;
 char buffer[BUF_SIZE];
@@ -70,6 +86,80 @@ char buffer[BUF_SIZE];
 int current_led = 0;
 int current_loop = 0;
 bool growing = true;
+
+// Fire2012 by Mark Kriegsman, July 2012
+// as part of "Five Elements" shown here: http://youtu.be/knWiGsmgycY
+//// 
+// This basic one-dimensional 'fire' simulation works roughly as follows:
+// There's a underlying array of 'heat' cells, that model the temperature
+// at each point along the line.  Every cycle through the simulation, 
+// four steps are performed:
+//  1) All cells cool down a little bit, losing heat to the air
+//  2) The heat from each cell drifts 'up' and diffuses a little
+//  3) Sometimes randomly new 'sparks' of heat are added at the bottom
+//  4) The heat from each cell is rendered as a color into the leds array
+//     The heat-to-color mapping uses a black-body radiation approximation.
+//
+// Temperature is in arbitrary units from 0 (cold black) to 255 (white hot).
+//
+// This simulation scales it self a bit depending on NUM_LEDS; it should look
+// "OK" on anywhere from 20 to 100 LEDs without too much tweaking. 
+//
+// I recommend running this simulation at anywhere from 30-100 frames per second,
+// meaning an interframe delay of about 10-35 milliseconds.
+//
+// Looks best on a high-density LED setup (60+ pixels/meter).
+//
+//
+// There are two main parameters you can play with to control the look and
+// feel of your fire: COOLING (used in step 1 above), and SPARKING (used
+// in step 3 above).
+//
+// COOLING: How much does the air cool as it rises?
+// Less cooling = taller flames.  More cooling = shorter flames.
+// Default 50, suggested range 20-100 
+#define COOLING  55
+
+// SPARKING: What chance (out of 255) is there that a new spark will be lit?
+// Higher chance = more roaring fire.  Lower chance = more flickery fire.
+// Default 120, suggested range 50-200.
+#define SPARKING 120
+
+bool gReverseDirection = false;
+
+void Fire2012()
+{
+  // Array of temperature readings at each simulation cell
+  static byte heat[NUM_LEDS];
+
+  // Step 1.  Cool down every cell a little
+  for( int i = 0; i < NUM_LEDS; i++) {
+    heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
+  }
+  
+  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+  for( int k= NUM_LEDS - 1; k >= 2; k--) {
+    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
+  }
+    
+  // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
+  if( random8() < SPARKING ) {
+    int y = random8(7);
+    heat[y] = qadd8( heat[y], random8(160,255) );
+  }
+
+  // Step 4.  Map from heat cells to LED colors
+  for( int j = 0; j < NUM_LEDS; j++) {
+    CRGB color = HeatColor( heat[j]);
+    int pixelnumber;
+    if( gReverseDirection ) {
+      pixelnumber = (NUM_LEDS-1) - j;
+    } else {
+      pixelnumber = j;
+    }
+    leds[pixelnumber] = color;
+  }
+}
 
 void loop()
 {
@@ -117,9 +207,7 @@ void loop()
     case 1: leds[current_led].g = 255; break;
     case 2: leds[current_led].b = 255; break;
     }
-    FastLED.show();
     ++current_led;
-    delay(30);
     break;
 
   case MODE_GROWING_BARS:
@@ -143,8 +231,6 @@ void loop()
       case 1: leds[current_led].g = 255; break;
       case 2: leds[current_led].b = 255; break;
       }
-      FastLED.show();
-      delay(10);
     }
     else
     {
@@ -160,15 +246,13 @@ void loop()
       case 1: leds[NUM_LEDS-1-current_led].g = 0; break;
       case 2: leds[NUM_LEDS-1-current_led].b = 0; break;
       }
-      FastSPI_LED.show();
-      delay(10);
     }
     ++current_led;
     break;
 
   case MODE_FADE:
     // Fade in/fade out
-    for(int j = 0; j < 3; j++ ) { 
+    for (int j = 0; j < 3; j++ ) { 
       memset(leds, 0, NUM_LEDS * 3);
       for(int k = 0; k < 256; k++) { 
         for(int i = 0; i < NUM_LEDS; i++ ) {
@@ -277,14 +361,15 @@ void loop()
     startIndex = startIndex + 1; /* motion speed */
     
     FillLEDsFromPaletteColors(startIndex);
-    
-    FastLED.show();
-    FastLED.delay(1000 / UPDATES_PER_SECOND);
     break;
 
   case MODE_RAINBOW:
     fill_rainbow(leds, NUM_LEDS, --starthue, 20);
-    FastLED.delay(8);
+    break;
+
+  case MODE_RAINBOW_GLITTER:
+    fill_rainbow(leds, NUM_LEDS, --starthue, 20);
+    addGlitter(80);
     break;
 
   case MODE_CYLON:
@@ -294,18 +379,68 @@ void loop()
     leds[current_led] = CHSV(starthue++, 255, 255);
     // Show the leds
     FastLED.show(); 
-    // now that we've shown the leds, reset the i'th led to black
-    // leds[i] = CRGB::Black;
     fadeall();
     // Wait a little bit before we loop around and do it again
     FastLED.delay(10);
     ++current_led;
     break;
 
+  case MODE_CONFETTI:
+    // random colored speckles that blink in and fade smoothly
+    {
+      fadeToBlackBy(leds, NUM_LEDS, 10);
+      int pos = random16(NUM_LEDS);
+      leds[pos] += CHSV(starthue + random8(64), 200, 255);
+    }
+    break;
+    
+  case MODE_SINELON:
+    // a colored dot sweeping back and forth, with fading trails
+    {
+      fadeToBlackBy(leds, NUM_LEDS, 20);
+      int pos = beatsin16(13, 0, NUM_LEDS);
+      leds[pos] += CHSV(starthue, 255, 192);
+    }
+    break;
+
+  case MODE_BPM:
+    // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+    {
+      uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
+      for (int i = 0; i < NUM_LEDS; i++)
+        leds[i] = ColorFromPalette(PartyColors_p, starthue+(i*2), beat-starthue+(i*10));
+    }
+    break;
+
+  case MODE_JUGGLE:
+    // eight colored dots, weaving in and out of sync with each other
+    {
+      fadeToBlackBy(leds, NUM_LEDS, 20);
+      byte dothue = 0;
+      for(int i = 0; i < 8; i++)
+      {
+        leds[beatsin16(i+7,0,NUM_LEDS)] |= CHSV(dothue, 200, 255);
+        dothue += 32;
+      }
+    }
+    break;
+
+  case MODE_FIRE:
+    Fire2012();
+    break;
+    
   default:
     memset(leds, 0, NUM_LEDS * 3);
     FastLED.show();
     break;
+  }
+    
+  FastLED.show();
+  FastLED.delay(1000 / UPDATES_PER_SECOND);
+
+  EVERY_N_MILLISECONDS(20)
+  {
+    ++starthue;
   }
 }
 
