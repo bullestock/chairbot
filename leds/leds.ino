@@ -1,4 +1,6 @@
 #include "FastLED.h"
+#include <Wire.h>
+
 // Number of RGB LEDs in the strand
 #define NUM_LEDS 60
 #define BRIGHTNESS  64
@@ -26,17 +28,17 @@ void SetupBlackAndWhiteStripedPalette();
 void SetupPurpleAndGreenPalette();
 void SetupTotallyRandomPalette();
 
-void setup()
+const int SLAVE_ADDRESS = 0x06;
+
+enum State
 {
-  FastLED.addLeds<WS2811, PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.setBrightness(BRIGHTNESS);
+    STATE_OK = 0,
+    STATE_UNKNOWN_COMMAND,
+    STATE_UNKNOWN_MODE,
+    STATE_WRONG_BYTECOUNT
+};
 
-  currentPalette = RainbowColors_p;
-  currentBlending = LINEARBLEND;
-
-  Serial.begin(57600);
-  Serial.println("LED Controller v 0.1");
-}
+int i2c_state = STATE_OK;
 
 enum Mode
 {
@@ -54,12 +56,73 @@ enum Mode
   MODE_SINELON,
   MODE_BPM,
   MODE_JUGGLE,
-  MODE_FIRE
+  MODE_FIRE,
+  MODE_LAST
 };
 
 uint8_t BeatsPerMinute = 62;
 
 Mode mode = MODE_PERIODIC_PALETTE;
+Mode old_mode = static_cast<Mode>(-1);
+
+void receiveData(int byteCount)
+{
+  int c = Wire.read();
+  switch (c)
+  {
+  case 0:
+    // Read status
+    if (byteCount != 1)
+    {
+      while (--byteCount)
+        Wire.read();
+      i2c_state = STATE_WRONG_BYTECOUNT;
+    }
+    break;
+
+  case 1:
+    // Set mode
+    if (byteCount != 2)
+    {
+      while (--byteCount)
+        Wire.read();
+      i2c_state = STATE_WRONG_BYTECOUNT;
+      return;
+    }
+    mode = static_cast<Mode>(Wire.read());
+    i2c_state = STATE_OK;
+    if (mode >= MODE_LAST)
+      i2c_state = STATE_UNKNOWN_MODE;
+    break;
+        
+  default:
+    while (--byteCount)
+      Wire.read();
+    i2c_state = STATE_UNKNOWN_COMMAND;
+    break;
+  }
+}
+
+void sendData()
+{
+  Wire.write(i2c_state);
+}
+
+void setup()
+{
+  FastLED.addLeds<WS2811, PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+  FastLED.setBrightness(BRIGHTNESS);
+
+  currentPalette = RainbowColors_p;
+  currentBlending = LINEARBLEND;
+
+  Serial.begin(57600);
+  Serial.println("LED Controller v 0.1");
+
+  Wire.begin(SLAVE_ADDRESS);
+  Wire.onReceive(receiveData);
+  Wire.onRequest(sendData);
+}
 
 const static CRGB chase_colours[] = {
   CRGB::Yellow, CRGB::Green, CRGB::HotPink, CRGB::Blue, CRGB::Red, CRGB::White
@@ -160,6 +223,14 @@ void Fire2012()
     leds[pixelnumber] = color;
   }
 }
+
+#define CHECK_MODE()                \
+  if (mode != old_mode)             \
+  {                                 \
+    old_mode = mode;                \
+    current_led = current_loop = 0; \
+    break;                          \
+  }
 
 void loop()
 {
@@ -264,8 +335,7 @@ void loop()
         }
         FastLED.show();
         delay(3);
-        if (Serial.available())
-          break;
+        CHECK_MODE();
       }
       for(int k = 255; k >= 0; k--) { 
         for(int i = 0; i < NUM_LEDS; i++ ) {
@@ -277,8 +347,7 @@ void loop()
         }
         FastLED.show();
         delay(3);
-        if (Serial.available())
-          break;
+        CHECK_MODE();
       }
     }
     break;
@@ -294,10 +363,9 @@ void loop()
         leds[i] = chase_colours[c];
         FastLED.show();
         delay(50);
+        CHECK_MODE();
       }
       leds[NUM_LEDS-1] = CRGB::Black;
-      if (Serial.available())
-        break;
     }
     break;
 
@@ -313,12 +381,11 @@ void loop()
         leds[i] = chase_colours[c];
         FastLED.show();
         delay(50);
+        CHECK_MODE();
       }
       leds[NUM_LEDS-1] = CRGB::Black;
       FastLED.show();
       delay(50);
-      if (Serial.available())
-        break;
       for (int i = 0; i < NUM_LEDS; ++i)
       {
         if (i)
@@ -326,10 +393,9 @@ void loop()
         leds[NUM_LEDS-1-i] = chase_colours[c];
         FastLED.show();
         delay(50);
+        CHECK_MODE();
       }
       leds[NUM_LEDS-1] = CRGB::Black;
-      if (Serial.available())
-        break;
     }
     break;
     
@@ -348,10 +414,9 @@ void loop()
         }
         FastLED.show();
         delay(100);
+        CHECK_MODE();
       }
       leds[NUM_LEDS-1] = CRGB::Black;
-      if (Serial.available())
-        break;
     }
     break;
 
