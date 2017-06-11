@@ -5,14 +5,12 @@
 const int INTERNAL_LED = 13;
 const int R_PWM_A = 5;
 const int L_PWM_A = 3;
-const int R_EN_A = 6;
-const int L_EN_A = 4;
+const int EN_A = 4;
 const int R_IS_A = 7;
 const int L_IS_A = 2;
 const int R_PWM_B = 9;
 const int L_PWM_B = 11;
-const int R_EN_B = A2;
-const int L_EN_B = 12;
+const int EN_B = 12;
 const int R_IS_B = A3;
 const int L_IS_B = 13;
 const int BRAKE = 8;
