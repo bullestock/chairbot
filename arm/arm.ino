@@ -9,10 +9,10 @@ const int SLAVE_ADDRESS = 0x05;
 
 int curr_pos[] = { 150, 80, 50, 90 };
 int limits[][2] = {
-    { 30, 180 },
+    { 0, 180 },
     // Base
     { 0, 180},
-    { 0, 125 },  // 125: Horizontal
+    { 0, 180 },  // 125: Horizontal
     { 0, 180 }
 };
 
