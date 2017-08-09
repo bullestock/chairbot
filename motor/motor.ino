@@ -147,15 +147,13 @@ void setup()
 
     pinMode(R_PWM_A, OUTPUT);
     pinMode(L_PWM_A, OUTPUT);
-    pinMode(L_EN_A, OUTPUT);
-    pinMode(R_EN_A, OUTPUT);
+    pinMode(EN_A, OUTPUT);
     pinMode(L_IS_A, INPUT);
     pinMode(R_IS_A, INPUT);
 
     pinMode(R_PWM_B, OUTPUT);
     pinMode(L_PWM_B, OUTPUT);
-    pinMode(L_EN_B, OUTPUT);
-    pinMode(R_EN_B, OUTPUT);
+    pinMode(EN_B, OUTPUT);
     pinMode(L_IS_B, INPUT);
     pinMode(R_IS_B, INPUT);
 
@@ -164,16 +162,15 @@ void setup()
 
     digitalWrite(R_PWM_A, LOW);
     digitalWrite(L_PWM_A, LOW);
-    digitalWrite(L_EN_A, LOW);
-    digitalWrite(R_EN_A, LOW);
+    digitalWrite(EN_A, LOW);
 
     digitalWrite(R_PWM_B, LOW);
     digitalWrite(L_PWM_B, LOW);
-    digitalWrite(L_EN_B, LOW);
-    digitalWrite(R_EN_B, LOW);
+    digitalWrite(EN_B, LOW);
 
     digitalWrite(BRAKE, LOW);
 
+#if 0
     // 1024 - brum
     // 64 - hyl
     // 8 - piv
@@ -187,7 +184,7 @@ void setup()
     const int divisor2 = divisor;
     setPwmFrequency(L_PWM_A, divisor2); 
     setPwmFrequency(L_PWM_B, divisor2); 
-    
+#endif
     Serial.begin(57600);
     Serial.println("MOTOR: Controller v 0.3");
 
@@ -217,10 +214,8 @@ void set_power(// 0-1
         brake_off();
     const int l_pwm_pin = motor ? L_PWM_B : L_PWM_A;
     const int r_pwm_pin = motor ? R_PWM_B : R_PWM_A;
-    const int l_enable_pin = motor ? L_EN_B : L_EN_A;
-    const int r_enable_pin = motor ? R_EN_B : R_EN_A;
-    digitalWrite(l_enable_pin, power != 0);
-    digitalWrite(r_enable_pin, power != 0);
+    const int enable_pin = motor ? EN_B : EN_A;
+    digitalWrite(enable_pin, power != 0);
     if (power >= 0)
     {
         analogWrite(l_pwm_pin, power);
@@ -319,6 +314,7 @@ void process(const char* buffer)
 
 void run_test()
 {
+    digitalWrite(INTERNAL_LED, 0);
     for (int i = -255; i < 256; i++)
     {
         Serial.print("A ");
@@ -327,7 +323,9 @@ void run_test()
         delay(100);
     }
     set_power(0, 0);
+    digitalWrite(INTERNAL_LED, 1);
     delay(2000);
+    digitalWrite(INTERNAL_LED, 0);
     for (int i = -255; i < 256; i++)
     {
         Serial.print("B ");
@@ -335,8 +333,10 @@ void run_test()
         set_power(1, i);
         delay(100);
     }
+    digitalWrite(INTERNAL_LED, 1);
     set_power(1, 0);
     Serial.println("Test done");
+    delay(2000);
 }
 
 int index = 0;
