@@ -26,60 +26,32 @@ TMRh20 2014 - Updated to work with optimized RF24 Arduino library
 
 #include <errno.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 #include <RF24/RF24.h>
 
-#include <linux/i2c-dev.h>
-
 #include "../../remote/firmware/protocol.h"
+
+#include "radio.h"
+#include "motor.h"
 
 using namespace std;
 
 RF24 radio(22, 0);
-
-// Radio pipe addresses for the 2 nodes to communicate.
-const uint8_t pipes[][6] = {"1Node","2Node"};
-
-const int MOTOR_STATUS = 0x00;
-const int MOTOR_PWR = 0x01;
-const int MOTOR_VOLTAGE = 0x02;
 
 int main(int argc, char** argv)
 {
     cout << "Chairbot nRF24 controller\n";
 
     // Setup and configure rf radio
-    if (!radio.begin())
+    if (!radio_init(radio))
     {
-        cout << "No radio found" << endl;
-        exit(1);
-    }
-    radio.setChannel(108);
-
-    radio.setRetries(15, 15);
-
-    radio.openWritingPipe(pipes[1]);
-    radio.openReadingPipe(1, pipes[0]);
-
-    int i2c_device = open("/dev/i2c-1", O_RDWR);
-    if (i2c_device < 0)
-    {
-        cout << "No I2C device found" << endl;
+        cout << "Could not initialize radio" << endl;
         exit(1);
     }
 
-    const int motor_addr = 0x04;
-
-    if (ioctl(i2c_device, I2C_SLAVE, motor_addr) < 0)
-    {
-        cout << "Error setting up I2C: " << strerror(errno) << endl;
+    int motor_device = 0;
+    if (!motor_init(motor_device))
         exit(1);
-    }
-
-	radio.startListening();
 
     int powerL = 0;
     int powerR = 0;
@@ -157,14 +129,5 @@ int main(int argc, char** argv)
         }
         delay(10);
 
-        const uint8_t data[4] = {
-            MOTOR_PWR,
-            static_cast<uint8_t>((powerL < 0 ? 0x01 : 0) | (powerL < 0 ? 0x02 : 0)),
-            static_cast<uint8_t>(abs(powerL)),
-            static_cast<uint8_t>(abs(powerR))
-        };
-        //cout << powerL << "/" << powerR << endl;
-        if (write(i2c_device, data, sizeof(data)) != sizeof(data))
-            cout << "Error writing I2C: " << strerror(errno) << endl;
     }
 }

@@ -13,9 +13,11 @@
 
 include Makefile.inc
 
-PROGRAMS = main
+PROGRAMS = controller
 
-SOURCES = $(PROGRAMS:=.cpp)
+SOURCES = main.cpp radio.cpp motor.cpp
+
+CFLAGS = -O -std=c++14
 
 LIBS=-l$(LIB)
 ifeq ($(DRIVER), LittleWire)
@@ -25,7 +27,7 @@ endif
 all: $(PROGRAMS)
 
 $(PROGRAMS): $(SOURCES)
-	$(CXX) $(CFLAGS) -I$(HEADER_DIR)/.. -I.. -L$(LIB_DIR) $@.cpp $(LIBS) -o $@
+	$(CXX) $(CFLAGS) -I$(HEADER_DIR)/.. -I.. -L$(LIB_DIR) $(SOURCES) $(LIBS) -o $@
 
 clean:
 	@echo "[Cleaning]"
