@@ -53,9 +53,15 @@ int main(int argc, char** argv)
     if (!motor_init(motor_device))
         exit(1);
 
-    int powerL = 0;
-    int powerR = 0;
+    int power_left = 0;
+    int power_right = 0;
 
+    int left_x_zero = 0;
+    int left_y_zero = 0;
+    int right_x_zero = 0;
+    int right_y_zero = 0;
+    bool first_reading = true;
+    
     // The threshold at which the pivot action starts
     // This threshold is measured in units on the Y-axis
     // away from the X-axis (Y=0). A greater value will assign
@@ -85,14 +91,24 @@ int main(int argc, char** argv)
 
                 radio.startListening();
 
+                if (first_reading)
+                {
+                    // Zero sticks
+                    left_x_zero = frame.left_x;
+                    left_y_zero = frame.left_y;
+                    right_x_zero = frame.right_x;
+                    right_y_zero = frame.right_y;
+                    first_reading = false;
+                }
+                
                 cerr << "Sticks " << frame.left_x << " " << frame.left_y
                      << " " << frame.right_x << " " << frame.right_y << endl;
                 
                 const int max_power = 100;
 
                 const int max_range = 511;
-                const int rx = frame.right_x - max_range;
-                const int ry = frame.right_y - max_range;
+                const int rx = frame.right_x - right_x_zero;
+                const int ry = frame.right_y - right_y_zero;
 
                 cout << "RX " << rx << " RY " << ry << endl;
 
@@ -123,8 +139,9 @@ int main(int argc, char** argv)
                 const auto fPivScale = abs(ry) > pivot ? 0.0 : 1.0 - abs(ry)/float(pivot);
 
                 // Calculate final mix of Drive and Pivot and convert to motor PWM range
-                powerL = int(-((1.0-fPivScale)*nMotPremixL + fPivScale*(nPivSpeed))/float(max_range)*max_power);
-                powerR = int(-((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*max_power);
+                power_left = int(-((1.0-fPivScale)*nMotPremixL + fPivScale*(nPivSpeed))/float(max_range)*max_power);
+                power_right = int(-((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*max_power);
+                motor_set(motor_device, power_left, power_right);
             }
         }
         delay(10);
