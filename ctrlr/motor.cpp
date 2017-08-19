@@ -18,6 +18,12 @@ const int MOTOR_STATUS = 0x00;
 const int MOTOR_PWR = 0x01;
 const int MOTOR_VOLTAGE = 0x02;
 
+// The threshold at which the pivot action starts
+// This threshold is measured in units on the Y-axis
+// away from the X-axis (Y=0). A greater value will assign
+// more of the joystick's range to pivot actions.
+const int PIVOT = 35;
+
 bool motor_init(int& i2c_device)
 {
     i2c_device = open("/dev/i2c-1", O_RDWR);
@@ -51,4 +57,43 @@ bool motor_set(int i2c_device, int power_left, int power_right)
         return false;
     }
     return true;
+}
+
+void compute_power(int rx, int ry, int& power_left, int& power_right)
+{
+    const int max_power = 100;
+
+    const int max_range = 511;
+                
+    cout << "RX " << rx << " RY " << ry << endl;
+
+    int nMotPremixL = 0;
+    int nMotPremixR = 0;
+    // Calculate Drive Turn output due to Joystick X input
+    if (ry >= 0)
+    {
+        // Forward
+        nMotPremixL = rx >= 0 ? max_range : max_range + rx;
+        nMotPremixR = rx >= 0 ? max_range - rx : max_range;
+    }
+    else
+    {
+        // Reverse
+        nMotPremixL = rx >= 0 ? max_range - rx : max_range;
+        nMotPremixR = rx >= 0 ? max_range : max_range + rx;
+    }
+
+    // Scale Drive output due to Joystick Y input (throttle)
+    nMotPremixL = nMotPremixL * ry/(max_range+1.0);
+    nMotPremixR = nMotPremixR * ry/(max_range+1.0);
+
+    // Now calculate pivot amount
+    // - Strength of pivot (nPivSpeed) based on Joystick X input
+    // - Blending of pivot vs drive (fPivScale) based on Joystick Y input
+    const auto nPivSpeed = rx;
+    const auto fPivScale = abs(ry) > PIVOT ? 0.0 : 1.0 - abs(ry)/float(PIVOT);
+
+    // Calculate final mix of Drive and Pivot and convert to motor PWM range
+    power_left = int(-((1.0-fPivScale)*nMotPremixL + fPivScale*(nPivSpeed))/float(max_range)*max_power);
+    power_right = int(-((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*max_power);
 }

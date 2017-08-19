@@ -62,12 +62,6 @@ int main(int argc, char** argv)
     int right_y_zero = 0;
     bool first_reading = true;
     
-    // The threshold at which the pivot action starts
-    // This threshold is measured in units on the Y-axis
-    // away from the X-axis (Y=0). A greater value will assign
-    // more of the joystick's range to pivot actions.
-    const int pivot = 35;
-
 	while (1)
 	{
         // if there is data ready
@@ -81,70 +75,41 @@ int main(int argc, char** argv)
             if (frame.magic != AirFrame::MAGIC_VALUE)
             {
                 cerr << "Bad magic value; expected " << AirFrame::MAGIC_VALUE << ", got " << frame.magic << endl;
+                continue;
             }
-            else
-            {
-                // Echo back tick value so we can compute round trip time
-                radio.stopListening();
+
+            // Echo back tick value so we can compute round trip time
+            radio.stopListening();
 				
-                radio.write(&frame.ticks, sizeof(frame.ticks));
+            radio.write(&frame.ticks, sizeof(frame.ticks));
 
-                radio.startListening();
+            radio.startListening();
 
-                if (first_reading)
-                {
-                    // Zero sticks
-                    left_x_zero = frame.left_x;
-                    left_y_zero = frame.left_y;
-                    right_x_zero = frame.right_x;
-                    right_y_zero = frame.right_y;
-                    first_reading = false;
-                }
-                
-                cerr << "Sticks " << frame.left_x << " " << frame.left_y
-                     << " " << frame.right_x << " " << frame.right_y << endl;
-                
-                const int max_power = 100;
-
-                const int max_range = 511;
-                const int rx = frame.right_x - right_x_zero;
-                const int ry = frame.right_y - right_y_zero;
-
-                cout << "RX " << rx << " RY " << ry << endl;
-
-                int nMotPremixL = 0;
-                int nMotPremixR = 0;
-                // Calculate Drive Turn output due to Joystick X input
-                if (ry >= 0)
-                {
-                    // Forward
-                    nMotPremixL = rx >= 0 ? max_range : max_range + rx;
-                    nMotPremixR = rx >= 0 ? max_range - rx : max_range;
-                }
-                else
-                {
-                    // Reverse
-                    nMotPremixL = rx >= 0 ? max_range - rx : max_range;
-                    nMotPremixR = rx >= 0 ? max_range : max_range + rx;
-                }
-
-                // Scale Drive output due to Joystick Y input (throttle)
-                nMotPremixL = nMotPremixL * ry/(max_range+1.0);
-                nMotPremixR = nMotPremixR * ry/(max_range+1.0);
-
-                // Now calculate pivot amount
-                // - Strength of pivot (nPivSpeed) based on Joystick X input
-                // - Blending of pivot vs drive (fPivScale) based on Joystick Y input
-                const auto nPivSpeed = rx;
-                const auto fPivScale = abs(ry) > pivot ? 0.0 : 1.0 - abs(ry)/float(pivot);
-
-                // Calculate final mix of Drive and Pivot and convert to motor PWM range
-                power_left = int(-((1.0-fPivScale)*nMotPremixL + fPivScale*(nPivSpeed))/float(max_range)*max_power);
-                power_right = int(-((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*max_power);
-                motor_set(motor_device, power_left, power_right);
+            if (first_reading)
+            {
+                // Zero sticks
+                left_x_zero = frame.left_x;
+                left_y_zero = frame.left_y;
+                right_x_zero = frame.right_x;
+                right_y_zero = frame.right_y;
+                first_reading = false;
             }
-        }
-        delay(10);
 
+#define PUSH(bit)   ((frame.switches & (1 << bit)) ? '1' : '0')
+#define TOGGLE(bit)   ((frame.switches & (1 << 8+2*bit)) ? 'D' : ((frame.switches & (2 << 8+2*bit)) ? 'U' : '-'))
+                
+            cerr << "Left " << frame.left_x << "/" << frame.left_y
+                 << " Right " << frame.right_x << " " << frame.right_y
+                 << " Pot " << int(frame.left_pot) << "/" << int(frame.right_pot)
+                 << " Push " << PUSH(0) << PUSH(1) << PUSH(2) << PUSH(3)
+                 << " Toggle " << TOGGLE(0) << TOGGLE(1) << TOGGLE(2) << TOGGLE(3)
+                 << endl;
+                
+            const int rx = frame.right_x - right_x_zero;
+            const int ry = frame.right_y - right_y_zero;
+
+            compute_power(rx, ry, power_left, power_right);
+            motor_set(motor_device, power_left, power_right);
+        }
     }
 }
