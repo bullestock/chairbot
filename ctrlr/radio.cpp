@@ -11,7 +11,7 @@
 using namespace std;
 
 // Radio pipe addresses for the 2 nodes to communicate.
-static const uint8_t pipes[][6] = {"1Node","2Node"};
+static const uint8_t pipes[][6] = {"1BULL","2BULL"};
 
 bool radio_init(RF24& radio)
 {
