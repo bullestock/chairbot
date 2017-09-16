@@ -1,25 +1,14 @@
 /*
- Copyright (C) 2011 J. Coliz <maniacbug@ymail.com>
+ Copyright (C) 2017 Torsten Martinsen
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
-
- 03/17/2013 : Charles-Henri Hallard (http://hallard.me)
-              Modified to use with Arduipi board http://hallard.me/arduipi
-						  Changed to use modified bcm2835 and RF24 library
-TMRh20 2014 - Updated to work with optimized RF24 Arduino library
-
  */
 
-/**
- * Example RF Radio Ping Pair
- *
- * This is an example of how to use the RF24 class on RPi, communicating to an Arduino running
- * the GettingStarted sketch.
- */
-
+#include <chrono>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -36,6 +25,8 @@ TMRh20 2014 - Updated to work with optimized RF24 Arduino library
 
 using namespace std;
 
+const auto max_radio_idle_time = chrono::milliseconds(100);
+                                            
 RF24 radio(22, 0);
 
 int main(int argc, char** argv)
@@ -61,12 +52,17 @@ int main(int argc, char** argv)
     int right_x_zero = 0;
     int right_y_zero = 0;
     bool first_reading = true;
-    
+
+    auto last_packet = chrono::steady_clock::now();
+
+    int count = 0;
 	while (1)
 	{
         // if there is data ready
         if (radio.available())
         {
+            last_packet = chrono::steady_clock::now();
+
             AirFrame frame;
             // Fetch the payload, and see if this was the last one.
             while (radio.available())
@@ -101,18 +97,33 @@ int main(int argc, char** argv)
             const int rx = frame.right_x - right_x_zero;
             const int ry = frame.right_y - right_y_zero;
 
-            cerr << "Left " << frame.left_x << "/" << frame.left_y
-                 << " Right " << frame.right_x << "/" << frame.right_y << " (" << rx << "/" << ry << ")"
-                 << " P " << int(frame.left_pot) << "/" << int(frame.right_pot)
-                 << " Push " << PUSH(0) << PUSH(1) << PUSH(2) << PUSH(3)
-                 << " Toggle " << TOGGLE(0) << TOGGLE(1) << TOGGLE(2) << TOGGLE(3)
-                 << endl;
-
             // Map right pot (0-255) to pivot value (20-51)
             const int pivot = 20 + frame.right_pot/8;
             compute_power(rx, ry, power_left, power_right, pivot);
-            cerr << "Power " << power_left << "/" << power_right << endl;
+            ++count;
+            if (count > 10)
+            {
+                count = 0;
+                cerr << "L " << setw(4) << frame.left_x << "/" << setw(4) << frame.left_y
+                     << " R " << setw(4) << frame.right_x << "/" << setw(4) << frame.right_y << " (" << rx << "/" << ry << ")"
+                     << " P " << setw(3) << int(frame.left_pot) << "/" << setw(3) << int(frame.right_pot)
+                     << " Push " << PUSH(0) << PUSH(1) << PUSH(2) << PUSH(3)
+                     << " Toggle " << TOGGLE(0) << TOGGLE(1) << TOGGLE(2) << TOGGLE(3)
+                     << " Power " << power_left << "/" << power_right << endl;
+            }
+            
             motor_set(motor_device, power_left, power_right);
+        }
+        else
+        {
+            // No data from radio
+            const auto cur_time = chrono::steady_clock::now();
+            if (cur_time - last_packet > max_radio_idle_time)
+            {
+                motor_set(motor_device, 0, 0);
+                cerr << "HALT: Last packet was seen at " << last_packet.time_since_epoch().count() << endl;
+                first_reading = true;
+            }
         }
     }
 }
