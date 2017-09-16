@@ -98,17 +98,20 @@ int main(int argc, char** argv)
 #define PUSH(bit)   ((frame.switches & (1 << bit)) ? '1' : '0')
 #define TOGGLE(bit)   ((frame.switches & (1 << 8+2*bit)) ? 'D' : ((frame.switches & (2 << 8+2*bit)) ? 'U' : '-'))
                 
-            cerr << "Left " << frame.left_x << "/" << frame.left_y
-                 << " Right " << frame.right_x << " " << frame.right_y
-                 << " Pot " << int(frame.left_pot) << "/" << int(frame.right_pot)
-                 << " Push " << PUSH(0) << PUSH(1) << PUSH(2) << PUSH(3)
-                 << " Toggle " << TOGGLE(0) << TOGGLE(1) << TOGGLE(2) << TOGGLE(3)
-                 << endl;
-                
             const int rx = frame.right_x - right_x_zero;
             const int ry = frame.right_y - right_y_zero;
 
-            compute_power(rx, ry, power_left, power_right);
+            cerr << "Left " << frame.left_x << "/" << frame.left_y
+                 << " Right " << frame.right_x << "/" << frame.right_y << " (" << rx << "/" << ry << ")"
+                 << " P " << int(frame.left_pot) << "/" << int(frame.right_pot)
+                 << " Push " << PUSH(0) << PUSH(1) << PUSH(2) << PUSH(3)
+                 << " Toggle " << TOGGLE(0) << TOGGLE(1) << TOGGLE(2) << TOGGLE(3)
+                 << endl;
+
+            // Map right pot (0-255) to pivot value (20-51)
+            const int pivot = 20 + frame.right_pot/8;
+            compute_power(rx, ry, power_left, power_right, pivot);
+            cerr << "Power " << power_left << "/" << power_right << endl;
             motor_set(motor_device, power_left, power_right);
         }
     }
