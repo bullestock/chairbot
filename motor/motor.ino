@@ -117,8 +117,8 @@ void receiveData(int byteCount)
     case 2:
         // Read battery voltage
         {
-            const float v = analogRead(V_SENSE)/1023.0*5*5;
-            i2c_voltage = static_cast<uint16_t>(v*100);
+            const float v = analogRead(V_SENSE)/1023.0*5*11;
+            i2c_voltage = static_cast<uint16_t>(v*1000);
             reading_voltage = true;
         }
         break;
@@ -185,7 +185,7 @@ void setup()
     setPwmFrequency(L_PWM_A, divisor2); 
     setPwmFrequency(L_PWM_B, divisor2); 
 #endif
-    Serial.begin(57600);
+    Serial.begin(115200);
     Serial.println("MOTOR: Controller v 0.3");
 
     Wire.begin(SLAVE_ADDRESS);

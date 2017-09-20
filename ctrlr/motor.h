@@ -10,4 +10,7 @@ bool motor_init(int& i2c_device);
 
 bool motor_set(int i2c_device, int power_left, int power_right);
 
+// Get battery voltage in mV. -1 signifies an error.
+int32_t motor_get_battery();
+
 void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot = PIVOT);

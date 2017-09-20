@@ -63,12 +63,12 @@ int main(int argc, char** argv)
         {
             last_packet = chrono::steady_clock::now();
 
-            AirFrame frame;
+            ForwardAirFrame frame;
             // Fetch the payload, and see if this was the last one.
             while (radio.available())
                 radio.read(&frame, sizeof(frame));
 
-            if (frame.magic != AirFrame::MAGIC_VALUE)
+            if (frame.magic != ForwardAirFrame::MAGIC_VALUE)
             {
                 cerr << "Bad magic value; expected " << AirFrame::MAGIC_VALUE << ", got " << frame.magic << endl;
                 continue;
@@ -76,8 +76,13 @@ int main(int argc, char** argv)
 
             // Echo back tick value so we can compute round trip time
             radio.stopListening();
-				
-            radio.write(&frame.ticks, sizeof(frame.ticks));
+
+            ReturnAirFrame ret_frame;
+            ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
+            ret_frame.ticks = frame.ticks;
+            ret_frame.battery = motor_get_battery();
+            cout << "BAT " << ret_frame.battery << endl;
+            radio.write(&ret_frame, sizeof(ret_frame));
 
             radio.startListening();
 

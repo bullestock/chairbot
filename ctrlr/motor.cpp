@@ -53,6 +53,25 @@ bool motor_set(int i2c_device, int power_left, int power_right)
     return true;
 }
 
+int32_t motor_get_battery()
+{
+    const uint8_t data[1] = {
+        MOTOR_VOLTAGE
+    };
+    if (write(i2c_device, data, sizeof(data)) != sizeof(data))
+    {
+        cout << "Error writing I2C: " << strerror(errno) << endl;
+        return -1;
+    }
+    uint16_t v;
+    if (read(i2c_device, &v, sizeof(v)) != sizeof(v))
+    {
+        cout << "Error reading I2C: " << strerror(errno) << endl;
+        return -1;
+    }
+    return v;
+}
+
 void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot)
 {
     const int max_power = 100;
