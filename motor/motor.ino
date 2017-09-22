@@ -70,8 +70,7 @@ enum State
 };
 
 int i2c_state = STATE_OK;
-uint16_t i2c_voltage = 0;
-bool reading_voltage = false;
+uint8_t i2c_voltage = 0;
 
 int idle_count = 0;
 
@@ -117,9 +116,6 @@ void receiveData(int byteCount)
     case 2:
         // Read battery voltage
         {
-            const float v = analogRead(V_SENSE)/1023.0*5*11;
-            i2c_voltage = static_cast<uint16_t>(v*1000);
-            reading_voltage = true;
         }
         break;
         
@@ -133,12 +129,7 @@ void receiveData(int byteCount)
 
 void sendData()
 {
-    if (reading_voltage)
-    {
-        Wire.write(reinterpret_cast<const uint8_t*>(&i2c_voltage), sizeof(i2c_voltage));
-        reading_voltage = false;
-    }
-    Wire.write(i2c_state);
+    Wire.write(i2c_voltage);
 }
 
 void setup()
@@ -379,6 +370,7 @@ void loop()
         }
     }
     delay(10);
+    i2c_voltage = static_cast<uint8_t>(analogRead(V_SENSE)/4);
 #else
     run_test();
 #endif
