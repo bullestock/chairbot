@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 // The threshold at which the pivot action starts
 // This threshold is measured in units on the Y-axis
 // away from the X-axis (Y=0). A greater value will assign
@@ -11,6 +13,6 @@ bool motor_init(int& i2c_device);
 bool motor_set(int i2c_device, int power_left, int power_right);
 
 // Get battery voltage in mV. -1 signifies an error.
-int32_t motor_get_battery();
+int32_t motor_get_battery(int i2c_device);
 
 void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot = PIVOT);

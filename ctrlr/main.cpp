@@ -25,7 +25,7 @@
 
 using namespace std;
 
-const auto max_radio_idle_time = chrono::milliseconds(100);
+const auto max_radio_idle_time = chrono::milliseconds(150);
                                             
 RF24 radio(22, 0);
 
@@ -70,7 +70,8 @@ int main(int argc, char** argv)
 
             if (frame.magic != ForwardAirFrame::MAGIC_VALUE)
             {
-                cerr << "Bad magic value; expected " << AirFrame::MAGIC_VALUE << ", got " << frame.magic << endl;
+                cerr << "Bad magic value; expected " << ForwardAirFrame::MAGIC_VALUE
+                     << ", got " << frame.magic << endl;
                 continue;
             }
 
@@ -80,7 +81,7 @@ int main(int argc, char** argv)
             ReturnAirFrame ret_frame;
             ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
             ret_frame.ticks = frame.ticks;
-            ret_frame.battery = motor_get_battery();
+            ret_frame.battery = motor_get_battery(motor_device);
             cout << "BAT " << ret_frame.battery << endl;
             radio.write(&ret_frame, sizeof(ret_frame));
 
