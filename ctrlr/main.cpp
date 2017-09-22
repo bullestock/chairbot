@@ -55,6 +55,12 @@ int main(int argc, char** argv)
 
     auto last_packet = chrono::steady_clock::now();
 
+    const int NOF_BATTERY_READINGS = 100;
+    int32_t battery_readings[NOF_BATTERY_READINGS];
+    int battery_reading_index = 0;
+    for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
+        battery_readings[i] = 0;
+    
     int count = 0;
 	while (1)
 	{
@@ -81,8 +87,20 @@ int main(int argc, char** argv)
             ReturnAirFrame ret_frame;
             ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
             ret_frame.ticks = frame.ticks;
-            ret_frame.battery = motor_get_battery(motor_device);
-            cout << "BAT " << ret_frame.battery << endl;
+            battery_readings[battery_reading_index] = motor_get_battery(motor_device);
+            ++battery_reading_index;
+            if (battery_reading_index >= NOF_BATTERY_READINGS)
+                battery_reading_index = 0;
+            int n = 0;
+            int32_t sum = 0;
+            for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
+                if (battery_readings[i])
+                {
+                    sum += battery_readings[i];
+                    ++n;
+                }
+            // Round to nearest 0.1 V to prevent flickering
+            ret_frame.battery = n ? 100*((sum/n+50)/100) : 0;
             radio.write(&ret_frame, sizeof(ret_frame));
 
             radio.startListening();
