@@ -16,7 +16,7 @@ const int L_IS_B = 13;
 const int BRAKE = 8;
 const int V_SENSE = A0;
 const int BUF_SIZE = 200;
-const int MAX_IDLE_COUNT = 1000;
+const int MAX_IDLE_COUNT = 10;
 const int SLAVE_ADDRESS = 0x04;
 
 void run_test();
