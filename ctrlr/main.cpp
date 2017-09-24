@@ -12,6 +12,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <thread>
+
+#include <boost/program_options.hpp>
 
 #include <errno.h>
 #include <unistd.h>
@@ -24,6 +27,7 @@
 #include "motor.h"
 
 using namespace std;
+namespace po = boost::program_options;
 
 const auto max_radio_idle_time = chrono::milliseconds(150);
                                             
@@ -31,18 +35,51 @@ RF24 radio(22, 0);
 
 int main(int argc, char** argv)
 {
-    cout << "Chairbot nRF24 controller\n";
+    po::options_description desc("Allowed options");
+    desc.add_options()
+       ("help,h", "produce help message")
+       ("motortest,m", "exercise motors")
+       ;
 
-    // Setup and configure rf radio
-    if (!radio_init(radio))
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("help"))
     {
-        cout << "Could not initialize radio" << endl;
-        exit(1);
+        cout << desc << "\n";
+        return 1;
     }
 
     int motor_device = 0;
     if (!motor_init(motor_device))
         exit(1);
+
+    if (vm.count("motortest"))
+    {
+        cout << "Left" << endl;
+        for (int i = 0; i < 256; ++i)
+        {
+            motor_set(motor_device, i, 0);
+            this_thread::sleep_for(chrono::milliseconds(10));
+        }
+        cout << "Right" << endl;
+        for (int i = 0; i < 256; ++i)
+        {
+            motor_set(motor_device, 0, i);
+            this_thread::sleep_for(chrono::milliseconds(10));
+        }
+        return 0;
+    }
+
+    cout << "Chairbot nRF24 controller\n";
+
+    // Setup and configure radio
+    if (!radio_init(radio))
+    {
+        cout << "Could not initialize radio" << endl;
+        exit(1);
+    }
 
     int power_left = 0;
     int power_right = 0;

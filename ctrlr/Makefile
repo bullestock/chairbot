@@ -19,7 +19,7 @@ SOURCES = main.cpp radio.cpp motor.cpp
 
 CFLAGS = -O -std=c++14
 
-LIBS=-l$(LIB)
+LIBS=-l$(LIB) -lboost_program_options
 ifeq ($(DRIVER), LittleWire)
 	LIBS+= -llittlewire-spi
 endif
