@@ -1,9 +1,12 @@
 #include <SoftwareSerial.h>
+#include <Wire.h>
 
 SoftwareSerial mySerial(10, 11); // RX, TX
 
-#define LED_PIN    13
-#define BUSY_PIN   12
+const int LED_PIN = 13;
+const int BUSY_PIN = 12;
+const int MOSFET_PIN = 2;
+const int SLAVE_ADDRESS = 0x05;
 
 // The limit value for measuring darkness, i.e. the maximum value that get_darkness_level() will ever return.
 const int MAX_DARKNESS_LEVEL = 30000;
@@ -187,10 +190,51 @@ DFPlayer player(mySerial);
 
 int num_flash_files = 0;
 
+// Index of sound to play. -1 means random.
+int sound_index = -1;
+// Flag to start playing sound
+bool do_play = false;
+
+void receiveData(int byteCount)
+{
+    int c = Wire.read();
+    switch (c)
+    {
+    case 0:
+        // Play random sound
+        sound_index = -1;
+        do_play = true;
+        break;
+
+    case 1:
+        // Play specific sound
+        sound_index = Wire.read();
+        --byteCount;
+        do_play = true;
+        break;
+
+    case 2:
+        // Control MOSFET
+        digitalWrite(MOSFET_PIN, Wire.read());
+        --byteCount;
+        break;
+        
+    default:
+        break;
+    }
+
+    while (--byteCount)
+        Wire.read();
+}
+
+void sendData()
+{
+}
+
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("Signals v 0.1");
+    Serial.println("Signals v 0.2");
 
     mySerial.begin(9600);
 	delay(10);
@@ -209,6 +253,10 @@ void setup()
         Serial.print("Files on flash: ");
         Serial.println(num_flash_files);
     }
+
+    Wire.begin(SLAVE_ADDRESS);
+    Wire.onReceive(receiveData);
+    Wire.onRequest(sendData);
 }
 
 int n = 0;
@@ -228,10 +276,18 @@ void loop()
     switch (state)
     {
     case STATE_IDLE:
-        if (1)
+        if (do_play)
         {
+            int num = sound_index;
+            do_play = false;
             digitalWrite(LED_PIN, HIGH);
-            int num = 1+random(num_flash_files);
+            if (num < 0)
+                num = random(num_flash_files);
+            else if (num >= num_flash_files)
+            {
+                Serial.println("Invalid sound index");
+                break;
+            }
             if (debug_on)
             {
                 Serial.print("Play ");
@@ -247,7 +303,6 @@ void loop()
     case STATE_PLAYING:
         {
             const bool busy = player.is_busy();
-            //Serial.println(busy);
             if (!busy)
             {
                 digitalWrite(LED_PIN, LOW);
