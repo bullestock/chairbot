@@ -25,6 +25,7 @@
 
 #include "radio.h"
 #include "motor.h"
+#include "signal.h"
 
 using namespace std;
 namespace po = boost::program_options;
@@ -33,12 +34,28 @@ const auto max_radio_idle_time = chrono::milliseconds(150);
                                             
 RF24 radio(22, 0);
 
+bool is_pushed(const ForwardAirFrame& frame, int button)
+{
+    return frame.switches & (1 << button);
+}
+
+bool is_toggle_up(const ForwardAirFrame& frame, int sw)
+{
+    return frame.switches & (2 << 8+2*sw);
+}
+
+bool is_toggle_down(const ForwardAirFrame& frame, int sw)
+{
+    return frame.switches & (1 << 8+2*sw);
+}
+
 int main(int argc, char** argv)
 {
     po::options_description desc("Allowed options");
     desc.add_options()
        ("help,h", "produce help message")
        ("motortest,m", "exercise motors")
+       ("soundtest,s", "play a sound")
        ;
 
     po::variables_map vm;
@@ -72,6 +89,17 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    int signal_device = 0;
+    if (!signal_init(signal_device))
+        exit(1);
+
+    if (vm.count("soundtest"))
+    {
+        cout << "Play random sound" << endl;
+        signal_play_sound(signal_device, -1);
+        return 0;
+    }
+    
     cout << "Chairbot nRF24 controller\n";
 
     // Setup and configure radio
@@ -152,8 +180,8 @@ int main(int argc, char** argv)
                 first_reading = false;
             }
 
-#define PUSH(bit)   ((frame.switches & (1 << bit)) ? '1' : '0')
-#define TOGGLE(bit)   ((frame.switches & (1 << 8+2*bit)) ? 'D' : ((frame.switches & (2 << 8+2*bit)) ? 'U' : '-'))
+#define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
+#define TOGGLE(bit) (is_toggle_down(frame, bit) ? 'D' : (is_toggle_up(frame, bit) ? 'U' : '-'))
                 
             const int rx = frame.right_x - right_x_zero;
             const int ry = frame.right_y - right_y_zero;
@@ -171,9 +199,13 @@ int main(int argc, char** argv)
                      << " Push " << PUSH(0) << PUSH(1) << PUSH(2) << PUSH(3)
                      << " Toggle " << TOGGLE(0) << TOGGLE(1) << TOGGLE(2) << TOGGLE(3)
                      << " Power " << power_left << "/" << power_right << endl;
+                signal_control_lights(signal_device, is_toggle_up(frame, 3));
             }
             
             motor_set(motor_device, power_left, power_right);
+
+            if (is_pushed(frame, 0))
+                signal_play_sound(signal_device, -1);
         }
         else
         {

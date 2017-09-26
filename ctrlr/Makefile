@@ -15,7 +15,7 @@ include Makefile.inc
 
 PROGRAMS = controller
 
-SOURCES = main.cpp radio.cpp motor.cpp
+SOURCES = main.cpp radio.cpp motor.cpp signal.cpp
 
 CFLAGS = -O -std=c++14
 
