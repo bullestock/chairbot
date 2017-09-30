@@ -146,6 +146,12 @@ int main(int argc, char** argv)
                 continue;
             }
 
+            if (!check_crc(frame))
+            {
+                cerr << "Bad CRC" << endl;
+                continue;
+            }
+
             // Echo back tick value so we can compute round trip time
             radio.stopListening();
 
@@ -166,6 +172,7 @@ int main(int argc, char** argv)
                 }
             // Round to nearest 0.1 V to prevent flickering
             ret_frame.battery = n ? 100*((sum/n+50)/100) : 0;
+            set_crc(frame);
             radio.write(&ret_frame, sizeof(ret_frame));
 
             radio.startListening();
