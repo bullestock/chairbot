@@ -7,11 +7,13 @@ const int LED_PIN = 13;
 const int BUSY_PIN = 12;
 const int MOSFET_PIN = 2;
 const int SLAVE_ADDRESS = 0x05;
-
-// The limit value for measuring darkness, i.e. the maximum value that get_darkness_level() will ever return.
-const int MAX_DARKNESS_LEVEL = 30000;
+const int FLASH_RATE = 100; // Flash half period in ms
 
 bool debug_on = true;
+
+bool mosfet_state = false;
+bool mosfet_steady = true;
+unsigned long flash_tick = 0;
 
 class DFPlayer
 {
@@ -214,9 +216,16 @@ void receiveData(int byteCount)
         break;
 
     case 2:
-        // Control MOSFET
-        digitalWrite(MOSFET_PIN, Wire.read());
+        // Switch MOSFET on/off
+        mosfet_state = Wire.read();
+        mosfet_steady = true;
         --byteCount;
+        break;
+
+    case 3:
+        mosfet_state = Wire.read();
+        mosfet_steady = false;
+        flash_tick = millis();
         break;
         
     default:
@@ -234,7 +243,7 @@ void sendData()
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("Signals v 0.3");
+    Serial.println("Signals v 0.4");
 
     pinMode(MOSFET_PIN, OUTPUT);
     
@@ -329,6 +338,17 @@ void loop()
         break;
     }
 
+    digitalWrite(MOSFET_PIN, mosfet_state);
+    if (!mosfet_steady)
+    {
+        const auto now = millis();
+        if (now - flash_tick > FLASH_RATE)
+        {
+            flash_tick = now;
+            mosfet_state = !mosfet_state;
+        }
+    }
+             
     if (state == STATE_IDLE)
     {
         // Flash led at 2% duty cycle
