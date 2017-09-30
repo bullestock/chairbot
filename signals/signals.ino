@@ -234,8 +234,10 @@ void sendData()
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("Signals v 0.2");
+    Serial.println("Signals v 0.3");
 
+    pinMode(MOSFET_PIN, OUTPUT);
+    
     mySerial.begin(9600);
 	delay(10);
     player.set_volume(10);
