@@ -172,7 +172,7 @@ int main(int argc, char** argv)
                 }
             // Round to nearest 0.1 V to prevent flickering
             ret_frame.battery = n ? 100*((sum/n+50)/100) : 0;
-            set_crc(frame);
+            set_crc(ret_frame);
             radio.write(&ret_frame, sizeof(ret_frame));
 
             radio.startListening();
