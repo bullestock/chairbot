@@ -16,7 +16,8 @@ using namespace std;
 
 const int SIGNAL_SOUND_RANDOM = 0x00;
 const int SIGNAL_SOUND_SPECIFIC = 0x01;
-const int SIGNAL_LIGHTS = 0x02;
+const int SIGNAL_LIGHTS_STEADY = 0x02;
+const int SIGNAL_LIGHTS_FLASHING = 0x03;
 
 bool signal_init(int& i2c_device)
 {
@@ -64,10 +65,10 @@ bool signal_play_sound(int i2c_device, int sound_index)
     return true;
 }
 
-bool signal_control_lights(int i2c_device, bool on)
+bool signal_control_lights(int i2c_device, bool on, bool steady)
 {
     const uint8_t data[2] = {
-        SIGNAL_LIGHTS,
+        static_cast<uint8_t>(steady ? SIGNAL_LIGHTS_STEADY : SIGNAL_LIGHTS_FLASHING,)
         on
     };
     if (write(i2c_device, data, sizeof(data)) != sizeof(data))
