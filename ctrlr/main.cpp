@@ -206,7 +206,12 @@ int main(int argc, char** argv)
                      << " Push " << PUSH(0) << PUSH(1) << PUSH(2) << PUSH(3)
                      << " Toggle " << TOGGLE(0) << TOGGLE(1) << TOGGLE(2) << TOGGLE(3)
                      << " Power " << power_left << "/" << power_right << endl;
-                signal_control_lights(signal_device, is_toggle_up(frame, 3));
+                if (is_toggle_up(frame, 3))
+                    signal_control_lights(signal_device, true, true);
+                else if (is_toggle_down(frame, 3))
+                    signal_control_lights(signal_device, true, false);
+                else
+                    signal_control_lights(signal_device, false, true);
             }
             
             motor_set(motor_device, power_left, power_right);
