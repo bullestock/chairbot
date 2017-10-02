@@ -194,12 +194,17 @@ int num_flash_files = 0;
 
 // Index of sound to play. -1 means random.
 int sound_index = -1;
+
 // Flag to start playing sound
 bool do_play = false;
+
+// LED state
+bool led_state = false;
 
 void receiveData(int byteCount)
 {
     int c = Wire.read();
+    --byteCount;
     switch (c)
     {
     case 0:
@@ -223,16 +228,24 @@ void receiveData(int byteCount)
         break;
 
     case 3:
+        // Turn MOSFET blink on/off
         mosfet_state = Wire.read();
         mosfet_steady = false;
         flash_tick = millis();
+        --byteCount;
+        break;
+
+    case 4:
+        // Control LED
+        led_state = Wire.read();
+        --byteCount;
         break;
         
     default:
         break;
     }
 
-    while (--byteCount)
+    while (byteCount--)
         Wire.read();
 }
 
@@ -270,7 +283,6 @@ void setup()
     Wire.onRequest(sendData);
 }
 
-int n = 0;
 enum State {
     STATE_IDLE,
     STATE_PLAYING,
@@ -282,8 +294,6 @@ unsigned long play_start = 0;
 
 void loop()
 {
-    ++n;
-
     switch (state)
     {
     case STATE_IDLE:
@@ -308,7 +318,8 @@ void loop()
             play_start = millis();
             state = STATE_PLAYING;
         }
-
+        else
+            digitalWrite(LED_PIN, led_state);
         break;
 
     case STATE_PLAYING:
@@ -347,14 +358,5 @@ void loop()
             flash_tick = now;
             mosfet_state = !mosfet_state;
         }
-    }
-             
-    if (state == STATE_IDLE)
-    {
-        // Flash led at 2% duty cycle
-        digitalWrite(LED_PIN, n > 50);
-        if (n > 51)
-            n = 0;
-        delay(1);
     }
 }
