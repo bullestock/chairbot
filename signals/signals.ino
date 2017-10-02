@@ -7,11 +7,13 @@ const int LED_PIN = 13;
 const int BUSY_PIN = 12;
 const int MOSFET_PIN = 2;
 const int SLAVE_ADDRESS = 0x05;
-
-// The limit value for measuring darkness, i.e. the maximum value that get_darkness_level() will ever return.
-const int MAX_DARKNESS_LEVEL = 30000;
+const int FLASH_RATE = 100; // Flash half period in ms
 
 bool debug_on = true;
+
+bool mosfet_state = false;
+bool mosfet_steady = true;
+unsigned long flash_tick = 0;
 
 class DFPlayer
 {
@@ -192,12 +194,17 @@ int num_flash_files = 0;
 
 // Index of sound to play. -1 means random.
 int sound_index = -1;
+
 // Flag to start playing sound
 bool do_play = false;
+
+// LED state
+bool led_state = false;
 
 void receiveData(int byteCount)
 {
     int c = Wire.read();
+    --byteCount;
     switch (c)
     {
     case 0:
@@ -214,8 +221,23 @@ void receiveData(int byteCount)
         break;
 
     case 2:
-        // Control MOSFET
-        digitalWrite(MOSFET_PIN, Wire.read());
+        // Switch MOSFET on/off
+        mosfet_state = Wire.read();
+        mosfet_steady = true;
+        --byteCount;
+        break;
+
+    case 3:
+        // Turn MOSFET blink on/off
+        mosfet_state = Wire.read();
+        mosfet_steady = false;
+        flash_tick = millis();
+        --byteCount;
+        break;
+
+    case 4:
+        // Control LED
+        led_state = Wire.read();
         --byteCount;
         break;
         
@@ -223,7 +245,7 @@ void receiveData(int byteCount)
         break;
     }
 
-    while (--byteCount)
+    while (byteCount--)
         Wire.read();
 }
 
@@ -234,7 +256,7 @@ void sendData()
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("Signals v 0.3");
+    Serial.println("Signals v 0.4");
 
     pinMode(MOSFET_PIN, OUTPUT);
     
@@ -261,7 +283,6 @@ void setup()
     Wire.onRequest(sendData);
 }
 
-int n = 0;
 enum State {
     STATE_IDLE,
     STATE_PLAYING,
@@ -273,8 +294,6 @@ unsigned long play_start = 0;
 
 void loop()
 {
-    ++n;
-
     switch (state)
     {
     case STATE_IDLE:
@@ -299,7 +318,8 @@ void loop()
             play_start = millis();
             state = STATE_PLAYING;
         }
-
+        else
+            digitalWrite(LED_PIN, led_state);
         break;
 
     case STATE_PLAYING:
@@ -329,12 +349,14 @@ void loop()
         break;
     }
 
-    if (state == STATE_IDLE)
+    digitalWrite(MOSFET_PIN, mosfet_state);
+    if (!mosfet_steady)
     {
-        // Flash led at 2% duty cycle
-        digitalWrite(LED_PIN, n > 50);
-        if (n > 51)
-            n = 0;
-        delay(1);
+        const auto now = millis();
+        if (now - flash_tick > FLASH_RATE)
+        {
+            flash_tick = now;
+            mosfet_state = !mosfet_state;
+        }
     }
 }
