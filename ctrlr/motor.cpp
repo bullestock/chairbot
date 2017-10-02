@@ -39,15 +39,17 @@ bool motor_init(int& i2c_device)
 
 bool motor_set(int i2c_device, int power_left, int power_right)
 {
+    static int count = 0;
     const uint8_t data[4] = {
         MOTOR_PWR,
         static_cast<uint8_t>((power_left < 0 ? 0x01 : 0) | (power_right < 0 ? 0x02 : 0)),
         static_cast<uint8_t>(abs(power_left)),
         static_cast<uint8_t>(abs(power_right))
     };
+    ++count;
     if (write(i2c_device, data, sizeof(data)) != sizeof(data))
     {
-        cout << "Error writing I2C: " << strerror(errno) << endl;
+        cout << "Error writing I2C (motor power): " << strerror(errno) << " (" << count << ")" << endl;
         return false;
     }
     return true;
@@ -60,7 +62,7 @@ int32_t motor_get_battery(int i2c_device)
     };
     if (write(i2c_device, data, sizeof(data)) != sizeof(data))
     {
-        cout << "Error writing I2C: " << strerror(errno) << endl;
+        cout << "Error writing I2C (battery): " << strerror(errno) << endl;
         return -1;
     }
     uint8_t v;
