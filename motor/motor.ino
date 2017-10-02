@@ -22,20 +22,14 @@ const int SLAVE_ADDRESS = 0x04;
 void run_test();
 void set_power(int motor, int power);
 
-void setPwmFrequency(int pin, int divisor)
+void setPwmFrequency(int pin, uint8_t mode)
 {
-    byte mode;
     if (pin == 5 || pin == 6 || pin == 9 || pin == 10)
     {
-        switch (divisor)
-        {
-        case 1: mode = 0x01; break;
-        case 8: mode = 0x02; break;
-        case 64: mode = 0x03; break;
-        case 256: mode = 0x04; break;
-        case 1024: mode = 0x05; break;
-        default: return;
-        }
+        if (mode < 1)
+            mode = 1;
+        if (mode > 5)
+            mode = 5;
         if (pin == 5 || pin == 6)
         {
             TCCR0B = (TCCR0B & 0b11111000) | mode;
@@ -47,17 +41,10 @@ void setPwmFrequency(int pin, int divisor)
     }
     else if (pin == 3 || pin == 11)
     {
-        switch (divisor)
-        {
-        case 1: mode = 0x01; break;
-        case 8: mode = 0x02; break;
-        case 32: mode = 0x03; break;
-        case 64: mode = 0x04; break;
-        case 128: mode = 0x05; break;
-        case 256: mode = 0x06; break;
-        case 1024: mode = 0x7; break;
-        default: return;
-        }
+        if (mode < 1)
+            mode = 1;
+        if (mode > 7)
+            mode = 7;
         TCCR2B = (TCCR2B & 0b11111000) | mode;
     }
 }
@@ -118,7 +105,19 @@ void receiveData(int byteCount)
         {
         }
         break;
-        
+
+    case 3:
+        // Set PWM frequency
+        if (byteCount != 2)
+        {
+            while (--byteCount)
+                Wire.read();
+            i2c_state = STATE_WRONG_BYTECOUNT;
+            return;
+        }
+        setPwmFrequency(Wire.read(), Wire.read());
+        break;
+
     default:
         while (--byteCount)
             Wire.read();
