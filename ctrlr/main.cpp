@@ -129,6 +129,7 @@ int main(int argc, char** argv)
     int count = 0;
     bool led_state = false;
     auto last_led_flip = chrono::steady_clock::now();
+    bool is_halted = false;
 	while (1)
 	{
         // if there is data ready
@@ -217,7 +218,8 @@ int main(int argc, char** argv)
             }
             
             motor_set(motor_device, power_left, power_right);
-
+            is_halted = false;
+            
             if (is_pushed(frame, 0))
                 signal_play_sound(signal_device, -1);
         }
@@ -225,11 +227,12 @@ int main(int argc, char** argv)
         {
             // No data from radio
             const auto cur_time = chrono::steady_clock::now();
-            if (cur_time - last_packet > max_radio_idle_time)
+            if ((cur_time - last_packet > max_radio_idle_time) && !is_halted)
             {
-                motor_set(motor_device, 0, 0);
-                //!!cerr << "HALT: Last packet was seen at " << last_packet.time_since_epoch().count() << endl;
+                is_halted = true;
+                cerr << "HALT: Last packet was seen at " << last_packet.time_since_epoch().count() << endl;
                 first_reading = true;
+                motor_set(motor_device, 0, 0);
             }
         }
 
@@ -239,7 +242,6 @@ int main(int argc, char** argv)
         {
             last_led_flip = cur_time;
             led_state = !led_state;
-            cout << "LED " << led_state << endl;
             signal_control_led(signal_device, led_state);
         }
     }
