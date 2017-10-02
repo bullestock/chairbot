@@ -127,6 +127,8 @@ int main(int argc, char** argv)
         battery_readings[i] = 0;
     
     int count = 0;
+    bool led_state = false;
+    auto last_led_flip = chrono::steady_clock::now();
 	while (1)
 	{
         // if there is data ready
@@ -226,9 +228,19 @@ int main(int argc, char** argv)
             if (cur_time - last_packet > max_radio_idle_time)
             {
                 motor_set(motor_device, 0, 0);
-                cerr << "HALT: Last packet was seen at " << last_packet.time_since_epoch().count() << endl;
+                //!!cerr << "HALT: Last packet was seen at " << last_packet.time_since_epoch().count() << endl;
                 first_reading = true;
             }
+        }
+
+        // Change LED state every 3 seconds
+        const auto cur_time = chrono::steady_clock::now();
+        if (cur_time - last_led_flip > chrono::seconds(3))
+        {
+            last_led_flip = cur_time;
+            led_state = !led_state;
+            cout << "LED " << led_state << endl;
+            signal_control_led(signal_device, led_state);
         }
     }
 }
