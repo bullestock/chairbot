@@ -180,6 +180,8 @@ int main(int argc, char** argv)
 
             radio.startListening();
 
+            frame.right_x = 1023 - frame.right_x; // hack!
+            
             if (first_reading)
             {
                 // Zero sticks
