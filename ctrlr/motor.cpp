@@ -74,10 +74,8 @@ int32_t motor_get_battery(int i2c_device)
     return static_cast<int32_t>(v*4/1023.0*5*11*1000);
 }
 
-void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot)
+void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot, int max_power)
 {
-    const int max_power = 100;
-
     const int max_range = 511;
                 
     int nMotPremixL = 0;

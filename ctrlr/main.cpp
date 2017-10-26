@@ -112,10 +112,10 @@ int main(int argc, char** argv)
     int power_left = 0;
     int power_right = 0;
 
-    int left_x_zero = 0;
-    int left_y_zero = 0;
-    int right_x_zero = 0;
-    int right_y_zero = 0;
+    int left_x_zero = 512;
+    int left_y_zero = 512;
+    int right_x_zero = 512;
+    int right_y_zero = 512;
     bool first_reading = true;
 
     auto last_packet = chrono::steady_clock::now();
@@ -125,6 +125,8 @@ int main(int argc, char** argv)
     int battery_reading_index = 0;
     for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
         battery_readings[i] = 0;
+
+    const int max_power = static_cast<int>(0.35*255);
     
     int count = 0;
     bool led_state = false;
@@ -181,7 +183,8 @@ int main(int argc, char** argv)
             radio.startListening();
 
             frame.right_x = 1023 - frame.right_x; // hack!
-            
+
+#if 0
             if (first_reading)
             {
                 // Zero sticks
@@ -191,7 +194,8 @@ int main(int argc, char** argv)
                 right_y_zero = frame.right_y;
                 first_reading = false;
             }
-
+#endif
+	   
 #define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
 #define TOGGLE(bit) (is_toggle_down(frame, bit) ? 'D' : (is_toggle_up(frame, bit) ? 'U' : '-'))
                 
@@ -199,8 +203,8 @@ int main(int argc, char** argv)
             const int ry = frame.right_y - right_y_zero;
 
             // Map right pot (0-255) to pivot value (20-51)
-            const int pivot = 20 + frame.right_pot/8;
-            compute_power(rx, ry, power_left, power_right, pivot);
+            const int pivot = 10 + frame.right_pot/2;
+            compute_power(rx, ry, power_left, power_right, pivot, max_power);
             ++count;
             if (count > 10)
             {
