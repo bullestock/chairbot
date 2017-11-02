@@ -2,6 +2,7 @@
 
 #include <linux/i2c-dev.h>
 
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <errno.h>
@@ -74,9 +75,26 @@ int32_t motor_get_battery(int i2c_device)
     return static_cast<int32_t>(v*4/1023.0*5*11*1000);
 }
 
+static const int max_range = 512;
+
+int apply_s_curve(int x)
+{
+    if (x >= max_range)
+        x = max_range-1;
+    else if (x <= -max_range)
+        x = -(max_range-1);
+
+    const auto max_logit = 6.93;
+
+    const auto scaled = 0.5 + abs(x)/static_cast<double>(2*max_range);
+    // Logit function
+    return -log(1.0/scaled - 1)*(x > 0 ? max_range/max_logit : -max_range/max_logit);
+}
+
 void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot, int max_power)
 {
-    const int max_range = 511;
+    rx = apply_s_curve(rx);
+    ry = apply_s_curve(ry);
                 
     int nMotPremixL = 0;
     int nMotPremixR = 0;
