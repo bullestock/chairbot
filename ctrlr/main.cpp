@@ -126,7 +126,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
         battery_readings[i] = 0;
 
-    const int max_power = static_cast<int>(0.35*255);
+    const int max_power = 255;
     
     int count = 0;
     bool led_state = false;
@@ -203,7 +203,7 @@ int main(int argc, char** argv)
             const int ry = frame.right_y - right_y_zero;
 
             // Map right pot (0-255) to pivot value (20-51)
-            const int pivot = 10 + frame.right_pot/2;
+            const int pivot = frame.right_pot*2;
             compute_power(rx, ry, power_left, power_right, pivot, max_power);
             ++count;
             if (count > 10)
