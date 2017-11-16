@@ -18,6 +18,7 @@ using namespace std;
 const int MOTOR_STATUS = 0x00;
 const int MOTOR_PWR = 0x01;
 const int MOTOR_VOLTAGE = 0x02;
+const int MOTOR_PWM = 0x03;
 
 bool motor_init(int& i2c_device)
 {
@@ -51,6 +52,23 @@ bool motor_set(int i2c_device, int power_left, int power_right)
     if (write(i2c_device, data, sizeof(data)) != sizeof(data))
     {
         cout << "Error writing I2C (motor power): " << strerror(errno) << " (" << count << ")" << endl;
+        return false;
+    }
+    return true;
+}
+
+bool motor_set_pwm_freq(int i2c_device, int pin, int mode)
+{
+    static int count = 0;
+    const uint8_t data[3] = {
+        MOTOR_PWM,
+        static_cast<uint8_t>(pin),
+        static_cast<uint8_t>(mode)
+    };
+    ++count;
+    if (write(i2c_device, data, sizeof(data)) != sizeof(data))
+    {
+        cout << "Error writing I2C (motor pwm): " << strerror(errno) << " (" << count << ")" << endl;
         return false;
     }
     return true;
