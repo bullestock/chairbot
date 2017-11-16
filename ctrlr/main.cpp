@@ -74,17 +74,29 @@ int main(int argc, char** argv)
 
     if (vm.count("motortest"))
     {
-        cout << "Left" << endl;
-        for (int i = 0; i < 256; ++i)
+        for (int mode = 1; mode < 8; ++mode)
         {
-            motor_set(motor_device, i, 0);
-            this_thread::sleep_for(chrono::milliseconds(10));
-        }
-        cout << "Right" << endl;
-        for (int i = 0; i < 256; ++i)
-        {
-            motor_set(motor_device, 0, i);
-            this_thread::sleep_for(chrono::milliseconds(10));
+            cout << "Mode " << mode << endl;
+            if (!motor_set_pwm_freq(motor_device, 3, mode))
+                exit(1);
+            if (!motor_set_pwm_freq(motor_device, 5, mode))
+                exit(1);
+            if (!motor_set_pwm_freq(motor_device, 9, mode))
+                exit(1);
+            if (!motor_set_pwm_freq(motor_device, 11, mode))
+                exit(1);
+            cout << "Left" << endl;
+            for (int i = 0; i < 256; ++i)
+            {
+                motor_set(motor_device, i, 0);
+                this_thread::sleep_for(chrono::milliseconds(10));
+            }
+            cout << "Right" << endl;
+            for (int i = 0; i < 256; ++i)
+            {
+                motor_set(motor_device, 0, i);
+                this_thread::sleep_for(chrono::milliseconds(10));
+            }
         }
         return 0;
     }
@@ -126,7 +138,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
         battery_readings[i] = 0;
 
-    const int max_power = 255;
+    int max_power = 255;
     
     int count = 0;
     bool led_state = false;
@@ -204,6 +216,8 @@ int main(int argc, char** argv)
 
             // Map right pot (0-255) to pivot value (20-51)
             const int pivot = frame.right_pot*2;
+            // Map left pot (0-255) to max_power (20-255)
+            max_power = static_cast<int>(20 + (256-20)/256.0*frame.left_pot);
             compute_power(rx, ry, power_left, power_right, pivot, max_power);
             ++count;
             if (count > 10)
