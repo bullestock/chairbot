@@ -6,13 +6,13 @@ const int INTERNAL_LED = 13;
 const int R_PWM_A = 5;
 const int L_PWM_A = 3;
 const int EN_A = 4;
-const int R_IS_A = 7;
-const int L_IS_A = 2;
+const int R_IS_A = A1;
+const int L_IS_A = A2;
 const int R_PWM_B = 9;
 const int L_PWM_B = 11;
 const int EN_B = 12;
 const int R_IS_B = A3;
-const int L_IS_B = 13;
+const int L_IS_B = A7;
 const int BRAKE = 8;
 const int V_SENSE = A0;
 const int BUF_SIZE = 200;
@@ -304,29 +304,48 @@ void process(const char* buffer)
 
 void run_test()
 {
-    digitalWrite(INTERNAL_LED, 0);
-    for (int i = -255; i < 256; i++)
+    while (1)
     {
-        Serial.print("A ");
-        Serial.println(i);
-        set_power(0, i);
-        delay(100);
+        digitalWrite(INTERNAL_LED, 0);
+        for (int i = -255; i < 256; i++)
+        {
+            set_power(0, i);
+            delay(100);
+            Serial.print("A ");
+            Serial.print(i);
+            Serial.print(" Sense A ");
+            Serial.print(analogRead(L_IS_A));
+            Serial.print(" ");
+            Serial.print(analogRead(R_IS_A));
+            Serial.print(" B ");
+            Serial.print(analogRead(L_IS_B));
+            Serial.print(" ");
+            Serial.println(analogRead(R_IS_B));
+        }
+        set_power(0, 0);
+        digitalWrite(INTERNAL_LED, 1);
+        delay(2000);
+        digitalWrite(INTERNAL_LED, 0);
+        for (int i = -255; i < 256; i++)
+        {
+            set_power(1, i);
+            delay(100);
+            Serial.print("B ");
+            Serial.print(i);
+            Serial.print(" Sense A ");
+            Serial.print(analogRead(L_IS_A));
+            Serial.print(" ");
+            Serial.print(analogRead(R_IS_A));
+            Serial.print(" B ");
+            Serial.print(analogRead(L_IS_B));
+            Serial.print(" ");
+            Serial.println(analogRead(R_IS_B));
+        }
+        digitalWrite(INTERNAL_LED, 1);
+        set_power(1, 0);
+        Serial.println("Test done");
+        delay(2000);
     }
-    set_power(0, 0);
-    digitalWrite(INTERNAL_LED, 1);
-    delay(2000);
-    digitalWrite(INTERNAL_LED, 0);
-    for (int i = -255; i < 256; i++)
-    {
-        Serial.print("B ");
-        Serial.println(i);
-        set_power(1, i);
-        delay(100);
-    }
-    digitalWrite(INTERNAL_LED, 1);
-    set_power(1, 0);
-    Serial.println("Test done");
-    delay(2000);
 }
 
 int index = 0;
