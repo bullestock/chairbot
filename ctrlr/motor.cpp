@@ -2,6 +2,7 @@
 
 #include <linux/i2c-dev.h>
 
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <errno.h>
@@ -17,6 +18,7 @@ using namespace std;
 const int MOTOR_STATUS = 0x00;
 const int MOTOR_PWR = 0x01;
 const int MOTOR_VOLTAGE = 0x02;
+const int MOTOR_PWM = 0x03;
 
 bool motor_init(int& i2c_device)
 {
@@ -55,6 +57,23 @@ bool motor_set(int i2c_device, int power_left, int power_right)
     return true;
 }
 
+bool motor_set_pwm_freq(int i2c_device, int pin, int mode)
+{
+    static int count = 0;
+    const uint8_t data[3] = {
+        MOTOR_PWM,
+        static_cast<uint8_t>(pin),
+        static_cast<uint8_t>(mode)
+    };
+    ++count;
+    if (write(i2c_device, data, sizeof(data)) != sizeof(data))
+    {
+        cout << "Error writing I2C (motor pwm): " << strerror(errno) << " (" << count << ")" << endl;
+        return false;
+    }
+    return true;
+}
+
 int32_t motor_get_battery(int i2c_device)
 {
     const uint8_t data[1] = {
@@ -74,11 +93,26 @@ int32_t motor_get_battery(int i2c_device)
     return static_cast<int32_t>(v*4/1023.0*5*11*1000);
 }
 
-void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot)
-{
-    const int max_power = 100;
+static const int max_range = 512;
 
-    const int max_range = 511;
+int apply_s_curve(int x)
+{
+    if (x >= max_range)
+        x = max_range-1;
+    else if (x <= -max_range)
+        x = -(max_range-1);
+
+    const auto max_logit = 6.93;
+
+    const auto scaled = 0.5 + abs(x)/static_cast<double>(2*max_range);
+    // Logit function
+    return -log(1.0/scaled - 1)*(x > 0 ? max_range/max_logit : -max_range/max_logit);
+}
+
+void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot, int max_power)
+{
+    rx = apply_s_curve(rx);
+    ry = apply_s_curve(ry);
                 
     int nMotPremixL = 0;
     int nMotPremixR = 0;
