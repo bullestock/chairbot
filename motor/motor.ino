@@ -19,7 +19,7 @@ const int BUF_SIZE = 200;
 const int MAX_IDLE_COUNT = 10;
 const int SLAVE_ADDRESS = 0x04;
 
-void run_test();
+void run_test(const char* buffer);
 void set_power(int motor, int power);
 
 void setPwmFrequency(int pin, uint8_t mode)
@@ -246,7 +246,7 @@ void process(const char* buffer)
     {
     case 't':
     case 'T':
-        run_test();
+        run_test(buffer+1);
         break;
         
     case 'm':
@@ -302,8 +302,27 @@ void process(const char* buffer)
     }
 }
 
-void run_test()
+void run_test(const char* buffer)
 {
+#if 1
+    int index;
+    const int pwr = get_int(buffer+1, BUF_SIZE-1, index); 
+    set_power(0, pwr);
+    for (int i = 0; i < 100; ++i)
+    {
+        delay(100);
+        Serial.print("A ");
+        Serial.print(pwr);
+        Serial.print(" Sense A ");
+        Serial.print(analogRead(L_IS_A));
+        Serial.print(" ");
+        Serial.print(analogRead(R_IS_A));
+        Serial.print(" B ");
+        Serial.print(analogRead(L_IS_B));
+        Serial.print(" ");
+        Serial.println(analogRead(R_IS_B));
+    }
+#else
     while (1)
     {
         digitalWrite(INTERNAL_LED, 0);
@@ -346,6 +365,7 @@ void run_test()
         Serial.println("Test done");
         delay(2000);
     }
+#endif
 }
 
 int index = 0;
