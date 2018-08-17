@@ -12,16 +12,14 @@ from solid.utils import *
 SEGMENTS = 32
 
 def partA():
-    return cylinder(r = 22, h = 2) - down(0.1)(cylinder(r = 12.5, h = 2.2))
-
-def partB():
-    return translate([-12.5, 9, 0])(cube([25, 10, 5]))
+    return cylinder(r = 25, h = 2) - down(0.5)(cylinder(r = 13, h = 3))
 
 def screwhole():
-    return translate([0, 12, -1])(cylinder(r = 1, h = 7))
+    return translate([0, 12, 5])(cylinder(r = 1.2, h = 15))
 
 def assembly():
-    return partA() + partB() - left(5)(screwhole()) - right(5)(screwhole())
+    sd = 13
+    return partA()
 
 if __name__ == '__main__':
     a = assembly()
