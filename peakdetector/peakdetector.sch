@@ -131,7 +131,7 @@ L conn:Conn_01x07_Male J1
 U 1 1 5B76FB68
 P 2600 3050
 F 0 "J1" H 2706 3528 50  0000 C CNN
-F 1 "Conn_01x07_Male" H 2706 3437 50  0000 C CNN
+F 1 "Conn_01x07_Male" H 2706 3437 50  0001 C CNN
 F 2 "Pin_Headers:Pin_Header_Straight_1x07_Pitch2.54mm" H 2600 3050 50  0001 C CNN
 F 3 "~" H 2600 3050 50  0001 C CNN
 	1    2600 3050
@@ -329,7 +329,7 @@ L Amplifier_Operational:TL074 U1
 U 1 1 5B77019C
 P 3500 2350
 F 0 "U1" H 3450 2350 50  0000 C CNN
-F 1 "TL074" H 3500 2626 50  0000 C CNN
+F 1 "LM324" H 3500 2626 50  0000 C CNN
 F 2 "peakdetector:SOP14" H 3450 2450 50  0001 C CNN
 F 3 "http://www.ti.com/lit/ds/symlink/tl071.pdf" H 3550 2550 50  0001 C CNN
 	1    3500 2350
@@ -340,7 +340,7 @@ L Amplifier_Operational:TL074 U1
 U 2 1 5B77027F
 P 5200 2250
 F 0 "U1" H 5150 2250 50  0000 C CNN
-F 1 "TL074" H 5200 2526 50  0000 C CNN
+F 1 "LM324" H 5200 2526 50  0000 C CNN
 F 2 "peakdetector:SOP14" H 5150 2350 50  0001 C CNN
 F 3 "http://www.ti.com/lit/ds/symlink/tl071.pdf" H 5250 2450 50  0001 C CNN
 	2    5200 2250
@@ -351,7 +351,7 @@ L Amplifier_Operational:TL074 U1
 U 3 1 5B7702DE
 P 3500 4000
 F 0 "U1" H 3450 4000 50  0000 C CNN
-F 1 "TL074" H 3500 4276 50  0000 C CNN
+F 1 "LM324" H 3500 4276 50  0000 C CNN
 F 2 "peakdetector:SOP14" H 3450 4100 50  0001 C CNN
 F 3 "http://www.ti.com/lit/ds/symlink/tl071.pdf" H 3550 4200 50  0001 C CNN
 	3    3500 4000
@@ -362,7 +362,7 @@ L Amplifier_Operational:TL074 U1
 U 4 1 5B77035E
 P 5300 3900
 F 0 "U1" H 5250 3900 50  0000 C CNN
-F 1 "TL074" H 5300 4176 50  0000 C CNN
+F 1 "LM324" H 5300 4176 50  0000 C CNN
 F 2 "peakdetector:SOP14" H 5250 4000 50  0001 C CNN
 F 3 "http://www.ti.com/lit/ds/symlink/tl071.pdf" H 5350 4100 50  0001 C CNN
 	4    5300 3900
@@ -373,7 +373,7 @@ L Amplifier_Operational:TL074 U1
 U 5 1 5B7703E9
 P 2950 5750
 F 0 "U1" H 2908 5796 50  0000 L CNN
-F 1 "TL074" H 2908 5705 50  0000 L CNN
+F 1 "LM324" H 2908 5705 50  0000 L CNN
 F 2 "peakdetector:SOP14" H 2900 5850 50  0001 C CNN
 F 3 "http://www.ti.com/lit/ds/symlink/tl071.pdf" H 3000 5950 50  0001 C CNN
 	5    2950 5750
