@@ -5,7 +5,9 @@ SoftwareSerial mySerial(10, 11); // RX, TX
 
 const int LED_PIN = 13;
 const int BUSY_PIN = 12;
-const int MOSFET_PIN = 2;
+const int HEADLIGHT_PIN = 2;
+const int HORN_PIN = 9;
+const int KNIGHTRIDER_PIN = 8;
 const int SLAVE_ADDRESS = 0x05;
 const int FLASH_RATE = 100; // Flash half period in ms
 
@@ -200,6 +202,9 @@ bool do_play = false;
 
 // LED state
 bool led_state = false;
+bool knightrider_state = false;
+bool horn_on = false;
+unsigned long horn_tick = 0;
 
 void receiveData(int byteCount)
 {
@@ -221,14 +226,14 @@ void receiveData(int byteCount)
         break;
 
     case 2:
-        // Switch MOSFET on/off
+        // Switch headlight on/off
         mosfet_state = Wire.read();
         mosfet_steady = true;
         --byteCount;
         break;
 
     case 3:
-        // Turn MOSFET blink on/off
+        // Turn headlight blink on/off
         mosfet_state = Wire.read();
         mosfet_steady = false;
         flash_tick = millis();
@@ -238,6 +243,19 @@ void receiveData(int byteCount)
     case 4:
         // Control LED
         led_state = Wire.read();
+        --byteCount;
+        break;
+        
+    case 5:
+        // Sound horn
+        horn_on = true;
+        horn_tick = millis();
+        --byteCount;
+        break;
+        
+    case 6:
+        // Control Knight Rider
+        knightrider_state = Wire.read();
         --byteCount;
         break;
         
@@ -258,7 +276,9 @@ void setup()
     Serial.begin(115200);
     Serial.println("Signals v 0.4");
 
-    pinMode(MOSFET_PIN, OUTPUT);
+    pinMode(HEADLIGHT_PIN, OUTPUT);
+    pinMode(HORN_PIN, OUTPUT);
+    pinMode(KNIGHTRIDER_PIN, OUTPUT);
     
     mySerial.begin(9600);
 	delay(10);
@@ -349,14 +369,21 @@ void loop()
         break;
     }
 
-    digitalWrite(MOSFET_PIN, mosfet_state);
+    const auto now = millis();
+    digitalWrite(HEADLIGHT_PIN, mosfet_state);
     if (!mosfet_steady)
     {
-        const auto now = millis();
         if (now - flash_tick > FLASH_RATE)
         {
             flash_tick = now;
             mosfet_state = !mosfet_state;
         }
     }
+
+    digitalWrite(KNIGHTRIDER_PIN, knightrider_state);
+
+    if (horn_on && (now - horn_tick > 500))
+        horn_on = false;
+
+    digitalWrite(HORN_PIN, horn_on);
 }
