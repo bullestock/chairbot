@@ -200,6 +200,7 @@ void set_power(// 0-1
                // -255..255
                int power)
 {
+    power = -power * 0.7;
     if (power != 0)
         brake_off();
     const int l_pwm_pin = motor ? L_PWM_B : L_PWM_A;
@@ -304,7 +305,7 @@ void process(const char* buffer)
 
 void run_test(const char* buffer)
 {
-#if 1
+#if 0
     int index;
     const int pwr = get_int(buffer+1, BUF_SIZE-1, index); 
     set_power(0, pwr);
