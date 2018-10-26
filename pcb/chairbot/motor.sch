@@ -109,24 +109,10 @@ Wire Wire Line
 	6750 1950 6950 1950
 Wire Wire Line
 	6750 1850 6950 1850
-$Comp
-L 74xx_IEEE:7408 U2
-U 2 1 5BC5FD27
-P 5950 3650
-F 0 "U2" H 5950 4066 50  0000 C CNN
-F 1 "74HCT08" H 5950 3975 50  0000 C CNN
-F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5950 3650 50  0001 C CNN
-F 3 "" H 5950 3650 50  0001 C CNN
-	2    5950 3650
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	6500 3650 6750 3650
 Wire Wire Line
 	6750 3650 6750 3750
 Wire Wire Line
 	6750 3750 6950 3750
-Connection ~ 6750 3650
 Wire Wire Line
 	6750 3650 6950 3650
 $Comp
@@ -348,40 +334,33 @@ Wire Wire Line
 Wire Wire Line
 	6650 1400 4750 1400
 Wire Wire Line
-	6750 2950 6750 3350
+	6550 2950 6550 3350
 Wire Wire Line
-	6750 3350 6950 3350
+	6550 3350 6950 3350
 Wire Wire Line
-	6950 3450 6650 3450
+	6950 3450 6450 3450
 Wire Wire Line
-	6650 3450 6650 3100
+	6450 3450 6450 3100
 Text GLabel 4050 5400 0    50   Input ~ 0
 Brake
 Wire Wire Line
 	4050 5400 5350 5400
 Wire Wire Line
-	5350 2350 5350 3750
-Wire Wire Line
-	5400 3750 5350 3750
-Connection ~ 5350 3750
-Wire Wire Line
-	5350 3750 5350 5400
-Wire Wire Line
 	5900 2500 5900 2650
-Text GLabel 6650 2500 0    50   Input ~ 0
+Text GLabel 6500 2500 0    50   Input ~ 0
 IS_A_L
-Text GLabel 6650 2700 0    50   Input ~ 0
+Text GLabel 6500 2700 0    50   Input ~ 0
 IS_A_R
 Wire Wire Line
 	6950 2250 6950 2700
 Wire Wire Line
-	6950 2700 6650 2700
+	6950 2700 6500 2700
 Wire Wire Line
 	6950 2150 6850 2150
 Wire Wire Line
 	6850 2150 6850 2500
 Wire Wire Line
-	6850 2500 6650 2500
+	6850 2500 6500 2500
 Text GLabel 6650 3950 0    50   Input ~ 0
 IS_B_L
 Text GLabel 6650 4050 0    50   Input ~ 0
@@ -399,17 +378,13 @@ PWM_B_L
 Text GLabel 4750 3100 0    50   Input ~ 0
 PWM_B_R
 Wire Wire Line
-	4750 2950 6750 2950
+	4750 2950 6550 2950
 Wire Wire Line
-	4750 3100 6650 3100
+	4750 3100 6450 3100
 Text GLabel 4750 2150 0    50   Input ~ 0
-EN_A
+EN
 Wire Wire Line
 	4750 2150 5350 2150
-Text GLabel 4750 3550 0    50   Input ~ 0
-EN_B
-Wire Wire Line
-	4750 3550 5400 3550
 $Comp
 L Device:R R2
 U 1 1 5BD21085
@@ -436,4 +411,10 @@ Wire Wire Line
 	6300 5400 5350 5400
 Connection ~ 6300 5400
 Connection ~ 5350 5400
+Wire Wire Line
+	5350 2350 5350 5400
+Wire Wire Line
+	6750 2250 6750 3650
+Connection ~ 6750 2250
+Connection ~ 6750 3650
 $EndSCHEMATC

@@ -9,4 +9,5 @@
   (lib (name chairbot)(type Legacy)(uri ${KIPRJMOD}/libs/chairbot.lib)(options "")(descr ""))
   (lib (name buckconverter)(type Legacy)(uri ${KIPRJMOD}/libs/buckconverter.lib)(options "")(descr ""))
   (lib (name nRF24L01)(type Legacy)(uri ${KIPRJMOD}/libs/nRF24L01.lib)(options "")(descr ""))
+  (lib (name Regulator_Linear)(type Legacy)(uri ${KIPRJMOD}/libs/Regulator_Linear.lib)(options "")(descr ""))
 )
