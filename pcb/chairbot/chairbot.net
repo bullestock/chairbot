@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /home/torsten/projects/chairbot/pcb/chairbot/chairbot.sch)
-    (date "Sat 27 Oct 2018 01:00:25 AM CEST")
+    (date "Sat 27 Oct 2018 04:11:49 PM CEST")
     (tool "Eeschema 5.0.0-fee4fd1~66~ubuntu16.04.1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -37,7 +37,7 @@
       (footprint chairbot:ESP32mini)
       (libsource (lib esp32mini) (part ESP32mini) (description ""))
       (sheetpath (names /) (tstamps /))
-      (tstamp 5BC5AE9F))
+      (tstamp 5BD471F7))
     (comp (ref J2)
       (value Conn_01x05)
       (footprint Connector_JST:JST_XH_B05B-XH-A_1x05_P2.50mm_Vertical)
