@@ -417,4 +417,120 @@ Wire Wire Line
 	6750 2250 6750 3650
 Connection ~ 6750 2250
 Connection ~ 6750 3650
+$Comp
+L Connector_Generic:Conn_01x07 J5
+U 1 1 5BDF1CC6
+P 1550 4350
+F 0 "J5" H 1470 3825 50  0000 C CNN
+F 1 "Conn_01x07" H 1470 3916 50  0000 C CNN
+F 2 "chairbot:peakdetector" H 1550 4350 50  0001 C CNN
+F 3 "~" H 1550 4350 50  0001 C CNN
+	1    1550 4350
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x07 J4
+U 1 1 5BDF1D76
+P 1550 1950
+F 0 "J4" H 1470 1425 50  0000 C CNN
+F 1 "Conn_01x07" H 1470 1516 50  0000 C CNN
+F 2 "chairbot:peakdetector" H 1550 1950 50  0001 C CNN
+F 3 "~" H 1550 1950 50  0001 C CNN
+	1    1550 1950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR0126
+U 1 1 5BDFA834
+P 1900 1500
+F 0 "#PWR0126" H 1900 1350 50  0001 C CNN
+F 1 "+5V" H 1915 1673 50  0000 C CNN
+F 2 "" H 1900 1500 50  0001 C CNN
+F 3 "" H 1900 1500 50  0001 C CNN
+	1    1900 1500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1900 1500 1900 1650
+Wire Wire Line
+	1900 1650 1750 1650
+$Comp
+L power:GND #PWR0127
+U 1 1 5BDFBE65
+P 1900 2450
+F 0 "#PWR0127" H 1900 2200 50  0001 C CNN
+F 1 "GND" H 1905 2277 50  0000 C CNN
+F 2 "" H 1900 2450 50  0001 C CNN
+F 3 "" H 1900 2450 50  0001 C CNN
+	1    1900 2450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1750 2250 1900 2250
+Wire Wire Line
+	1900 2250 1900 2450
+$Comp
+L power:GND #PWR0128
+U 1 1 5BDFD5FF
+P 1900 4800
+F 0 "#PWR0128" H 1900 4550 50  0001 C CNN
+F 1 "GND" H 1905 4627 50  0000 C CNN
+F 2 "" H 1900 4800 50  0001 C CNN
+F 3 "" H 1900 4800 50  0001 C CNN
+	1    1900 4800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1900 4800 1900 4650
+Wire Wire Line
+	1900 4650 1750 4650
+$Comp
+L power:+5V #PWR0129
+U 1 1 5BDFEF77
+P 1900 3850
+F 0 "#PWR0129" H 1900 3700 50  0001 C CNN
+F 1 "+5V" H 1915 4023 50  0000 C CNN
+F 2 "" H 1900 3850 50  0001 C CNN
+F 3 "" H 1900 3850 50  0001 C CNN
+	1    1900 3850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1900 3850 1900 4050
+Wire Wire Line
+	1900 4050 1750 4050
+NoConn ~ 1750 4550
+NoConn ~ 1750 2150
+Text GLabel 2100 1750 2    50   Input ~ 0
+IS_A_L
+Text GLabel 2100 1950 2    50   Input ~ 0
+IS_A_R
+Wire Wire Line
+	2100 1750 1750 1750
+Wire Wire Line
+	1750 1950 2100 1950
+Text GLabel 2050 4150 2    50   Input ~ 0
+IS_B_L
+Text GLabel 2050 4350 2    50   Input ~ 0
+IS_B_R
+Wire Wire Line
+	2050 4350 1750 4350
+Wire Wire Line
+	1750 4150 2050 4150
+Text GLabel 2450 4250 2    50   Output ~ 0
+IS_B_L_P
+Text GLabel 2450 4450 2    50   Output ~ 0
+IS_B_R_P
+Wire Wire Line
+	2450 4450 1750 4450
+Wire Wire Line
+	1750 4250 2450 4250
+Text GLabel 2500 1850 2    50   Output ~ 0
+IS_A_L_P
+Text GLabel 2500 2050 2    50   Output ~ 0
+IS_A_R_P
+Wire Wire Line
+	2500 2050 1750 2050
+Wire Wire Line
+	1750 1850 2500 1850
 $EndSCHEMATC
