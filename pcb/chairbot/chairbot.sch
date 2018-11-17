@@ -151,9 +151,9 @@ F0 "Motor driver" 50
 F1 "motor.sch" 50
 $EndSheet
 Text GLabel 6150 1400 2    50   Input ~ 0
-PWM_A_L
-Text GLabel 6150 1500 2    50   Input ~ 0
 PWM_A_R
+Text GLabel 6150 1500 2    50   Input ~ 0
+PWM_A_L
 Text GLabel 6150 1600 2    50   Input ~ 0
 PWM_B_L
 Text GLabel 6150 1700 2    50   Input ~ 0
@@ -776,11 +776,7 @@ Wire Wire Line
 	4150 3400 4250 3400
 NoConn ~ 2200 3550
 NoConn ~ 2200 3650
-NoConn ~ 4150 3500
 NoConn ~ 4150 3600
-NoConn ~ 4150 3700
-NoConn ~ 4150 3800
-NoConn ~ 4150 3900
 $Comp
 L power:+5V #PWR0125
 U 1 1 5BDC7A11
@@ -886,4 +882,20 @@ Wire Wire Line
 Wire Wire Line
 	9250 1100 9150 1100
 NoConn ~ 9050 1500
+Text GLabel 4250 3800 2    50   Input ~ 0
+IS_B_R_P
+Text GLabel 4250 3900 2    50   Input ~ 0
+IS_B_L_P
+Wire Wire Line
+	4150 3800 4250 3800
+Wire Wire Line
+	4250 3900 4150 3900
+Text GLabel 4250 3500 2    50   Input ~ 0
+IS_A_L_P
+Text GLabel 4250 3700 2    50   Input ~ 0
+IS_A_R_P
+Wire Wire Line
+	4150 3500 4250 3500
+Wire Wire Line
+	4250 3700 4150 3700
 $EndSCHEMATC
