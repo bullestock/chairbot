@@ -155,9 +155,9 @@ PWM_A_R
 Text GLabel 6150 1500 2    50   Input ~ 0
 PWM_A_L
 Text GLabel 6150 1600 2    50   Input ~ 0
-PWM_B_L
-Text GLabel 6150 1700 2    50   Input ~ 0
 PWM_B_R
+Text GLabel 6150 1700 2    50   Input ~ 0
+PWM_B_L
 Wire Wire Line
 	5800 1700 6150 1700
 Wire Wire Line
