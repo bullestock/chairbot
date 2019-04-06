@@ -38,49 +38,32 @@ void main_loop(void* pvParameters)
 #define SHOW_DEBUG() 0 //((my_state == RUNNING) && (loopcount == 0))
 
 #if 0
+    // Motor test
     while (1)
     {
-        digitalWrite(INTERNAL_LED, 0);
-        for (int i = -255; i < 256; i++)
+        set_motors(0, 0);
+        for (int i = -100; i < 100; i++)
         {
-            set_power(0, i);
-            delay(100);
-            Serial.print("A ");
-            Serial.print(i);
-            Serial.print(" Sense A ");
-            Serial.print(analogRead(L_IS_A));
-            Serial.print(" ");
-            Serial.print(analogRead(R_IS_A));
-            Serial.print(" B ");
-            Serial.print(analogRead(L_IS_B));
-            Serial.print(" ");
-            Serial.println(analogRead(R_IS_B));
+            printf("%d\n", i);
+            set_motors(0, i/100.0);
+            gpio_set_level(GPIO_INTERNAL_LED, 1);
+            vTaskDelay(100/portTICK_PERIOD_MS);
+            gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
-        set_power(0, 0);
-        digitalWrite(INTERNAL_LED, 1);
-        delay(2000);
-        digitalWrite(INTERNAL_LED, 0);
-        for (int i = -255; i < 256; i++)
+        set_motors(0, 0);
+        vTaskDelay(1000/portTICK_PERIOD_MS);
+        for (int i = -100; i < 100; i++)
         {
-            set_power(1, i);
-            delay(100);
-            Serial.print("B ");
-            Serial.print(i);
-            Serial.print(" Sense A ");
-            Serial.print(analogRead(L_IS_A));
-            Serial.print(" ");
-            Serial.print(analogRead(R_IS_A));
-            Serial.print(" B ");
-            Serial.print(analogRead(L_IS_B));
-            Serial.print(" ");
-            Serial.println(analogRead(R_IS_B));
+            printf("%d\n", i);
+            set_motors(i/100.0, 0);
+            gpio_set_level(GPIO_INTERNAL_LED, 1);
+            vTaskDelay(100/portTICK_PERIOD_MS);
+            gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
-        digitalWrite(INTERNAL_LED, 1);
-        set_power(1, 0);
-        Serial.println("Test done");
-        delay(2000);
+        vTaskDelay(1000/portTICK_PERIOD_MS);
     }
-#endif    
+#endif
+    
     while (1)
     {
         ++loopcount;
@@ -109,12 +92,5 @@ void app_main()
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
     gpio_config(&io_conf);
 
-    while (1)
-    {
-        gpio_set_level(GPIO_INTERNAL_LED, 0);
-        vTaskDelay(1000 / portTICK_RATE_MS);
-        gpio_set_level(GPIO_INTERNAL_LED, 1);
-        vTaskDelay(1000 / portTICK_RATE_MS);
-    }
     xTaskCreate(&main_loop, "Main loop", 10240, NULL, 1, &xMainTask);
 }
