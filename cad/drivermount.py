@@ -15,25 +15,25 @@ sd = 7
 th = 5
 
 def stud():
-    return cylinder(d = sd, h = 3) - down(1)(cylinder(d = 3, h = 5))
+    return cylinder(d = sd, h = 3) - hole()((down(7)(cylinder(d = 2.5, h = 15))))
 
 def studpair():
     return stud() + right(40)(stud())
 
 def brace():
-    return up(5)(studpair()) + translate([-13, -3.5, 0])(cube([57, 7, 5]))
+    return up(5)(studpair()) + translate([-10, -3.5, 0])(cube([54, 7, 5]))
 
 def assembly():
     b1 = brace()
     b2 = brace()
     b3 = brace()
     b4 = brace()
-    #braces = b1 + back(40)(b2) + back(13.34+40)(b3) + back(13.34+80)(b2)
-    #plate = translate([-15, -107, 0])(cube([5, 120, 25]))
-    # TEST
-    braces = b1
-    plate = translate([-15, -10, 0])(cube([5, 20, 25]))
-    return braces + plate
+    braces = b1 + back(40)(b2) + back(13.34+40)(b3) + back(13.34+80)(b2)
+    plate = translate([-15+4.3, -107, 0])(cube([5, 120, 25]))
+    h1 = 3
+    h = down(1)(cylinder(d = 3, h = th + 1)) + up(th - h1 + 0.1)(cylinder(d1 = 3, d2 = 7, h = h1))
+    hr = rotate([90, 0, 90])(h)
+    return braces + plate + h - translate([-10, 8, 12])(hr) - translate([-10, -102, 12])(hr)
 
 if __name__ == '__main__':
     a = assembly()
