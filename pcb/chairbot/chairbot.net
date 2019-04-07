@@ -1,8 +1,8 @@
 (export (version D)
   (design
     (source /home/torsten/projects/chairbot/pcb/chairbot/chairbot.sch)
-    (date "Tue 20 Nov 2018 08:25:06 PM CET")
-    (tool "Eeschema 5.0.0-fee4fd1~66~ubuntu16.04.1")
+    (date "Sat 15 Dec 2018 10:15:26 PM CET")
+    (tool "Eeschema 5.0.2-bee76a0~70~ubuntu18.04.1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
         (title)
@@ -75,7 +75,7 @@
       (tstamp 5BD26A01))
     (comp (ref D1)
       (value SS34)
-      (footprint Diode_SMD:D_SMC)
+      (footprint Diode_SMD:D_SMB)
       (datasheet ~)
       (libsource (lib Device) (part D_Schottky) (description "Schottky diode"))
       (sheetpath (names /) (tstamps /))
@@ -199,7 +199,7 @@
       (tstamp 5BC5FD66))
     (comp (ref D2)
       (value SS34)
-      (footprint Diode_SMD:D_SMC)
+      (footprint Diode_SMD:D_SMB)
       (datasheet ~)
       (libsource (lib Device) (part D_Schottky) (description "Schottky diode"))
       (sheetpath (names "/Motor driver/") (tstamps /5BC5FAEF/))
