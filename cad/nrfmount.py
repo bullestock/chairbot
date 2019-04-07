@@ -12,7 +12,7 @@ from solid.utils import *
 SEGMENTS = 32
 
 w1 = 15.5
-h1 = 10.7
+h1 = 11.7
 l1 = 10
 h2 = 3
 l2 = 13
@@ -21,10 +21,12 @@ def block():
     return translate([-w1/2, 0, 0])(cube([w1, l1, h1]))
 
 def tab():
-    s = hole()(cylinder(h = 5, d = 1))
+    s = hole()(cylinder(h = 5, d = 1.5))
     d = 11.4
     d2 = 12
-    return translate([-w1/2, 0, 0])(cube([w1, l2, h2]) +
+    sw = 8
+    return translate([-w1/2, 0, 0])(cube([w1, l2, h2]) -
+                                    translate([sw/2, 4, -1])(cube([sw, 10, h2+2])) +
                                     translate([w1/2 - d2/2, l2 - 1.5, 0])(s) +
                                     translate([w1/2 + d/2, l2 - 1.5, 0])(s))
 
