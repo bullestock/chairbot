@@ -229,7 +229,7 @@ U 1 1 5BD26B72
 P 6050 5450
 F 0 "D1" V 6004 5529 50  0000 L CNN
 F 1 "SS34" V 6095 5529 50  0000 L CNN
-F 2 "Diode_SMD:D_SMC" H 6050 5450 50  0001 C CNN
+F 2 "Diode_SMD:D_SMB" H 6050 5450 50  0001 C CNN
 F 3 "~" H 6050 5450 50  0001 C CNN
 	1    6050 5450
 	0    1    1    0   
@@ -447,7 +447,7 @@ Text GLabel 4250 3200 2    50   Input ~ 0
 SCL0
 Text GLabel 2900 4500 3    50   Input ~ 0
 MOSI
-Text GLabel 2800 4500 3    50   Input ~ 0
+Text GLabel 4250 3600 2    50   Input ~ 0
 MISO
 Text GLabel 3000 4500 3    50   Input ~ 0
 SCK
@@ -765,8 +765,6 @@ Wire Wire Line
 Wire Wire Line
 	4150 2700 4250 2700
 Wire Wire Line
-	2800 4400 2800 4500
-Wire Wire Line
 	2900 4400 2900 4500
 Wire Wire Line
 	3000 4400 3000 4500
@@ -776,7 +774,6 @@ Wire Wire Line
 	4150 3400 4250 3400
 NoConn ~ 2200 3550
 NoConn ~ 2200 3650
-NoConn ~ 4150 3600
 $Comp
 L power:+5V #PWR0125
 U 1 1 5BDC7A11
@@ -898,4 +895,7 @@ Wire Wire Line
 	4150 3500 4250 3500
 Wire Wire Line
 	4250 3700 4150 3700
+Wire Wire Line
+	4250 3600 4150 3600
+NoConn ~ 2800 4400
 $EndSCHEMATC
