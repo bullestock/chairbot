@@ -105,9 +105,6 @@ void app_main()
 #define SPI_CS      GPIO_NUM_16
 #define SPI_CE      GPIO_NUM_17
 
-    printf("CE high\n");
-    //vTaskDelay(1000/portTICK_PERIOD_MS);
-
     spi_bus_config_t buscfg;
 	memset(&buscfg, 0, sizeof(buscfg));
 
@@ -123,11 +120,12 @@ void app_main()
 	
 	CNRFLib nrf(SPI_CS, SPI_CE);
 	ESP_ERROR_CHECK(nrf.AttachToSpiBus(HSPI_HOST));
+    nrf.SetChannel(108);
 
     /* Buffer for tx/rx operations */
 	uint8_t buff[32] = {0};
 	/* Setup custom address */
-	uint8_t addr[5] = {222, 111, 001, 100, 040};    
+	uint8_t addr[5] = { '1', 'B', 'U', 'L', 'L' };    
 
     nrf.Begin(nrf_rx_mode);
     /* Set pipe0 addr to listen to packets with this addr */
@@ -138,7 +136,11 @@ void app_main()
 
         /* Check for available packets in rx buffer */
         if(!nrf.IsRxDataAvailable())
+        {
+            printf("no data\n");
+            vTaskDelay(pdMS_TO_TICKS(1000));
             continue;
+        }
 
         /* Read it */
         nrf.Read(buff, 32);
