@@ -1,0 +1,6 @@
+In this directory, run ./setuprf24.sh
+
+Check out https://github.com/nkolban/esp32-snippets somewhere and
+- copy the cpp_utils subdirectory to this directory
+- copy the hardware/nrf24/utility/ESP_IDF_utils subdirectory to this directory
+

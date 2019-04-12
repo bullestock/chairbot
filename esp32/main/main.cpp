@@ -14,12 +14,11 @@
 #include "esp_event_loop.h"
 #include "nvs_flash.h"
 
-#include "driver/spi_master.h"
+#include "RF24.h"
 
 #include "motor.h"
+#include "radio.h"
 
-#define DEBUG_MODE
-#include "nrf24l01p_lib.h"
 
 #define GPIO_INTERNAL_LED    GPIO_NUM_22
 
@@ -71,6 +70,7 @@ void main_loop(void* pvParameters)
     }
 #endif
 
+    
     while (1)
     {
         ++loopcount;
@@ -84,6 +84,8 @@ void main_loop(void* pvParameters)
 }
 
 static TaskHandle_t xMainTask = nullptr;
+
+static const uint8_t pipes[][6] = {"1BULL","2BULL"};
 
 extern "C"
 void app_main()
@@ -105,49 +107,124 @@ void app_main()
 #define SPI_CS      GPIO_NUM_16
 #define SPI_CE      GPIO_NUM_17
 
-    spi_bus_config_t buscfg;
-	memset(&buscfg, 0, sizeof(buscfg));
+    RF24 radio(SPI_CE, SPI_CS);
+    assert(radio_init(radio));
 
-	buscfg.miso_io_num = SPI_MISO;
-	buscfg.mosi_io_num = SPI_MOSI;
-	buscfg.sclk_io_num = SPI_SCLK;
-	buscfg.quadhd_io_num = -1;
-	buscfg.quadwp_io_num = -1;
-	buscfg.max_transfer_sz = 4096;
-
-	esp_err_t err = spi_bus_initialize(HSPI_HOST, &buscfg, 1);
-	assert(err == ESP_OK);
-	
-	CNRFLib nrf(SPI_CS, SPI_CE);
-	ESP_ERROR_CHECK(nrf.AttachToSpiBus(HSPI_HOST));
-    nrf.SetChannel(108);
-
-    /* Buffer for tx/rx operations */
-	uint8_t buff[32] = {0};
-	/* Setup custom address */
-	uint8_t addr[5] = { '1', 'B', 'U', 'L', 'L' };    
-
-    nrf.Begin(nrf_rx_mode);
-    /* Set pipe0 addr to listen to packets with this addr */
-    nrf.SetPipeAddr(0, addr, 5);
-
-    while(1){
-        vTaskDelay(pdMS_TO_TICKS(10));
-
-        /* Check for available packets in rx buffer */
-        if(!nrf.IsRxDataAvailable())
+	while (1)
+	{
+        // if there is data ready
+        if (radio.available())
         {
-            printf("no data\n");
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            continue;
+            printf("received!\n");
+#if 0
+            last_packet = chrono::steady_clock::now();
+
+            ForwardAirFrame frame;
+            // Fetch the payload, and see if this was the last one.
+            while (radio.available())
+                radio.read(&frame, sizeof(frame));
+
+            if (frame.magic != ForwardAirFrame::MAGIC_VALUE)
+            {
+                cerr << "Bad magic value; expected " << ForwardAirFrame::MAGIC_VALUE
+                     << ", got " << frame.magic << endl;
+                continue;
+            }
+
+            if (!check_crc(frame))
+            {
+                cerr << "Bad CRC" << endl;
+                continue;
+            }
+
+            // Echo back tick value so we can compute round trip time
+            radio.stopListening();
+
+            ReturnAirFrame ret_frame;
+            ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
+            ret_frame.ticks = frame.ticks;
+            battery_readings[battery_reading_index] = motor_get_battery(motor_device);
+            ++battery_reading_index;
+            if (battery_reading_index >= NOF_BATTERY_READINGS)
+                battery_reading_index = 0;
+            int n = 0;
+            int32_t sum = 0;
+            for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
+                if (battery_readings[i])
+                {
+                    sum += battery_readings[i];
+                    ++n;
+                }
+            // Round to nearest 0.1 V to prevent flickering
+            ret_frame.battery = n ? 100*((sum/n+50)/100) : 0;
+            set_crc(ret_frame);
+            radio.write(&ret_frame, sizeof(ret_frame));
+
+            radio.startListening();
+
+            frame.right_x = 1023 - frame.right_x; // hack!
+
+#define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
+#define TOGGLE(bit) (is_toggle_down(frame, bit) ? 'D' : (is_toggle_up(frame, bit) ? 'U' : '-'))
+                
+            const int rx = frame.right_x - right_x_zero;
+            const int ry = frame.right_y - right_y_zero;
+
+            // Map right pot (0-255) to pivot value (20-51)
+            const int pivot = frame.right_pot*2;
+            // Map left pot (0-255) to max_power (20-255)
+            max_power = static_cast<int>(20 + (256-20)/256.0*frame.left_pot);
+            compute_power(rx, ry, power_left, power_right, pivot, max_power);
+            ++count;
+            if (count > 10)
+            {
+                count = 0;
+                cerr << "L " << setw(4) << frame.left_x << "/" << setw(4) << frame.left_y
+                     << " R " << setw(4) << frame.right_x << "/" << setw(4) << frame.right_y << " (" << rx << "/" << ry << ")"
+                     << " P " << setw(3) << int(frame.left_pot) << "/" << setw(3) << int(frame.right_pot)
+                     << " Push " << PUSH(0) << PUSH(1) << PUSH(2) << PUSH(3)
+                     << " Toggle " << TOGGLE(0) << TOGGLE(1) << TOGGLE(2) << TOGGLE(3)
+                     << " Power " << power_left << "/" << power_right << endl;
+                if (is_toggle_up(frame, 3))
+                    signal_control_lights(signal_device, true, true);
+                else if (is_toggle_down(frame, 3))
+                    signal_control_lights(signal_device, true, false);
+                else
+                    signal_control_lights(signal_device, false, true);
+            }
+            
+            motor_set(motor_device, power_left, power_right);
+            is_halted = false;
+            
+            if (is_pushed(frame, 0))
+                signal_play_sound(signal_device, -1);
+#endif
+        }
+        else
+        {
+#if 0
+            // No data from radio
+            const auto cur_time = chrono::steady_clock::now();
+            if ((cur_time - last_packet > max_radio_idle_time) && !is_halted)
+            {
+                is_halted = true;
+                cerr << "HALT: Last packet was seen at " << last_packet.time_since_epoch().count() << endl;
+                first_reading = true;
+                motor_set(motor_device, 0, 0);
+            }
+#endif
         }
 
-        /* Read it */
-        nrf.Read(buff, 32);
-        printf("Received: ");
-        for(int i = 0; i < 32; i++)
-            printf("%d ", buff[i]);
-        printf("\n");
+#if 0
+        // Change LED state every 3 seconds
+        const auto cur_time = chrono::steady_clock::now();
+        if (cur_time - last_led_flip > chrono::seconds(3))
+        {
+            last_led_flip = cur_time;
+            led_state = !led_state;
+            signal_control_led(signal_device, led_state);
+        }
+#endif
     }
 
     xTaskCreate(&main_loop, "Main loop", 10240, NULL, 1, &xMainTask);
