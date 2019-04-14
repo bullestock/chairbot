@@ -92,3 +92,9 @@ void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot,
     power_left = int(-((1.0-fPivScale)*nMotPremixL + fPivScale*(nPivSpeed))/float(max_range)*max_power);
     power_right = int(-((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*max_power);
 }
+
+void set_motors(double m1, double m2)
+{
+    motor_a->set_speed(m1);
+    motor_b->set_speed(-m2);
+}

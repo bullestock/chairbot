@@ -16,29 +16,16 @@
 
 #include "RF24.h"
 
+#include "console.h"
 #include "motor.h"
 #include "radio.h"
 
 #include "protocol.h"
 
-#define GPIO_INTERNAL_LED    GPIO_NUM_22
-
-#define GPIO_PWM0A_OUT  5
-#define GPIO_PWM0B_OUT 18
-#define GPIO_PWM1A_OUT 19
-#define GPIO_PWM1B_OUT 23
-
-const auto max_radio_idle_time = 150/portTICK_PERIOD_MS;
+#include "config.h"
 
 Motor* motor_a = nullptr;
 Motor* motor_b = nullptr;
-
-// -1 to +1
-void set_motors(double m1, double m2)
-{
-    motor_a->set_speed(m1);
-    motor_b->set_speed(-m2);
-}
 
 bool is_pushed(const ForwardAirFrame& frame, int button)
 {
@@ -60,33 +47,6 @@ void main_loop(void* pvParameters)
     int loopcount = 0;
 #define SHOW_DEBUG() 0 //((my_state == RUNNING) && (loopcount == 0))
 
-#if 0
-    // Motor test
-    while (1)
-    {
-        printf("*** MOTOR TEST ***\n");
-        set_motors(0, 0);
-        for (int i = -100; i < 100; i++)
-        {
-            printf("%d\n", i);
-            set_motors(0, i/100.0);
-            gpio_set_level(GPIO_INTERNAL_LED, 1);
-            vTaskDelay(100/portTICK_PERIOD_MS);
-            gpio_set_level(GPIO_INTERNAL_LED, 0);
-        }
-        set_motors(0, 0);
-        vTaskDelay(1000/portTICK_PERIOD_MS);
-        for (int i = -100; i < 100; i++)
-        {
-            printf("%d\n", i);
-            set_motors(i/100.0, 0);
-            gpio_set_level(GPIO_INTERNAL_LED, 1);
-            vTaskDelay(100/portTICK_PERIOD_MS);
-            gpio_set_level(GPIO_INTERNAL_LED, 0);
-        }
-        vTaskDelay(1000/portTICK_PERIOD_MS);
-    }
-#endif
 
 #define SPI_SCLK     4
 #define SPI_MISO    27
@@ -97,12 +57,14 @@ void main_loop(void* pvParameters)
     int power_left = 0;
     int power_right = 0;
 
+#if 0
     int left_x_zero = 512;
     int left_y_zero = 512;
+#endif
     int right_x_zero = 512;
     int right_y_zero = 512;
     bool first_reading = true;
-
+    
     auto last_packet = xTaskGetTickCount();
 
     const int NOF_BATTERY_READINGS = 100;
@@ -266,6 +228,21 @@ void app_main()
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
     gpio_config(&io_conf);
 
+    printf("Press a key to enter console\n");
+    bool debug = false;
+    for (int i = 0; i < 20; ++i)
+    {
+        if (getchar() != EOF)
+        {
+            debug = true;
+            break;
+        }
+        vTaskDelay(100/portTICK_PERIOD_MS);
+    }
+    if (debug)
+        run_console();        // never returns
+    printf("\nStarting application\n");
+    
     xTaskCreate(&main_loop, "Main loop", 10240, NULL, 1, &xMainTask);
 }
 

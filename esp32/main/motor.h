@@ -25,3 +25,9 @@ private:
 const int PIVOT = 35;
 
 void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot = PIVOT, int max_power = 100);
+
+// -1 to +1
+void set_motors(double m1, double m2);
+
+extern Motor* motor_a;
+extern Motor* motor_b;
