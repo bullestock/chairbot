@@ -11,31 +11,42 @@
 #include "linenoise/linenoise.h"
 #include "argtable3/argtable3.h"
 
-int motor_test(int, char**)
+int motor_test(int argc, char** argv)
 {
-    printf("Running motor test\n");
-    set_motors(0, 0);
-    for (int i = -100; i < 100; i++)
+    int count = 1;
+    if (argc > 1)
     {
-        if (!(i % 10))
-            printf("A %d\n", i);
-        set_motors(i/100.0, 0);
-        gpio_set_level(GPIO_INTERNAL_LED, 1);
-        vTaskDelay(100/portTICK_PERIOD_MS);
-        gpio_set_level(GPIO_INTERNAL_LED, 0);
+        printf("parse\n");
+        printf("arg %s\n", argv[1]);
+        count = atoi(argv[1]);
     }
-    set_motors(0, 0);
-    vTaskDelay(1000/portTICK_PERIOD_MS);
-    for (int i = -100; i < 100; i++)
+    printf("Running motor test (%d)\n", count);
+    for (int j = 0; j < count; ++j)
     {
-        if (!(i % 10))
-            printf("B %d\n", i);
-        set_motors(0, i/100.0);
-        gpio_set_level(GPIO_INTERNAL_LED, 1);
-        vTaskDelay(100/portTICK_PERIOD_MS);
-        gpio_set_level(GPIO_INTERNAL_LED, 0);
+        set_motors(0, 0);
+        for (int i = -100; i < 100; i++)
+        {
+            if (!(i % 10))
+                printf("A %d\n", i);
+            set_motors(i/100.0, 0);
+            gpio_set_level(GPIO_INTERNAL_LED, 1);
+            vTaskDelay(100/portTICK_PERIOD_MS);
+            gpio_set_level(GPIO_INTERNAL_LED, 0);
+        }
+        set_motors(0, 0);
+        vTaskDelay(1000/portTICK_PERIOD_MS);
+        for (int i = -100; i < 100; i++)
+        {
+            if (!(i % 10))
+                printf("B %d\n", i);
+            set_motors(0, i/100.0);
+            gpio_set_level(GPIO_INTERNAL_LED, 1);
+            vTaskDelay(100/portTICK_PERIOD_MS);
+            gpio_set_level(GPIO_INTERNAL_LED, 0);
+        }
+        set_motors(0, 0);
+        vTaskDelay(1000/portTICK_PERIOD_MS);
     }
-
     return 0;
 }
 
@@ -98,6 +109,7 @@ void run_console()
 
     /* Register commands */
     esp_console_register_help_command();
+
     const esp_console_cmd_t cmd1 = {
         .command = "motortest",
         .help = "Test the motors",
