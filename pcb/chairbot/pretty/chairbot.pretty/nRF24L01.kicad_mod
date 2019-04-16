@@ -1,4 +1,4 @@
-(module nRF24L01 (layer F.Cu) (tedit 5BD21210)
+(module nRF24L01 (layer F.Cu) (tedit 5CB33738)
   (descr NRF24L01)
   (tags "nRF 24 NRF24L01 NRF24L01+")
   (fp_text reference REF** (at -1.016 -1.016) (layer F.SilkS)
@@ -7,7 +7,6 @@
   (fp_text value NRF24L01 (at -8.382 7.112) (layer F.Fab) hide
     (effects (font (size 0.8 0.8) (thickness 0.16)))
   )
-  (fp_line (start 0 0) (end -12.71 0) (layer F.CrtYd) (width 0.15))
   (fp_line (start -2.794 0.127) (end -0.127 0.127) (layer F.SilkS) (width 0.15))
   (fp_line (start -0.127 0.127) (end -0.127 2.794) (layer F.SilkS) (width 0.15))
   (fp_line (start 2.54 0) (end -12.71 0) (layer B.CrtYd) (width 0.15))
