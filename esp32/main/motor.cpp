@@ -1,5 +1,7 @@
 #include "motor.h"
 
+#include "config.h"
+
 #include <math.h>
 
 #include "soc/mcpwm_reg.h"
@@ -97,4 +99,5 @@ void set_motors(double m1, double m2)
 {
     motor_a->set_speed(m1);
     motor_b->set_speed(-m2);
+    gpio_set_level(GPIO_BRAKE_OUT, fabs(m1) > 0.001 || fabs(m2) > 0.001);
 }

@@ -24,24 +24,60 @@ int motor_test(int argc, char** argv)
     for (int j = 0; j < count; ++j)
     {
         set_motors(0, 0);
-        for (int i = -100; i < 100; i++)
+        for (int i = 10; i <= 100; ++i)
         {
             if (!(i % 10))
                 printf("A %d\n", i);
             set_motors(i/100.0, 0);
             gpio_set_level(GPIO_INTERNAL_LED, 1);
-            vTaskDelay(100/portTICK_PERIOD_MS);
+            vTaskDelay(50/portTICK_PERIOD_MS);
+            gpio_set_level(GPIO_INTERNAL_LED, 0);
+        }
+        for (int i = 100; i >= -100; --i)
+        {
+            if (!(i % 10))
+                printf("A %d\n", i);
+            set_motors(i/100.0, 0);
+            gpio_set_level(GPIO_INTERNAL_LED, 1);
+            vTaskDelay(50/portTICK_PERIOD_MS);
+            gpio_set_level(GPIO_INTERNAL_LED, 0);
+        }
+        for (int i = -100; i <= 0; ++i)
+        {
+            if (!(i % 10))
+                printf("A %d\n", i);
+            set_motors(i/100.0, 0);
+            gpio_set_level(GPIO_INTERNAL_LED, 1);
+            vTaskDelay(50/portTICK_PERIOD_MS);
             gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
         set_motors(0, 0);
         vTaskDelay(1000/portTICK_PERIOD_MS);
-        for (int i = -100; i < 100; i++)
+        for (int i = 10; i <= 100; ++i)
         {
             if (!(i % 10))
                 printf("B %d\n", i);
             set_motors(0, i/100.0);
             gpio_set_level(GPIO_INTERNAL_LED, 1);
-            vTaskDelay(100/portTICK_PERIOD_MS);
+            vTaskDelay(50/portTICK_PERIOD_MS);
+            gpio_set_level(GPIO_INTERNAL_LED, 0);
+        }
+        for (int i = 100; i >= -100; --i)
+        {
+            if (!(i % 10))
+                printf("B %d\n", i);
+            set_motors(0, i/100.0);
+            gpio_set_level(GPIO_INTERNAL_LED, 1);
+            vTaskDelay(50/portTICK_PERIOD_MS);
+            gpio_set_level(GPIO_INTERNAL_LED, 0);
+        }
+        for (int i = -100; i <= 0; ++i)
+        {
+            if (!(i % 10))
+                printf("B %d\n", i);
+            set_motors(0, i/100.0);
+            gpio_set_level(GPIO_INTERNAL_LED, 1);
+            vTaskDelay(50/portTICK_PERIOD_MS);
             gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
         set_motors(0, 0);

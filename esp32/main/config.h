@@ -11,5 +11,7 @@ static const int GPIO_PWM0B_OUT = 18;
 static const int GPIO_PWM1A_OUT = 19;
 static const int GPIO_PWM1B_OUT = 23;
 
+static const auto GPIO_BRAKE_OUT = GPIO_NUM_25;
+
 static const auto max_radio_idle_time = 150/portTICK_PERIOD_MS;
 
