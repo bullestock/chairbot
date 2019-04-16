@@ -7,7 +7,10 @@
 #include "esp_log.h"
 #include "esp_console.h"
 #include "esp_vfs_dev.h"
-#include "driver/uart.h"
+
+#include <driver/i2c.h>
+#include <driver/uart.h>
+
 #include "linenoise/linenoise.h"
 #include "argtable3/argtable3.h"
 
@@ -15,11 +18,8 @@ int motor_test(int argc, char** argv)
 {
     int count = 1;
     if (argc > 1)
-    {
-        printf("parse\n");
-        printf("arg %s\n", argv[1]);
         count = atoi(argv[1]);
-    }
+
     printf("Running motor test (%d)\n", count);
     for (int j = 0; j < count; ++j)
     {
@@ -83,6 +83,41 @@ int motor_test(int argc, char** argv)
         set_motors(0, 0);
         vTaskDelay(1000/portTICK_PERIOD_MS);
     }
+    return 0;
+}
+
+int i2c_scan(int argc, char** argv)
+{
+    int count = 1;
+    if (argc > 1)
+        count = atoi(argv[1]);
+
+    printf("Scanning for I2C devices (%d)\n", count);
+    for (int j = 0; j < count; ++j)
+    {
+        printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
+        printf("00:         ");
+        for (int i = 3; i < 0x78; ++i)
+        {
+            i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+            i2c_master_start(cmd);
+            i2c_master_write_byte(cmd, (i << 1) | I2C_MASTER_WRITE, 1 /* expect ack */);
+            i2c_master_stop(cmd);
+
+            const auto espRc = i2c_master_cmd_begin(I2C_NUM_0, cmd, 10/portTICK_PERIOD_MS);
+            if (i%16 == 0)
+                printf("\n%.2x:", i);
+            if (espRc == 0)
+                printf(" %.2x", i);
+            else
+                printf(" --");
+            //ESP_LOGD(tag, "i=%d, rc=%d (0x%x)", i, espRc, espRc);
+            i2c_cmd_link_delete(cmd);
+        }
+        printf("\n");
+        vTaskDelay(100/portTICK_PERIOD_MS);
+    }
+    
     return 0;
 }
 
@@ -154,6 +189,15 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd1));
+
+    const esp_console_cmd_t cmd2 = {
+        .command = "i2cscan",
+        .help = "Scan for I2C devices",
+        .hint = NULL,
+        .func = &i2c_scan,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd2));
 
     /* Prompt to be printed before each line.
      * This can be customized, made dynamic, etc.
