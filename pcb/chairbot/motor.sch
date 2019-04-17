@@ -26,7 +26,7 @@ F 3 "" H 7350 3850 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Transistor_FET:BS107 Q1
+L Transistor_FET:BSP129 Q1
 U 1 1 5BC5FCF5
 P 6950 5400
 F 0 "Q1" H 7156 5446 50  0000 L CNN
