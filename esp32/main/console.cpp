@@ -205,14 +205,14 @@ void run_console()
     const char* prompt = LOG_COLOR_I "esp32> " LOG_RESET_COLOR;
 
     printf("\n"
-           "This is an example of ESP-IDF console component.\n"
            "Type 'help' to get the list of commands.\n"
            "Use UP/DOWN arrows to navigate through command history.\n"
            "Press TAB when typing command name to auto-complete.\n");
 
     /* Figure out if the terminal supports escape sequences */
     int probe_status = linenoiseProbe();
-    if (probe_status) { /* zero indicates success */
+    if (probe_status)
+    {
         printf("\n"
                "Your terminal application does not support escape sequences.\n"
                "Line editing and history features are disabled.\n"
@@ -226,35 +226,25 @@ void run_console()
 #endif //CONFIG_LOG_COLORS
     }
 
-    /* Main loop */
-    while(true) {
-        /* Get a line using linenoise.
-         * The line is returned when ENTER is pressed.
-         */
+    while (true)
+    {
         char* line = linenoise(prompt);
-        if (line == NULL) { /* Ignore empty lines */
+        if (line == NULL)
             continue;
-        }
-        /* Add the command to the history */
-        linenoiseHistoryAdd(line);
-#if CONFIG_STORE_HISTORY
-        /* Save command history to filesystem */
-        linenoiseHistorySave(HISTORY_PATH);
-#endif
 
-        /* Try to run the command */
+        linenoiseHistoryAdd(line);
+
         int ret;
         esp_err_t err = esp_console_run(line, &ret);
-        if (err == ESP_ERR_NOT_FOUND) {
+        if (err == ESP_ERR_NOT_FOUND)
             printf("Unrecognized command\n");
-        } else if (err == ESP_ERR_INVALID_ARG) {
-            // command was empty
-        } else if (err == ESP_OK && ret != ESP_OK) {
+        else if (err == ESP_ERR_INVALID_ARG)
+            ; // command was empty
+        else if (err == ESP_OK && ret != ESP_OK)
             printf("Command returned non-zero error code: 0x%x (%s)\n", ret, esp_err_to_name(err));
-        } else if (err != ESP_OK) {
+        else if (err != ESP_OK)
             printf("Internal error: %s\n", esp_err_to_name(err));
-        }
-        /* linenoise allocates line buffer on the heap, so need to free it */
+
         linenoiseFree(line);
     }
 }
