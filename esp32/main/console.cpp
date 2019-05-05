@@ -1,7 +1,9 @@
 #include "console.h"
 
+#include "battery.h"
 #include "config.h"
 #include "motor.h"
+#include "peripherals.h"
 
 #include "esp_system.h"
 #include "esp_log.h"
@@ -121,6 +123,18 @@ int i2c_scan(int argc, char** argv)
     return 0;
 }
 
+int read_battery(int argc, char** argv)
+{
+    Battery bat;
+    for (int i = 0; i < 10; ++i)
+    {
+        printf("Battery voltage: %f V\n", bat.read_voltage());
+        vTaskDelay(100/portTICK_PERIOD_MS);
+    }
+
+    return 0;
+}
+
 void initialize_console()
 {
     /* Disable buffering on stdin */
@@ -198,6 +212,15 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd2));
+
+    const esp_console_cmd_t cmd3 = {
+        .command = "readbattery",
+        .help = "Read battery voltage",
+        .hint = NULL,
+        .func = &read_battery,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd3));
 
     /* Prompt to be printed before each line.
      * This can be customized, made dynamic, etc.

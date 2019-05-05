@@ -3,6 +3,7 @@
 #include "config.h"
 
 #include <math.h>
+#include <sys/time.h>
 
 #include "soc/mcpwm_reg.h"
 #include "soc/mcpwm_struct.h"
@@ -26,8 +27,34 @@ Motor::Motor(mcpwm_unit_t _unit,
     mcpwm_init(unit, timer, &pwm_config);  
 }
 
+// Max 10 percent per second = 0.0001 per microsecond
+const float MAX_DELTA = 0.0001;
+
 void Motor::set_speed(float speed)
 {
+    struct timeval tv;
+    struct timezone tz;
+    gettimeofday(&tv, &tz);
+#if 0
+    struct timeval tv;
+    struct timezone tz;
+    for (int i = 0; i < 10; ++i)
+    {
+        gettimeofday(&tv, &tz);
+        printf("s %ld us %ld\n", (long) tv.tv_sec, (long) tv.tv_usec);
+        vTaskDelay(100/portTICK_PERIOD_MS);
+    }
+    const auto elapsed = system_get_time() - last_time;
+    auto delta = fabs(speed - last_speed);
+    while (delta/elapsed > MAX_DELTA)
+    {
+        speed *= 0.9;
+        printf("Try %f\n", speed);
+        delta = fabs(speed - last_speed);
+    }
+    last_speed = speed;
+    last_time = system_get_time();
+#endif
     if (speed >= 0)
     {
         mcpwm_set_signal_low(unit, timer, MCPWM_OPR_B);
@@ -99,5 +126,5 @@ void set_motors(double m1, double m2)
 {
     motor_a->set_speed(m1);
     motor_b->set_speed(-m2);
-    gpio_set_level(GPIO_BRAKE_OUT, fabs(m1) > 0.001 || fabs(m2) > 0.001);
+    gpio_set_level(GPIO_ENABLE, fabs(m1) > 0.001 || fabs(m2) > 0.001);
 }

@@ -16,6 +16,8 @@ public:
 private:
     mcpwm_unit_t unit = (mcpwm_unit_t) 0;
     mcpwm_timer_t timer = (mcpwm_timer_t) 0;
+    float last_speed = 0.0;
+    int last_millis = 0;
 };
 
 // The threshold at which the pivot action starts

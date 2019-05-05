@@ -16,6 +16,7 @@
 
 #include "RF24.h"
 
+#include "battery.h"
 #include "console.h"
 #include "motor.h"
 #include "peripherals.h"
@@ -49,12 +50,6 @@ void main_loop(void* pvParameters)
 #define SHOW_DEBUG() 0 //((my_state == RUNNING) && (loopcount == 0))
 
 
-#define SPI_SCLK     4
-#define SPI_MISO    27
-#define SPI_MOSI     2
-#define SPI_CS      GPIO_NUM_16
-#define SPI_CE      GPIO_NUM_17
-
     int power_left = 0;
     int power_right = 0;
 
@@ -69,10 +64,11 @@ void main_loop(void* pvParameters)
     auto last_packet = xTaskGetTickCount();
 
     const int NOF_BATTERY_READINGS = 100;
-    int32_t battery_readings[NOF_BATTERY_READINGS];
+    float battery_readings[NOF_BATTERY_READINGS];
     int battery_reading_index = 0;
     for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
-        battery_readings[i] = 0;
+        battery_readings[i] = 0.0;
+    Battery battery;
 
     int max_power = 255;
     
@@ -118,13 +114,13 @@ void main_loop(void* pvParameters)
             ReturnAirFrame ret_frame;
             ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
             ret_frame.ticks = frame.ticks;
-#if 0
-            battery_readings[battery_reading_index] = motor_get_battery(motor_device);
+
+            battery_readings[battery_reading_index] = battery.read_voltage();
             ++battery_reading_index;
             if (battery_reading_index >= NOF_BATTERY_READINGS)
                 battery_reading_index = 0;
             int n = 0;
-            int32_t sum = 0;
+            float sum = 0;
             for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
                 if (battery_readings[i])
                 {
@@ -132,8 +128,9 @@ void main_loop(void* pvParameters)
                     ++n;
                 }
             // Round to nearest 0.1 V to prevent flickering
-            ret_frame.battery = n ? 100*((sum/n+50)/100) : 0;
-#endif
+            //ret_frame.battery = n ? 100*((sum/n+50)/100) : 0;
+            ret_frame.battery = n ? sum/n*1000 : 0;
+
             set_crc(ret_frame);
             radio.write(&ret_frame, sizeof(ret_frame));
 
@@ -156,7 +153,6 @@ void main_loop(void* pvParameters)
             if (count > 10)
             {
                 count = 0;
-                printf("max %d\n", max_power);
                 printf("L %4d/%4d R %4d/%4d (%d/%d) P %3d/%3d Push %c%c%c%c"
                        " Toggle %c%c%c%c"
                        " Power %d/%d\n",
@@ -237,7 +233,7 @@ void app_main()
     if (debug)
         run_console();        // never returns
     printf("\nStarting application\n");
-    
+
     xTaskCreate(&main_loop, "Main loop", 10240, NULL, 1, &xMainTask);
 }
 
