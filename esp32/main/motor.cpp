@@ -27,34 +27,33 @@ Motor::Motor(mcpwm_unit_t _unit,
     mcpwm_init(unit, timer, &pwm_config);  
 }
 
-// Max 10 percent per second = 0.0001 per microsecond
-const float MAX_DELTA = 0.0001;
+// Max 10 percent per second = 0.0001 per millisecond
+const float MAX_DELTA = 0.001;
 
 void Motor::set_speed(float speed)
 {
     struct timeval tv;
     struct timezone tz;
     gettimeofday(&tv, &tz);
-#if 0
-    struct timeval tv;
-    struct timezone tz;
-    for (int i = 0; i < 10; ++i)
+    const uint32_t millis = tv.tv_sec + tv.tv_usec/1000;
+    if (fabs(speed) > fabs(last_speed))
     {
-        gettimeofday(&tv, &tz);
-        printf("s %ld us %ld\n", (long) tv.tv_sec, (long) tv.tv_usec);
-        vTaskDelay(100/portTICK_PERIOD_MS);
-    }
-    const auto elapsed = system_get_time() - last_time;
-    auto delta = fabs(speed - last_speed);
-    while (delta/elapsed > MAX_DELTA)
-    {
-        speed *= 0.9;
-        printf("Try %f\n", speed);
-        delta = fabs(speed - last_speed);
+        const auto elapsed = millis - last_millis;
+        auto delta = fabs(speed - last_speed);
+        const auto initial_delta = delta;
+        bool clamped = false;
+        while (delta/elapsed > MAX_DELTA && speed > 0.01)
+        {
+            speed *= 0.9;
+            delta = fabs(speed - last_speed);
+            clamped = true;
+        }
+        if (clamped)
+            printf("Delta %f T %d ms, clamp to %f\n", initial_delta, elapsed, speed);
     }
     last_speed = speed;
-    last_time = system_get_time();
-#endif
+    last_millis = millis;
+
     if (speed >= 0)
     {
         mcpwm_set_signal_low(unit, timer, MCPWM_OPR_B);
