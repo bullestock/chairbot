@@ -171,7 +171,7 @@ void main_loop(void* pvParameters)
 #endif
             }
             
-            //!!set_motors(power_left, power_right);
+            set_motors(power_left/255.0, power_right/255.0);
             is_halted = false;
 
 #if 0
