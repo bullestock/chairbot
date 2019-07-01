@@ -11,4 +11,5 @@
   (lib (name Resistor_SMD)(type KiCad)(uri ${KIPRJMOD}/pretty/Resistor_SMD.pretty)(options "")(descr ""))
   (lib (name Module)(type KiCad)(uri ${KIPRJMOD}/pretty/Module.pretty)(options "")(descr ""))
   (lib (name Package_DIP)(type KiCad)(uri ${KIPRJMOD}/pretty/Package_DIP.pretty)(options "")(descr ""))
+  (lib (name Peripherals)(type KiCad)(uri ${KIPRJMOD}/pretty/Peripherals.pretty)(options "")(descr ""))
 )
