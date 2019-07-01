@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:chairbot-cache
-EELAYER 26 0
+EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -430,10 +430,8 @@ Text GLabel 4250 2700 2    50   Input ~ 0
 CS
 Text GLabel 4250 2800 2    50   Input ~ 0
 CE
-Text GLabel 4250 4000 2    50   Input ~ 0
+Text GLabel 4850 3400 2    50   Input ~ 0
 EN
-Text GLabel 2050 3550 0    50   Input ~ 0
-Brake
 $Comp
 L Regulator_Linear:AMS1117-3.3 U8
 U 1 1 5BD301D2
@@ -743,8 +741,6 @@ Wire Wire Line
 	3000 4400 3000 4500
 Wire Wire Line
 	4250 4000 4150 4000
-Wire Wire Line
-	4150 3400 4250 3400
 NoConn ~ 2200 3650
 $Comp
 L power:+5V #PWR0125
@@ -872,9 +868,7 @@ Wire Wire Line
 NoConn ~ 2800 4400
 Wire Wire Line
 	1500 2950 2200 2950
-Wire Wire Line
-	2050 3550 2200 3550
-Text GLabel 4250 3400 2    50   Input ~ 0
+Text GLabel 4250 4000 2    50   Input ~ 0
 Vbat
 $Comp
 L Device:R R3
@@ -958,32 +952,50 @@ Wire Wire Line
 $Comp
 L Device:R R5
 U 1 1 5CB60365
-P 4150 4400
-F 0 "R5" H 4220 4446 50  0000 L CNN
-F 1 "2K2" H 4220 4355 50  0000 L CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 4080 4400 50  0001 C CNN
-F 3 "~" H 4150 4400 50  0001 C CNN
-	1    4150 4400
+P 4750 4400
+F 0 "R5" H 4820 4446 50  0000 L CNN
+F 1 "2K2" H 4820 4355 50  0000 L CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 4680 4400 50  0001 C CNN
+F 3 "~" H 4750 4400 50  0001 C CNN
+	1    4750 4400
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR013
 U 1 1 5CB60409
-P 4150 4700
-F 0 "#PWR013" H 4150 4450 50  0001 C CNN
-F 1 "GND" H 4155 4527 50  0000 C CNN
-F 2 "" H 4150 4700 50  0001 C CNN
-F 3 "" H 4150 4700 50  0001 C CNN
-	1    4150 4700
+P 4750 4700
+F 0 "#PWR013" H 4750 4450 50  0001 C CNN
+F 1 "GND" H 4755 4527 50  0000 C CNN
+F 2 "" H 4750 4700 50  0001 C CNN
+F 3 "" H 4750 4700 50  0001 C CNN
+	1    4750 4700
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	4150 4700 4150 4550
-Wire Wire Line
-	4150 4000 4150 4250
-Connection ~ 4150 4000
+	4750 4700 4750 4550
 Wire Wire Line
 	5900 5250 6550 5250
 Wire Wire Line
 	5550 5650 6850 5650
+Wire Wire Line
+	4150 3400 4750 3400
+Wire Wire Line
+	4750 4250 4750 3400
+Connection ~ 4750 3400
+Wire Wire Line
+	4750 3400 4850 3400
+NoConn ~ 2200 3550
+$Comp
+L Connector_Generic:Conn_01x01 J6
+U 1 1 5CCFD0F5
+P 1600 4100
+F 0 "J6" H 1518 3875 50  0000 C CNN
+F 1 "GND" H 1518 3966 50  0000 C CNN
+F 2 "Connector_Pin:Pin_D1.3mm_L11.0mm" H 1600 4100 50  0001 C CNN
+F 3 "~" H 1600 4100 50  0001 C CNN
+	1    1600 4100
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1800 4100 2050 4100
 $EndSCHEMATC

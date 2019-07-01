@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:chairbot-cache
-EELAYER 26 0
+EELAYER 29 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -341,10 +341,6 @@ Wire Wire Line
 	6950 3450 6450 3450
 Wire Wire Line
 	6450 3450 6450 3100
-Text GLabel 4050 5400 0    50   Input ~ 0
-Brake
-Wire Wire Line
-	4050 5400 5350 5400
 Wire Wire Line
 	5900 2500 5900 2650
 Text GLabel 6500 2500 0    50   Input ~ 0
@@ -410,7 +406,6 @@ Wire Wire Line
 Wire Wire Line
 	6300 5400 5350 5400
 Connection ~ 6300 5400
-Connection ~ 5350 5400
 Wire Wire Line
 	5350 2350 5350 5400
 Wire Wire Line
@@ -533,4 +528,8 @@ Wire Wire Line
 	2500 2050 1750 2050
 Wire Wire Line
 	1750 1850 2500 1850
+Wire Wire Line
+	5350 2150 5350 2350
+Connection ~ 5350 2150
+Connection ~ 5350 2350
 $EndSCHEMATC
