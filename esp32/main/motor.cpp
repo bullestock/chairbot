@@ -12,14 +12,15 @@ Motor::Motor(mcpwm_unit_t _unit,
              mcpwm_timer_t _timer,
              mcpwm_io_signals_t _pwm_a,
              mcpwm_io_signals_t _pwm_b,
-             int _gpio_a, int _gpio_b)
+             int _gpio_a, int _gpio_b,
+             int _frequency)
     : unit(_unit),
       timer(_timer)
 {
     mcpwm_gpio_init(unit, _pwm_a, _gpio_a);
     mcpwm_gpio_init(unit, _pwm_b, _gpio_b);
     mcpwm_config_t pwm_config;
-    pwm_config.frequency = 1000;
+    pwm_config.frequency = _frequency;
     pwm_config.cmpr_a = 0;
     pwm_config.cmpr_b = 0;
     pwm_config.counter_mode = MCPWM_UP_COUNTER;
@@ -42,7 +43,7 @@ void Motor::set_speed(float speed)
         auto delta = fabs(speed - last_speed);
         const auto initial_delta = delta;
         bool clamped = false;
-        while (delta/elapsed > MAX_DELTA && speed > 0.01)
+        while (delta/elapsed > MAX_DELTA && fabs(speed) > 0.01)
         {
             speed *= 0.9;
             delta = fabs(speed - last_speed);
@@ -124,6 +125,6 @@ void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot,
 void set_motors(double m1, double m2)
 {
     motor_a->set_speed(m1);
-    motor_b->set_speed(-m2);
+    motor_b->set_speed(m2);
     gpio_set_level(GPIO_ENABLE, fabs(m1) > 0.001 || fabs(m2) > 0.001);
 }
