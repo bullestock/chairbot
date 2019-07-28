@@ -88,39 +88,92 @@ int motor_test(int argc, char** argv)
     return 0;
 }
 
-int i2c_scan(int argc, char** argv)
+int i2c_cmd(int argc, char** argv)
 {
-    int count = 1;
-    if (argc > 1)
-        count = atoi(argv[1]);
+    static const char* i2c_usage =
+       "Valid commands:\n"
+       "scan [<count>]       Scan for I2C devices\n"
+       "read <addr>          Read from device at specified address\n"
+       "write <addr> <data>  Write to device at specified address\n";
 
-    printf("Scanning for I2C devices (%d)\n", count);
-    for (int j = 0; j < count; ++j)
+    if (argc < 2)
     {
-        printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
-        printf("00:         ");
-        for (int i = 3; i < 0x78; ++i)
-        {
-            i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-            i2c_master_start(cmd);
-            i2c_master_write_byte(cmd, (i << 1) | I2C_MASTER_WRITE, 1 /* expect ack */);
-            i2c_master_stop(cmd);
-
-            const auto espRc = i2c_master_cmd_begin(I2C_NUM_0, cmd, 10/portTICK_PERIOD_MS);
-            if (i%16 == 0)
-                printf("\n%.2x:", i);
-            if (espRc == 0)
-                printf(" %.2x", i);
-            else
-                printf(" --");
-            //ESP_LOGD(tag, "i=%d, rc=%d (0x%x)", i, espRc, espRc);
-            i2c_cmd_link_delete(cmd);
-        }
-        printf("\n");
-        vTaskDelay(100/portTICK_PERIOD_MS);
+        printf("Error: Missing command\n");
+        printf(i2c_usage);
+        return -1;
     }
-    
-    return 0;
+    if (!strcmp(argv[1], "scan"))
+    {
+        int count = 1;
+        if (argc > 2)
+            count = atoi(argv[2]);
+        printf("Scanning for I2C devices (%d)\n", count);
+        for (int j = 0; j < count; ++j)
+        {
+            printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
+            printf("00:         ");
+            for (int i = 3; i < 0x78; ++i)
+            {
+                i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+                i2c_master_start(cmd);
+                i2c_master_write_byte(cmd, (i << 1) | I2C_MASTER_WRITE, 1 /* expect ack */);
+                i2c_master_stop(cmd);
+
+                const auto espRc = i2c_master_cmd_begin(I2C_NUM_0, cmd, 10/portTICK_PERIOD_MS);
+                if (i%16 == 0)
+                    printf("\n%.2x:", i);
+                if (espRc == 0)
+                    printf(" %.2x", i);
+                else
+                    printf(" --");
+                //ESP_LOGD(tag, "i=%d, rc=%d (0x%x)", i, espRc, espRc);
+                i2c_cmd_link_delete(cmd);
+            }
+            printf("\n");
+            vTaskDelay(100/portTICK_PERIOD_MS);
+        }
+        return 0;
+    }
+    if (!strcmp(argv[1],"read"))
+    {
+        return 0;
+    }
+    if (!strcmp(argv[1], "write"))
+    {
+        if (argc < 3)
+        {
+            printf("Error: Missing address\n");
+            printf(i2c_usage);
+            return -1;
+        }
+        const int address = atoi(argv[2]);
+
+        if (argc < 4)
+        {
+            printf("Error: Missing data\n");
+            printf(i2c_usage);
+            return -1;
+        }
+        const int data = atoi(argv[3]);
+
+        i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+        i2c_master_start(cmd);
+        i2c_master_write_byte(cmd, address << 1 | I2C_MASTER_WRITE, 1);
+        i2c_master_write_byte(cmd, data, 1);
+        i2c_master_stop(cmd);
+        esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_RATE_MS);
+        if (ret == ESP_OK)
+            printf("I2C write %d to %d OK\n", data, address);
+        else if (ret == ESP_ERR_TIMEOUT)
+            printf("Error: Bus is busy\n");
+        else
+            printf("Error: Write failed: %d", ret);
+        i2c_cmd_link_delete(cmd);        
+        return 0;
+    }
+    printf("Error: Unknown command\n");
+    printf(i2c_usage);
+    return -1;
 }
 
 int read_battery(int argc, char** argv)
@@ -133,6 +186,49 @@ int read_battery(int argc, char** argv)
     }
 
     return 0;
+}
+
+int control_peripherals(int argc, char** argv)
+{
+    static const char* peripherals_usage =
+       "Valid commands:\n"
+       "sound              Play sound\n"
+       "pwm <addr> <data>  Set PWM output\n";
+
+    if (argc < 2)
+    {
+        printf("Error: Missing command\n");
+        printf(peripherals_usage);
+        return -1;
+    }
+    if (!strcmp(argv[1], "sound"))
+    {
+        peripherals_play_sound();
+        return 0;
+    }
+    if (!strcmp(argv[1], "pwm"))
+    {
+        if (argc < 3)
+        {
+            printf("Error: Missing address\n");
+            printf(peripherals_usage);
+            return -1;
+        }
+        const int chan = atoi(argv[2]);
+
+        if (argc < 4)
+        {
+            printf("Error: Missing data\n");
+            printf(peripherals_usage);
+            return -1;
+        }
+        const int value = atoi(argv[3]);
+
+        peripherals_set_pwm(chan, value);
+        return 0;
+    }
+    printf("Error: Unknown command\n");
+    return -1;
 }
 
 void initialize_console()
@@ -205,10 +301,10 @@ void run_console()
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd1));
 
     const esp_console_cmd_t cmd2 = {
-        .command = "i2cscan",
-        .help = "Scan for I2C devices",
+        .command = "i2c",
+        .help = "Manage I2C devices",
         .hint = NULL,
-        .func = &i2c_scan,
+        .func = &i2c_cmd,
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd2));
@@ -221,6 +317,15 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd3));
+
+    const esp_console_cmd_t cmd4 = {
+        .command = "peripherals",
+        .help = "Control peripherals",
+        .hint = NULL,
+        .func = &control_peripherals,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd4));
 
     /* Prompt to be printed before each line.
      * This can be customized, made dynamic, etc.
