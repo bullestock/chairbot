@@ -2,13 +2,16 @@
 
 #include <driver/mcpwm.h>
 
+#include <memory>
+
 class Motor
 {
 public:
     Motor(mcpwm_unit_t unit,
           mcpwm_timer_t timer,
           mcpwm_io_signals_t pwm_a, mcpwm_io_signals_t pwm_b,
-          int gpio_a, int gpio_b);
+          int gpio_a, int gpio_b,
+          int _frequency = 1000);
 
     // -1.0 to 1.0
     void set_speed(float speed);
@@ -17,7 +20,7 @@ private:
     mcpwm_unit_t unit = (mcpwm_unit_t) 0;
     mcpwm_timer_t timer = (mcpwm_timer_t) 0;
     float last_speed = 0.0;
-    int last_millis = 0;
+    uint32_t last_millis = 0;
 };
 
 // The threshold at which the pivot action starts
@@ -31,5 +34,5 @@ void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot 
 // -1 to +1
 void set_motors(double m1, double m2);
 
-extern Motor* motor_a;
-extern Motor* motor_b;
+extern std::unique_ptr<Motor> motor_a;
+extern std::unique_ptr<Motor> motor_b;
