@@ -26,8 +26,19 @@
 
 #include "config.h"
 
-Motor* motor_a = nullptr;
-Motor* motor_b = nullptr;
+static const int pwm_freq = 6000;
+
+namespace std
+{
+    template<typename T, typename ...Args>
+    std::unique_ptr<T> make_unique(Args&& ...args)
+    {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
+}
+
+std::unique_ptr<Motor> motor_a;
+std::unique_ptr<Motor> motor_b;
 
 bool is_pushed(const ForwardAirFrame& frame, int button)
 {
@@ -59,7 +70,6 @@ void main_loop(void* pvParameters)
 #endif
     int right_x_zero = 512;
     int right_y_zero = 512;
-    bool first_reading = true;
     
     auto last_packet = xTaskGetTickCount();
 
@@ -161,23 +171,19 @@ void main_loop(void* pvParameters)
                        PUSH(0), PUSH(1), PUSH(2), PUSH(3),
                        TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
                        power_left, power_right);
-#if 0
-                if (is_toggle_up(frame, 3))
-                    signal_control_lights(signal_device, true, true);
-                else if (is_toggle_down(frame, 3))
-                    signal_control_lights(signal_device, true, false);
-                else
-                    signal_control_lights(signal_device, false, true);
-#endif
             }
-            
             set_motors(power_left/255.0, power_right/255.0);
             is_halted = false;
 
-#if 0
+            if (is_toggle_up(frame, 3))
+                peripherals_set_pwm(0, 255);
+            else if (is_toggle_down(frame, 3))
+                peripherals_set_pwm(0, 0);
+            else
+                peripherals_set_pwm(0, 64);
+            
             if (is_pushed(frame, 0))
-                signal_play_sound(signal_device, -1);
-#endif
+                peripherals_play_sound();
         }
         else
         {
@@ -187,7 +193,6 @@ void main_loop(void* pvParameters)
             {
                 is_halted = true;
                 printf("HALT: Last packet was seen at %d\n", last_packet);
-                first_reading = true;
                 set_motors(0, 0);
             }
         }
@@ -215,9 +220,9 @@ extern "C"
 void app_main()
 {
     init_peripherals();
-   
-    motor_a = new Motor(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, MCPWM0B, GPIO_PWM0A_OUT, GPIO_PWM0B_OUT);
-    motor_b = new Motor(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM1A, MCPWM1B, GPIO_PWM1A_OUT, GPIO_PWM1B_OUT);
+
+    motor_a = std::make_unique<Motor>(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, MCPWM0B, GPIO_PWM0A_OUT, GPIO_PWM0B_OUT, pwm_freq);
+    motor_b = std::make_unique<Motor>(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM1A, MCPWM1B, GPIO_PWM1A_OUT, GPIO_PWM1B_OUT, pwm_freq);
 
     printf("Press a key to enter console\n");
     bool debug = false;
