@@ -12,6 +12,12 @@ const int FLASH_RATE = 100; // Flash half period in ms
 
 bool debug_on = true;
 
+const int sounds_per_bank[] = {
+    82,
+    2,
+    25
+};
+
 class DFPlayer
 {
 public:
@@ -192,6 +198,9 @@ int num_flash_files = 0;
 // Index of sound to play. -1 means random.
 int sound_index = -1;
 
+// Bank of sound to play. -1 means random.
+int sound_bank = -1;
+
 // Flag to start playing sound
 bool do_play = false;
 
@@ -224,6 +233,13 @@ void receiveData(int byteCount)
         // PWM 2
         analogWrite(PWM2_PIN, Wire.read());
         --byteCount;
+        break;
+
+    case 4:
+        // Play random sound from specific bank
+        sound_bank = Wire.read();
+        sound_index = -1;
+        do_play = true;
         break;
 
     default:
@@ -337,6 +353,19 @@ void process(const char* buffer)
         Serial.println("OK");
         break;
 
+        // R: Play random sound from bank <n>
+    case 'B':
+    case 'b':
+        {
+            int index;
+            const int n = get_int(buffer+1, BUF_SIZE-1, index); 
+            sound_index = -1;
+            sound_bank = n;
+            do_play = true;
+            Serial.println("OK");
+        }
+        break;
+
         // O: Control output
     case 'o':
     case 'O':
@@ -376,7 +405,21 @@ void loop()
             do_play = false;
             digitalWrite(LED_PIN, HIGH);
             if (num < 0)
-                num = random(num_flash_files);
+            {
+                if (sound_bank >= 0)
+                {
+                    num = 0;
+                    for (int i = 0; i < sound_bank; ++i)
+                        num += sounds_per_bank[i];
+                    num += random(sounds_per_bank[sound_bank]);
+                    Serial.print("Bank ");
+                    Serial.print(sound_bank);
+                    Serial.print(" random: ");
+                    Serial.println(num);
+                }
+                else
+                    num = random(num_flash_files);
+            }
             else if (num >= num_flash_files)
             {
                 Serial.println("Invalid sound index");
@@ -387,6 +430,7 @@ void loop()
                 Serial.print("Play ");
                 Serial.println(num);
             }
+            sound_bank = -1;
             player.start_play_physical(num);
             play_start = millis();
             state = STATE_PLAYING;
