@@ -13,11 +13,15 @@ const int FLASH_RATE = 100; // Flash half period in ms
 bool debug_on = true;
 
 const int sounds_per_bank[] = {
+    // 01/001-082
     82,
+    // 02/001-002
     2,
+    // 03/001-025
     25
 };
 
+// http://www.mat54-wiki.nl/mat54/index.php/DFPlayer_Mini_SKU:DFR0299
 class DFPlayer
 {
 public:
@@ -49,6 +53,11 @@ public:
     void start_play_physical(uint16_t num)
     {
         send_cmd(0x03, num);
+    }
+
+    void stop_play()
+    {
+        send_cmd(0x16);
     }
 
     bool is_busy() const
@@ -387,6 +396,13 @@ void process(const char* buffer)
             Serial.println("OK");
         }
         break;
+
+        // S: Stop play
+    case 's':
+    case 'S':
+        player.stop_play();
+        Serial.println("OK");
+        break;
         
     default:
         Serial.println("ERROR: Unknown command");
@@ -446,7 +462,7 @@ void loop()
                 state = STATE_WAIT;
                 wait_start = millis();
             }
-            else if ((millis() - play_start) > 30000)
+            else if ((millis() - play_start) > 3000)
             {
                 Serial.println("TIMEOUT");
                 state = STATE_IDLE;
@@ -455,7 +471,7 @@ void loop()
         break;
 
     case STATE_WAIT:
-        if ((millis() - wait_start) > 5000)
+        if ((millis() - wait_start) > 2000)
         {
             state = STATE_IDLE;
             if (debug_on)
