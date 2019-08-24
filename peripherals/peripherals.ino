@@ -13,12 +13,12 @@ const int FLASH_RATE = 100; // Flash half period in ms
 bool debug_on = true;
 
 const int sounds_per_bank[] = {
-    // 01/001-082
-    82,
-    // 02/001-002
-    2,
-    // 03/001-025
-    25
+    // 01/001-081
+    81,
+    // 01/082-084
+    3,
+    // 01/085-110
+    26
 };
 
 // http://www.mat54-wiki.nl/mat54/index.php/DFPlayer_Mini_SKU:DFR0299
@@ -427,7 +427,7 @@ void loop()
                     num = 0;
                     for (int i = 0; i < sound_bank; ++i)
                         num += sounds_per_bank[i];
-                    num += random(sounds_per_bank[sound_bank]);
+                    num += random(sounds_per_bank[sound_bank]+1);
                     Serial.print("Bank ");
                     Serial.print(sound_bank);
                     Serial.print(" random: ");
