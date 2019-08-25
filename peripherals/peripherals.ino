@@ -5,19 +5,19 @@ SoftwareSerial mySerial(10, 11); // RX, TX
 
 const int LED_PIN = 13;
 const int BUSY_PIN = A0;
-const int PWM1_PIN = 5;
-const int PWM2_PIN = 3;
+const int PWM1_PIN = 3; // TCCR2B
+const int PWM2_PIN = 5; // TCCR0B
 const int SLAVE_ADDRESS = 0x05;
 const int FLASH_RATE = 100; // Flash half period in ms
 
 bool debug_on = true;
 
 const int sounds_per_bank[] = {
-    // 01/001-082
-    82,
-    // 01/083-085
+    // 01/001-081
+    81,
+    // 01/082-084
     3,
-    // 01/086-110
+    // 01/085-109
     25
 };
 
@@ -268,6 +268,8 @@ void setup()
     Serial.begin(115200);
     Serial.println("Peripherals v 0.1");
 
+    TCCR0B = TCCR0B & B11111000 | B00000001;
+    
     pinMode(PWM1_PIN, OUTPUT);
     pinMode(PWM2_PIN, OUTPUT);
     
@@ -424,7 +426,7 @@ void loop()
             {
                 if (sound_bank >= 0)
                 {
-                    num = 0;
+                    num = 1;
                     for (int i = 0; i < sound_bank; ++i)
                         num += sounds_per_bank[i];
                     num += random(sounds_per_bank[sound_bank]+1);
