@@ -29,7 +29,7 @@ Motor::Motor(mcpwm_unit_t _unit,
 }
 
 // Max 10 percent per second = 0.0001 per millisecond
-const float MAX_DELTA = 0.001;
+const float MAX_DELTA = 0.002;
 
 void Motor::set_speed(float speed)
 {
@@ -88,7 +88,7 @@ int apply_s_curve(int x)
 
 void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot, int max_power)
 {
-    rx = apply_s_curve(rx);
+    rx = apply_s_curve(-rx);
     ry = apply_s_curve(ry);
                 
     int nMotPremixL = 0;
