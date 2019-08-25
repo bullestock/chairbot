@@ -203,7 +203,7 @@ int control_peripherals(int argc, char** argv)
     }
     if (!strcmp(argv[1], "sound"))
     {
-        peripherals_play_sound();
+        peripherals_play_sound(0); //!!
         return 0;
     }
     if (!strcmp(argv[1], "pwm"))
