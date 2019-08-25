@@ -678,14 +678,10 @@ Wire Wire Line
 Connection ~ 7800 4950
 Wire Wire Line
 	7800 4950 7950 4950
-Text GLabel 4650 4150 0    50   Input ~ 0
+Text GLabel 4650 3250 0    50   Input ~ 0
 PWM1
-Text GLabel 4650 4250 0    50   Input ~ 0
+Text GLabel 4650 3450 0    50   Input ~ 0
 PWM2
-Wire Wire Line
-	4650 4250 4950 4250
-Wire Wire Line
-	4950 4150 4650 4150
 Text GLabel 6150 3950 2    50   Input ~ 0
 SDA
 Text GLabel 6150 4050 2    50   Input ~ 0
@@ -799,9 +795,7 @@ Wire Wire Line
 	2400 4450 2700 4450
 Connection ~ 2700 4450
 NoConn ~ 4950 3150
-NoConn ~ 4950 3250
 NoConn ~ 4950 3350
-NoConn ~ 4950 3450
 NoConn ~ 4950 3550
 NoConn ~ 4950 3650
 NoConn ~ 4950 3750
@@ -856,4 +850,10 @@ Text Notes 9050 2500 0    50   ~ 0
 PWM1 OUT
 Text Notes 9050 4250 0    50   ~ 0
 PWM2 OUT
+Wire Wire Line
+	4650 3450 4950 3450
+Wire Wire Line
+	4950 3250 4650 3250
+NoConn ~ 4950 4150
+NoConn ~ 4950 4250
 $EndSCHEMATC
