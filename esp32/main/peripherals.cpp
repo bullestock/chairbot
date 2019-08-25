@@ -46,14 +46,16 @@ void init_peripherals()
 const int i2c_address = 5;
 
 const int SOUND_RANDOM = 0x00;
+const int SOUND_BANK = 0x04;
 
-void peripherals_play_sound()
+void peripherals_play_sound(int bank)
 {
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
-    const uint8_t data = (uint8_t) SOUND_RANDOM;
+    const uint8_t data = (uint8_t) SOUND_BANK;
     i2c_master_write_byte(cmd, data, 1);
+    i2c_master_write_byte(cmd, (uint8_t) bank, 1);
     i2c_master_stop(cmd);
     esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_RATE_MS);
     if (ret == ESP_ERR_TIMEOUT)
