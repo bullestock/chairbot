@@ -13,12 +13,12 @@ const int FLASH_RATE = 100; // Flash half period in ms
 bool debug_on = true;
 
 const int sounds_per_bank[] = {
-    // 01/001-081
-    81,
-    // 01/082-084
+    // 01/001-082
+    82,
+    // 01/083-085
     3,
-    // 01/085-110
-    26
+    // 01/086-110
+    25
 };
 
 // http://www.mat54-wiki.nl/mat54/index.php/DFPlayer_Mini_SKU:DFR0299
