@@ -183,7 +183,11 @@ void main_loop(void* pvParameters)
                 peripherals_set_pwm(0, 64);
             
             if (is_pushed(frame, 0))
-                peripherals_play_sound();
+                peripherals_play_sound(0);
+            else if (is_pushed(frame, 1))
+                peripherals_play_sound(1);
+            else if (is_pushed(frame, 2))
+                peripherals_play_sound(2);
         }
         else
         {
