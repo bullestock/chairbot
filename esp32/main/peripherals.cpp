@@ -10,6 +10,17 @@
 
 static QueueHandle_t sound_queue;
 
+struct Queue_item
+{
+    enum class Type
+    {
+        Sound,
+        Pwm
+    } type = Type::Sound;
+    int param1 = 0;
+    int param2 = 0;
+};
+
 void init_peripherals()
 {
     gpio_config_t io_conf;
@@ -52,7 +63,10 @@ const int SOUND_BANK = 0x04;
 
 void peripherals_play_sound(int bank)
 {
-    xQueueSend(sound_queue, &bank, 0);
+    Queue_item i;
+    i.type = Queue_item::Type::Sound;
+    i.param1 = bank;
+    xQueueSend(sound_queue, &i, 0);
 }
 
 void peripherals_do_play_sound(int bank)
@@ -74,6 +88,15 @@ void peripherals_do_play_sound(int bank)
 
 void peripherals_set_pwm(int chan, int value)
 {
+    Queue_item i;
+    i.type = Queue_item::Type::Pwm;
+    i.param1 = chan;
+    i.param2 = value;
+    xQueueSend(sound_queue, &i, 0);
+}
+
+void peripherals_do_set_pwm(int chan, int value)
+{
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
@@ -90,15 +113,24 @@ void peripherals_set_pwm(int chan, int value)
 
 void sound_loop(void*)
 {
-    // Create a queue capable of containing 3 int values.
-    sound_queue = xQueueCreate(3, sizeof(int));
+    // Create a queue capable of containing 10 items.
+    sound_queue = xQueueCreate(10, sizeof(Queue_item));
 
     while (1)
     {
-        int bank = 0;
-        if (xQueueReceive(sound_queue, &bank, 0))
-            peripherals_do_play_sound(bank);
+        Queue_item i;
+        if (xQueueReceive(sound_queue, &i, 0))
+            switch (i.type)
+            {
+            case Queue_item::Type::Sound:
+                peripherals_do_play_sound(i.param1);
+                break;
 
-        vTaskDelay(1000/portTICK_PERIOD_MS);
+            case Queue_item::Type::Pwm:
+                peripherals_do_set_pwm(i.param1, i.param2);
+                break;
+            }
+
+        vTaskDelay(10/portTICK_PERIOD_MS);
     }
 }
