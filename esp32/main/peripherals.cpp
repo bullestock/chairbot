@@ -1,12 +1,14 @@
 #include "peripherals.h"
 
 #include <driver/i2c.h>
-#include <driver/adc.h>
+#include <freertos/queue.h>
 
 #include "battery.h"
 #include "config.h"
 
 #define DEFAULT_VREF    1100        //Use adc2_vref_to_gpio() to obtain a better estimate
+
+static QueueHandle_t sound_queue;
 
 void init_peripherals()
 {
@@ -50,6 +52,11 @@ const int SOUND_BANK = 0x04;
 
 void peripherals_play_sound(int bank)
 {
+    xQueueSend(sound_queue, &bank, 0);
+}
+
+void peripherals_do_play_sound(int bank)
+{
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
@@ -79,4 +86,19 @@ void peripherals_set_pwm(int chan, int value)
     else if (ret != ESP_OK)
         printf("Error: Write failed: %d", ret);
     i2c_cmd_link_delete(cmd);        
+}
+
+void sound_loop(void*)
+{
+    // Create a queue capable of containing 3 int values.
+    sound_queue = xQueueCreate(3, sizeof(int));
+
+    while (1)
+    {
+        int bank = 0;
+        if (xQueueReceive(sound_queue, &bank, 0))
+            peripherals_do_play_sound(bank);
+
+        vTaskDelay(1000/portTICK_PERIOD_MS);
+    }
 }

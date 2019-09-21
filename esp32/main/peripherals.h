@@ -1,5 +1,7 @@
 #pragma once
 
+void sound_loop(void*);
+
 void init_peripherals();
 
 void peripherals_play_sound(int bank);

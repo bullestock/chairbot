@@ -217,6 +217,7 @@ void main_loop(void* pvParameters)
 }
 
 static TaskHandle_t xMainTask = nullptr;
+static TaskHandle_t xSoundTask = nullptr;
 
 static const uint8_t pipes[][6] = {"1BULL","2BULL"};
 
@@ -244,6 +245,7 @@ void app_main()
     printf("\nStarting application\n");
 
     xTaskCreate(&main_loop, "Main loop", 10240, NULL, 1, &xMainTask);
+    xTaskCreate(&sound_loop, "Sound loop", 10240, NULL, 1, &xSoundTask);
 }
 
 // Local Variables:
