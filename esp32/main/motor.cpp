@@ -88,38 +88,42 @@ int apply_s_curve(int x)
 
 void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot, int max_power)
 {
-    rx = apply_s_curve(-rx);
-    ry = apply_s_curve(ry);
+    // rx = apply_s_curve(rx);
+    // ry = apply_s_curve(ry);
+    rx = -rx;
                 
-    int nMotPremixL = 0;
-    int nMotPremixR = 0;
+    int premix_l = 0;
+    int premix_r = 0;
     // Calculate Drive Turn output due to Joystick X input
     if (ry >= 0)
     {
         // Forward
-        nMotPremixL = rx >= 0 ? max_range : max_range + rx;
-        nMotPremixR = rx >= 0 ? max_range - rx : max_range;
+        premix_l = rx >= 0 ? max_range : max_range + rx;
+        premix_r = rx >= 0 ? max_range - rx : max_range;
     }
     else
     {
         // Reverse
-        nMotPremixL = rx >= 0 ? max_range - rx : max_range;
-        nMotPremixR = rx >= 0 ? max_range : max_range + rx;
+        premix_l = rx >= 0 ? max_range - rx : max_range;
+        premix_r = rx >= 0 ? max_range : max_range + rx;
     }
 
     // Scale Drive output due to Joystick Y input (throttle)
-    nMotPremixL = nMotPremixL * ry/(max_range+1.0);
-    nMotPremixR = nMotPremixR * ry/(max_range+1.0);
+    premix_l = premix_l * ry/(max_range+1.0);
+    premix_r = premix_r * ry/(max_range+1.0);
 
     // Now calculate pivot amount
     // - Strength of pivot (nPivSpeed) based on Joystick X input
     // - Blending of pivot vs drive (fPivScale) based on Joystick Y input
-    const auto nPivSpeed = rx;
-    const auto fPivScale = abs(ry) > pivot ? 0.0 : 1.0 - abs(ry)/float(pivot);
+    const auto piv_speed = rx;
+    float piv_diff = abs(ry)/float(pivot);
+    auto piv_scale = abs(ry) > pivot ? 0.0 : 1.0 - piv_diff;
+    if (piv_scale > 1.0)
+        piv_scale = 1.0;
 
     // Calculate final mix of Drive and Pivot and convert to motor PWM range
-    power_left = int(-((1.0-fPivScale)*nMotPremixL + fPivScale*(nPivSpeed))/float(max_range)*max_power);
-    power_right = int(-((1.0-fPivScale)*nMotPremixR + fPivScale*(-nPivSpeed))/float(max_range)*max_power);
+    power_left = int(-((1.0-piv_scale)*premix_l + piv_scale*(piv_speed))/float(max_range)*max_power);
+    power_right = int(-((1.0-piv_scale)*premix_r + piv_scale*(-piv_speed))/float(max_range)*max_power);
 }
 
 void set_motors(double m1, double m2)
