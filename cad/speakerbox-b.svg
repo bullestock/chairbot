@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1220mm"
+   height="610mm"
+   viewBox="-1 -141 1220 610"
+   version="1.1"
+   id="svg1323"
+   sodipodi:docname="speakerbox-b.svg"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+  <metadata
+     id="metadata1329">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>OpenSCAD Model</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs1327" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1600"
+     inkscape:window-height="832"
+     id="namedview1325"
+     showgrid="false"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.66219685"
+     inkscape:cx="414.45832"
+     inkscape:cy="173.85829"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1323" />
+  <title
+     id="title1319">OpenSCAD Model</title>
+  <path
+     style="fill:#d3d3d3;stroke:#000000;stroke-width:0.5"
+     d="m 136.67251,372.84832 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 6 v -9 h 3 v -8.717 h -3 v -8.616 h 3 v -8.717 h -3 v -9 h -6 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -6 v 9 h -3 v 8.717 h 3 v 8.616 h -3 v 8.717 h 3 v 9 h 6 v 3 h 6.05 z"
+     id="path2386"
+     inkscape:connector-curvature="0" />
+  <path
+     style="fill:#d3d3d3;stroke:#000000;stroke-width:0.5"
+     d="m 15.025,372.84832 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 6 v -9 h 3 v -8.717 h -3 v -8.616 h 3 v -8.717 h -3 v -9 h -6 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 H 8.97501 v 3 h -6 v 9 h -3.0000039 v 8.717 H 2.97501 v 8.616 h -3.0000039 v 8.717 H 2.97501 v 9 h 6 v 3 H 15.025 Z"
+     id="path2384"
+     inkscape:connector-curvature="0" />
+  <path
+     style="fill:#d3d3d3;stroke:#000000;stroke-width:0.5"
+     d="m 11.05,465.02499 h 8.617 v 3 h 8.716 v -3 H 37 v 3 h 9.05 v -9 h 3 v -6.59539 h -3 v -6.4955 h 3 v -6.5954 h -3 v -6.4955 h 3 v -6.5955 h -3 v -6.4954 h 3 v -6.5955 h -3 v -6.4954 h 3 v -6.5955 h -3 v -6.4955 h 3 v -6.5954 h -3 v -9 H 37 v 3 h -8.617 v -3 h -8.716 v 3 H 11.05 v -3 H 2 v 9 h -3 v 6.5954 h 3 v 6.4955 h -3 v 6.5954 h 3 v 6.4955 h -3 v 6.5955 h 3 v 6.4954 h -3 v 6.5955 h 3 v 6.4954 h -3 v 6.5955 h 3 v 6.4955 h -3 v 6.59539 h 3 v 9 h 9.05 z"
+     id="path2382"
+     inkscape:connector-curvature="0" />
+  <path
+     style="fill:#d3d3d3;stroke:#000000;stroke-width:0.5"
+     d="m 64.079895,465.02499 h 8.616997 v 3 h 8.715994 v -3 h 8.616994 v 3 h 9.049976 v -9 h 2.999994 v -6.59539 h -2.999994 v -6.4955 h 2.999994 v -6.5954 h -2.999994 v -6.4955 h 2.999994 v -6.5955 h -2.999994 v -6.4954 h 2.999994 v -6.5955 h -2.999994 v -6.4954 h 2.999994 v -6.5955 h -2.999994 v -6.4955 h 2.999994 v -6.5954 h -2.999994 v -9 H 90.02988 v 3 h -8.616994 v -3 h -8.715994 v 3 h -8.616997 v -3 h -9.049994 v 9 h -2.999997 v 6.5954 h 2.999997 v 6.4955 h -2.999997 v 6.5954 h 2.999997 v 6.4955 h -2.999997 v 6.5955 h 2.999997 v 6.4954 h -2.999997 v 6.5955 h 2.999997 v 6.4954 h -2.999997 v 6.5955 h 2.999997 v 6.4955 h -2.999997 v 6.59539 h 2.999997 v 9 h 9.049994 z"
+     id="path2380"
+     inkscape:connector-curvature="0" />
+  <g
+     id="g2395"
+     transform="translate(-15.875)">
+    <path
+       inkscape:connector-curvature="0"
+       id="path2378"
+       d="m 131.20168,465.02499 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 6.05 v -3 h 5.95 v 3 h 9.05 v -9.04998 h -3 v -6.49541 h 3 v -6.5955 h -3 v -6.4955 h 3 v -6.5954 h -3 v -6.4955 h 3 v -6.5954 h -3 v -6.4955 h 3 v -6.5954 h -3 v -6.4955 h 3 v -6.5954 h -3 v -6.4955 h 3 v -9.05 h -9.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -6.05 v 3 h -5.95 v -3 h -9.05 v 9.05 h 3 v 6.4954 h -3 v 6.5955 h 3 v 6.4955 h -3 v 6.5954 h 3 v 6.4955 h -3 v 6.5954 h 3 v 6.4955 h -3 v 6.5954 h 3 v 6.4955 h -3 v 6.5954 h 3 v 6.49551 h -3 v 9.04998 h 9.05 z"
+       style="fill:#d3d3d3;stroke:#000000;stroke-width:0.5" />
+    <circle
+       r="2"
+       cy="459.14572"
+       cx="182.17668"
+       id="path1819"
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.37118483;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <circle
+       r="5"
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.92796206;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="circle1843"
+       cx="182.17668"
+       cy="423" />
+  </g>
+</svg>
