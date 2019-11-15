@@ -11,7 +11,6 @@
 #include "esp_wifi.h"
 #include "sdkconfig.h"
 #include "esp_event.h"
-#include "esp_event_loop.h"
 #include "nvs_flash.h"
 
 #include "RF24.h"
@@ -26,7 +25,7 @@
 
 #include "config.h"
 
-static const int pwm_freq = 6000;
+static const int pwm_freq = 200;
 
 namespace std
 {
