@@ -86,8 +86,10 @@ int apply_s_curve(int x)
     return -log(1.0/scaled - 1)*(x > 0 ? max_range/max_logit : -max_range/max_logit);
 }
 
-void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot, int max_power)
+void compute_power(int rx, int ry, int& power_left, int& power_right, double pivot, int max_power)
 {
+    if (pivot < 0.1)
+        pivot = 0.1;
     // rx = apply_s_curve(rx);
     // ry = apply_s_curve(ry);
     rx = -rx;
@@ -98,8 +100,8 @@ void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot,
     if (ry >= 0)
     {
         // Forward
-        premix_l = rx >= 0 ? max_range : max_range + rx;
-        premix_r = rx >= 0 ? max_range - rx : max_range;
+        premix_l = rx >= 0 ? max_range : max_range + rx;    // max_range
+        premix_r = rx >= 0 ? max_range - rx : max_range;    // max_range
     }
     else
     {
@@ -109,14 +111,14 @@ void compute_power(int rx, int ry, int& power_left, int& power_right, int pivot,
     }
 
     // Scale Drive output due to Joystick Y input (throttle)
-    premix_l = premix_l * ry/(max_range+1.0);
-    premix_r = premix_r * ry/(max_range+1.0);
+    premix_l = premix_l * ry/(max_range+1.0);   // 0
+    premix_r = premix_r * ry/(max_range+1.0);   // 0
 
     // Now calculate pivot amount
     // - Strength of pivot (nPivSpeed) based on Joystick X input
     // - Blending of pivot vs drive (fPivScale) based on Joystick Y input
-    const auto piv_speed = rx;
-    float piv_diff = abs(ry)/float(pivot);
+    const auto piv_speed = rx;  // 0
+    float piv_diff = abs(ry)/pivot;
     auto piv_scale = abs(ry) > pivot ? 0.0 : 1.0 - piv_diff;
     if (piv_scale > 1.0)
         piv_scale = 1.0;

@@ -80,9 +80,9 @@ void peripherals_do_play_sound(int bank)
     i2c_master_stop(cmd);
     esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_RATE_MS);
     if (ret == ESP_ERR_TIMEOUT)
-        printf("Error: Bus is busy\n");
+        printf("Error [sound]: Bus is busy\n");
     else if (ret != ESP_OK)
-        printf("Error: Write failed: %d", ret);
+        printf("Error [sound]: Write failed: %d", ret);
     i2c_cmd_link_delete(cmd);        
 }
 
@@ -105,9 +105,9 @@ void peripherals_do_set_pwm(int chan, int value)
     i2c_master_stop(cmd);
     esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_RATE_MS);
     if (ret == ESP_ERR_TIMEOUT)
-        printf("Error: Bus is busy\n");
+        printf("Error [pwm]: Bus is busy\n");
     else if (ret != ESP_OK)
-        printf("Error: Write failed: %d", ret);
+        printf("Error [pwm]: Write failed: %d", ret);
     i2c_cmd_link_delete(cmd);        
 }
 

@@ -149,12 +149,17 @@ void main_loop(void* pvParameters)
 
 #define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
 #define TOGGLE(bit) (is_toggle_down(frame, bit) ? 'D' : (is_toggle_up(frame, bit) ? 'U' : '-'))
-                
-            const int rx = frame.right_x - right_x_zero;
-            const int ry = frame.right_y - right_y_zero;
 
-            // Map right pot (0-255) to pivot value (20-51)
-            const int pivot = frame.right_pot*2;
+            const int MIN_DELTA = 7;
+            int rx = frame.right_x - right_x_zero;
+            if (abs(rx) < MIN_DELTA)
+                rx = 0;
+            int ry = frame.right_y - right_y_zero;
+            if (abs(ry) < MIN_DELTA)
+                ry = 0;
+
+            // Map right pot (0-255) to pivot value (?-?)
+            const int pivot = 0.1 + frame.right_pot/64;
             // Map left pot (0-255) to max_power (20-255)
             max_power = static_cast<int>(20 + (256-20)/256.0*frame.left_pot);
             compute_power(rx, ry, power_left, power_right, pivot, max_power);
@@ -162,14 +167,14 @@ void main_loop(void* pvParameters)
             if (count > 10)
             {
                 count = 0;
-                printf("L %4d/%4d R %4d/%4d (%d/%d) P %3d/%3d Push %c%c%c%c"
+                printf("L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c"
                        " Toggle %c%c%c%c"
-                       " Power %d/%d\n",
+                       " Power %d/%d Pivot %d\n",
                        (int) frame.left_x, (int) frame.left_y, (int) frame.right_x, (int) frame.right_y, rx, ry,
                        int(frame.left_pot), int(frame.right_pot),
                        PUSH(0), PUSH(1), PUSH(2), PUSH(3),
                        TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
-                       power_left, power_right);
+                       power_left, power_right, pivot);
             }
             set_motors(power_left/255.0, power_right/255.0);
             is_halted = false;
