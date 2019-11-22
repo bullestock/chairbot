@@ -1,7 +1,7 @@
 #include <SoftwareSerial.h>
 #include <Wire.h>
 
-SoftwareSerial mySerial(10, 11); // RX, TX
+SoftwareSerial mySerial(A2, A3); // RX, TX
 
 const int LED_PIN = 13;
 const int BUSY_PIN = A0;
