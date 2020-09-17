@@ -41,17 +41,17 @@ std::unique_ptr<Motor> motor_b;
 
 bool is_pushed(const ForwardAirFrame& frame, int button)
 {
-    return frame.switches & (1 << button);
+    return frame.pushbuttons & (1 << button);
 }
 
 bool is_toggle_up(const ForwardAirFrame& frame, int sw)
 {
-    return frame.switches & (2 << (8+2*sw));
+    return frame.toggles & (1 << 2*sw);
 }
 
 bool is_toggle_down(const ForwardAirFrame& frame, int sw)
 {
-    return frame.switches & (1 << (8+2*sw));
+    return frame.toggles & (2 << 2*sw);
 }
 
 void main_loop(void* pvParameters)
@@ -71,6 +71,7 @@ void main_loop(void* pvParameters)
     int right_y_zero = 512;
     
     auto last_packet = xTaskGetTickCount();
+    printf("Start at %d\n", last_packet);
 
     const int NOF_BATTERY_READINGS = 100;
     float battery_readings[NOF_BATTERY_READINGS];
@@ -88,6 +89,7 @@ void main_loop(void* pvParameters)
 
     RF24 radio(SPI_CE, SPI_CS);
     assert(radio_init(radio));
+    printf("Radio initialized\n");
 
 	while (1)
 	{
@@ -98,6 +100,7 @@ void main_loop(void* pvParameters)
         // if there is data ready
         if (radio.available())
         {
+            //printf("Radio has data\n");
             last_packet = xTaskGetTickCount();
 
             ForwardAirFrame frame;
@@ -123,7 +126,7 @@ void main_loop(void* pvParameters)
             ReturnAirFrame ret_frame;
             ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
             ret_frame.ticks = frame.ticks;
-
+#if 1
             battery_readings[battery_reading_index] = battery.read_voltage();
             ++battery_reading_index;
             if (battery_reading_index >= NOF_BATTERY_READINGS)
@@ -139,7 +142,7 @@ void main_loop(void* pvParameters)
             // Round to nearest 0.1 V to prevent flickering
             //ret_frame.battery = n ? 100*((sum/n+50)/100) : 0;
             ret_frame.battery = n ? sum/n*1000 : 0;
-
+#endif
             set_crc(ret_frame);
             radio.write(&ret_frame, sizeof(ret_frame));
 
@@ -159,7 +162,7 @@ void main_loop(void* pvParameters)
                 ry = 0;
 
             // Map right pot (0-255) to pivot value (?-?)
-            const int pivot = 0.1 + frame.right_pot/64;
+            const int pivot = 0.1 + frame.right_pot/64.0;
             // Map left pot (0-255) to max_power (20-255)
             max_power = static_cast<int>(20 + (256-20)/256.0*frame.left_pot);
             compute_power(rx, ry, power_left, power_right, pivot, max_power);
@@ -167,31 +170,32 @@ void main_loop(void* pvParameters)
             if (count > 10)
             {
                 count = 0;
-                printf("L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c"
+                printf("L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c%c%c"
                        " Toggle %c%c%c%c"
                        " Power %d/%d Pivot %d\n",
                        (int) frame.left_x, (int) frame.left_y, (int) frame.right_x, (int) frame.right_y, rx, ry,
                        int(frame.left_pot), int(frame.right_pot),
-                       PUSH(0), PUSH(1), PUSH(2), PUSH(3),
+                       PUSH(0), PUSH(1), PUSH(2), PUSH(3), PUSH(4), PUSH(5),
                        TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
                        power_left, power_right, pivot);
             }
             set_motors(power_left/255.0, power_right/255.0);
             is_halted = false;
-
+#if 1
             if (is_toggle_up(frame, 3))
                 peripherals_set_pwm(0, 255);
             else if (is_toggle_down(frame, 3))
                 peripherals_set_pwm(0, 0);
             else
                 peripherals_set_pwm(0, 64);
-            
+
             if (is_pushed(frame, 0))
                 peripherals_play_sound(0);
             else if (is_pushed(frame, 1))
                 peripherals_play_sound(1);
             else if (is_pushed(frame, 2))
                 peripherals_play_sound(2);
+#endif
         }
         else
         {
@@ -244,12 +248,12 @@ void app_main()
         }
         vTaskDelay(100/portTICK_PERIOD_MS);
     }
+    xTaskCreate(&sound_loop, "Sound loop", 10240, NULL, 1, &xSoundTask);
     if (debug)
         run_console();        // never returns
     printf("\nStarting application\n");
 
     xTaskCreate(&main_loop, "Main loop", 10240, NULL, 1, &xMainTask);
-    xTaskCreate(&sound_loop, "Sound loop", 10240, NULL, 1, &xSoundTask);
 }
 
 // Local Variables:
