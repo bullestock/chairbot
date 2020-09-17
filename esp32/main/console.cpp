@@ -192,7 +192,7 @@ int control_peripherals(int argc, char** argv)
 {
     static const char* peripherals_usage =
        "Valid commands:\n"
-       "sound              Play sound\n"
+       "sound <number>     Play sound\n"
        "pwm <addr> <data>  Set PWM output\n";
 
     if (argc < 2)
@@ -203,7 +203,13 @@ int control_peripherals(int argc, char** argv)
     }
     if (!strcmp(argv[1], "sound"))
     {
-        peripherals_play_sound(0); //!!
+        if (argc < 3)
+        {
+            printf("Error: Missing sound number\n");
+            return -1;
+        }
+        int sound = atoi(argv[2]);
+        peripherals_play_sound(sound);
         return 0;
     }
     if (!strcmp(argv[1], "pwm"))
