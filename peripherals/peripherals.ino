@@ -5,8 +5,13 @@ SoftwareSerial mySerial(A2, A3); // RX, TX
 
 const int LED_PIN = 13;
 const int BUSY_PIN = A0;
-const int PWM1_PIN = 3; // TCCR2B
-const int PWM2_PIN = 5; // TCCR0B
+const int PWM_PINS[] =
+    {
+        3, // TCCR2B
+        5, // TCCR0B
+        6, // 
+        9  // 
+    };
 const int SLAVE_ADDRESS = 0x05;
 const int FLASH_RATE = 100; // Flash half period in ms
 
@@ -233,22 +238,19 @@ void receiveData(int byteCount)
         break;
 
     case 2:
-        // PWM 1
-        analogWrite(PWM1_PIN, Wire.read());
-        --byteCount;
-        break;
-
-    case 3:
-        // PWM 2
-        analogWrite(PWM2_PIN, Wire.read());
-        --byteCount;
-        break;
-
-    case 4:
         // Play random sound from specific bank
         sound_bank = Wire.read();
         sound_index = -1;
         do_play = true;
+        break;
+
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+        // PWM 1-4
+        analogWrite(PWM_PINS[c - 10], Wire.read());
+        --byteCount;
         break;
 
     default:
@@ -269,9 +271,9 @@ void setup()
     Serial.println("Peripherals v 0.1");
 
     TCCR0B = TCCR0B & B11111000 | B00000001;
-    
-    pinMode(PWM1_PIN, OUTPUT);
-    pinMode(PWM2_PIN, OUTPUT);
+
+    for (auto pin : PWM_PINS)
+        pinMode(pin, OUTPUT);
     
     mySerial.begin(9600);
 	delay(10);
@@ -383,7 +385,7 @@ void process(const char* buffer)
         {
             int index;
             const int port = get_int(buffer+1, BUF_SIZE-1, index);
-            if (port < 0 || port > 1)
+            if (port < 0 || port > sizeof(PWM_PINS)/sizeof(PWM_PINS[0]))
             {
                 Serial.println("ERROR: Invalid port parameter to 'O'");
                 return;
@@ -394,7 +396,7 @@ void process(const char* buffer)
                 Serial.println("ERROR: Invalid value parameter to 'O'");
                 return;
             }
-            analogWrite(port == 0 ? PWM1_PIN : PWM2_PIN, value);
+            analogWrite(PWM_PINS[port], value);
             Serial.println("OK");
         }
         break;
