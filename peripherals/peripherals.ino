@@ -244,6 +244,13 @@ void receiveData(int byteCount)
         do_play = true;
         break;
 
+    case 3:
+        // Play specific sound from specific bank
+        sound_bank = Wire.read();
+        sound_index = Wire.read();
+        do_play = true;
+        break;
+
     case 10:
     case 11:
     case 12:
