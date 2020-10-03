@@ -1,6 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:peripherals-cache
-EELAYER 29 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -15,11 +14,11 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L MCU_Module:Arduino_Nano_v3.x A1
+L MCU_Module:Arduino_Nano_v3.x U1
 U 1 1 5D190561
 P 5450 3550
-F 0 "A1" H 5450 2461 50  0000 C CNN
-F 1 "Arduino_Nano_v3.x" H 5450 2370 50  0000 C CNN
+F 0 "U1" H 4700 2675 50  0000 C CNN
+F 1 "Arduino_Nano_v3.x" H 5000 2550 50  0000 C CNN
 F 2 "Module:Arduino_Nano" H 5600 2600 50  0001 L CNN
 F 3 "http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf" H 5450 2550 50  0001 C CNN
 	1    5450 3550
@@ -47,65 +46,6 @@ F 3 "" H 8700 1400 50  0001 C CNN
 	1    8700 1400
 	1    0    0    -1  
 $EndComp
-$Comp
-L peripherals-rescue:DFPlayer_Mini-dfplayer U1
-U 1 1 5D1A34FC
-P 3650 4750
-F 0 "U1" H 3625 5275 50  0000 C CNN
-F 1 "DFPlayer_Mini" H 3625 5184 50  0000 C CNN
-F 2 "Peripherals:DFPlayer" H 3550 4700 50  0001 C CNN
-F 3 "" H 3550 4700 50  0000 C CNN
-	1    3650 4750
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:+5V #PWR0103
-U 1 1 5D1A4428
-P 2700 4300
-F 0 "#PWR0103" H 2700 4150 50  0001 C CNN
-F 1 "+5V" H 2715 4473 50  0000 C CNN
-F 2 "" H 2700 4300 50  0001 C CNN
-F 3 "" H 2700 4300 50  0001 C CNN
-	1    2700 4300
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	2700 4300 2700 4450
-Wire Wire Line
-	2700 4450 3150 4450
-$Comp
-L power:GND #PWR0104
-U 1 1 5D1A49F6
-P 4250 5400
-F 0 "#PWR0104" H 4250 5150 50  0001 C CNN
-F 1 "GND" H 4255 5227 50  0000 C CNN
-F 2 "" H 4250 5400 50  0001 C CNN
-F 3 "" H 4250 5400 50  0001 C CNN
-	1    4250 5400
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	4100 5050 4250 5050
-Wire Wire Line
-	4250 5050 4250 5350
-Wire Wire Line
-	3150 5050 3050 5050
-Wire Wire Line
-	3050 5050 3050 5350
-Wire Wire Line
-	3050 5350 4250 5350
-Connection ~ 4250 5350
-Wire Wire Line
-	4250 5350 4250 5400
-Wire Wire Line
-	4250 5350 5450 5350
-Wire Wire Line
-	5550 5350 5550 4550
-Wire Wire Line
-	5450 4550 5450 5350
-Connection ~ 5450 5350
-Wire Wire Line
-	5450 5350 5550 5350
 Wire Wire Line
 	1400 1250 1950 1250
 Wire Wire Line
@@ -244,27 +184,6 @@ Wire Wire Line
 Wire Wire Line
 	8550 1650 8700 1650
 Connection ~ 8700 1650
-Wire Wire Line
-	2850 3950 2850 4650
-Wire Wire Line
-	2850 4650 3150 4650
-$Comp
-L Device:R R1
-U 1 1 5D1C81CA
-P 3600 4050
-F 0 "R1" V 3550 3850 50  0000 C CNN
-F 1 "1k" V 3600 4050 50  0000 C CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 3530 4050 50  0001 C CNN
-F 3 "~" H 3600 4050 50  0001 C CNN
-	1    3600 4050
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	3450 4050 2950 4050
-Wire Wire Line
-	2950 4050 2950 4550
-Wire Wire Line
-	2950 4550 3150 4550
 $Comp
 L Device:CP C1
 U 1 1 5D1A0A8E
@@ -278,17 +197,6 @@ F 3 "~" H 3600 6700 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	3600 6850 3600 6900
-$Comp
-L power:GND #PWR0113
-U 1 1 5D1ACF80
-P 2200 5650
-F 0 "#PWR0113" H 2200 5400 50  0001 C CNN
-F 1 "GND" H 2205 5477 50  0000 C CNN
-F 2 "" H 2200 5650 50  0001 C CNN
-F 3 "" H 2200 5650 50  0001 C CNN
-	1    2200 5650
-	1    0    0    -1  
-$EndComp
 $Comp
 L power:+5V #PWR0115
 U 1 1 5D1B9770
@@ -324,29 +232,7 @@ NoConn ~ 4950 3050
 NoConn ~ 5950 3650
 NoConn ~ 4950 3950
 NoConn ~ 5950 4150
-Wire Wire Line
-	5950 3550 6500 3550
-Wire Wire Line
-	6500 3550 6500 4850
-Wire Wire Line
-	6500 4850 4550 4850
-Wire Wire Line
-	4550 4850 4550 4450
-Wire Wire Line
-	4550 4450 4100 4450
 NoConn ~ 5950 4250
-NoConn ~ 4100 4550
-NoConn ~ 4100 4650
-NoConn ~ 4100 4750
-NoConn ~ 4100 4850
-NoConn ~ 4100 4950
-NoConn ~ 4100 5150
-Wire Wire Line
-	2900 4850 3150 4850
-Wire Wire Line
-	3150 4750 2750 4750
-NoConn ~ 3150 4950
-NoConn ~ 3150 5150
 $Comp
 L power:PWR_FLAG #FLG0101
 U 1 1 5D351DAA
@@ -371,35 +257,6 @@ F 3 "" H 6500 1200 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	6500 1200 6650 1200
-$Comp
-L Device:C C2
-U 1 1 5D1D601E
-P 2250 4450
-F 0 "C2" V 1998 4450 50  0000 C CNN
-F 1 "1u" V 2089 4450 50  0000 C CNN
-F 2 "Capacitor_SMD:C_0603_1608Metric" H 2288 4300 50  0001 C CNN
-F 3 "~" H 2250 4450 50  0001 C CNN
-	1    2250 4450
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR01
-U 1 1 5D1D6BB2
-P 1900 4550
-F 0 "#PWR01" H 1900 4300 50  0001 C CNN
-F 1 "GND" H 1905 4377 50  0000 C CNN
-F 2 "" H 1900 4550 50  0001 C CNN
-F 3 "" H 1900 4550 50  0001 C CNN
-	1    1900 4550
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	1900 4550 1900 4450
-Wire Wire Line
-	1900 4450 2100 4450
-Wire Wire Line
-	2400 4450 2700 4450
-Connection ~ 2700 4450
 $Comp
 L Mechanical:MountingHole H1
 U 1 1 5D1E466A
@@ -496,29 +353,6 @@ Connection ~ 5650 2450
 Wire Wire Line
 	5650 2450 5650 2550
 $Comp
-L Connector_Generic:Conn_01x03 J3
-U 1 1 5DAC0F2C
-P 1850 5400
-F 0 "J3" H 1768 5075 50  0000 C CNN
-F 1 "Conn_01x03" H 1768 5166 50  0000 C CNN
-F 2 "Connector_JST:JST_XH_B03B-XH-A_1x03_P2.50mm_Vertical" H 1850 5400 50  0001 C CNN
-F 3 "~" H 1850 5400 50  0001 C CNN
-	1    1850 5400
-	-1   0    0    1   
-$EndComp
-Wire Wire Line
-	2750 5300 2050 5300
-Wire Wire Line
-	2750 4750 2750 5300
-Wire Wire Line
-	2900 4850 2900 5500
-Wire Wire Line
-	2900 5500 2050 5500
-Wire Wire Line
-	2050 5400 2200 5400
-Wire Wire Line
-	2200 5400 2200 5650
-$Comp
 L power:GNDPWR #PWR0108
 U 1 1 5DADDBBA
 P 3600 6900
@@ -529,23 +363,7 @@ F 3 "" H 3600 6850 50  0001 C CNN
 	1    3600 6900
 	1    0    0    -1  
 $EndComp
-Text GLabel 3900 4050 2    50   Input ~ 0
-DFRX
-Wire Wire Line
-	3900 4050 3750 4050
-Text GLabel 6150 3850 2    50   Input ~ 0
-DFRX
-Wire Wire Line
-	5950 3850 6150 3850
 NoConn ~ 4950 4050
-Text GLabel 3900 3950 2    50   Input ~ 0
-DFTX
-Wire Wire Line
-	3900 3950 2850 3950
-Text GLabel 6150 3750 2    50   Input ~ 0
-DFTX
-Wire Wire Line
-	6150 3750 5950 3750
 NoConn ~ 4950 4250
 NoConn ~ 4950 4150
 NoConn ~ 4950 3750
@@ -618,4 +436,27 @@ Wire Wire Line
 Wire Wire Line
 	4600 6850 4600 6950
 Connection ~ 4250 6850
+$Comp
+L power:GND #PWR0103
+U 1 1 5F790F99
+P 5450 4925
+F 0 "#PWR0103" H 5450 4675 50  0001 C CNN
+F 1 "GND" H 5455 4752 50  0000 C CNN
+F 2 "" H 5450 4925 50  0001 C CNN
+F 3 "" H 5450 4925 50  0001 C CNN
+	1    5450 4925
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5450 4925 5450 4825
+Wire Wire Line
+	5550 4550 5550 4825
+Wire Wire Line
+	5550 4825 5450 4825
+Connection ~ 5450 4825
+Wire Wire Line
+	5450 4825 5450 4550
+NoConn ~ 5950 3550
+NoConn ~ 5950 3750
+NoConn ~ 5950 3850
 $EndSCHEMATC
