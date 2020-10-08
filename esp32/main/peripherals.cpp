@@ -59,7 +59,7 @@ void init_peripherals()
 const int i2c_address = 5;
 
 const int SOUND_RANDOM = 0x00;
-const int SOUND_BANK = 0x04;
+const int SOUND_BANK = 0x02;
 
 void peripherals_play_sound(int bank)
 {
@@ -100,7 +100,7 @@ void peripherals_do_set_pwm(int chan, int value)
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
-    i2c_master_write_byte(cmd, chan == 1 ? 2 : 3, 1);
+    i2c_master_write_byte(cmd, 10 + chan, 1);
     i2c_master_write_byte(cmd, (uint8_t) value, 1);
     i2c_master_stop(cmd);
     esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_RATE_MS);
