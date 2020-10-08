@@ -123,9 +123,14 @@ void compute_power(int rx, int ry, int& power_left, int& power_right, double piv
     if (piv_scale > 1.0)
         piv_scale = 1.0;
 
+    const int min_power = 7;
     // Calculate final mix of Drive and Pivot and convert to motor PWM range
     power_left = int(-((1.0-piv_scale)*premix_l + piv_scale*(piv_speed))/float(max_range)*max_power);
+    if (abs(power_left) < min_power)
+        power_left = 0;
     power_right = int(-((1.0-piv_scale)*premix_r + piv_scale*(-piv_speed))/float(max_range)*max_power);
+    if (abs(power_right) < min_power)
+        power_right = 0;
 }
 
 void set_motors(double m1, double m2)
