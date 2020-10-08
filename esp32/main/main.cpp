@@ -54,6 +54,10 @@ bool is_toggle_down(const ForwardAirFrame& frame, int sw)
     return frame.toggles & (2 << 2*sw);
 }
 
+const int pwm_lights = 0;
+bool is_flashing = false;
+int flash_count = 0;
+
 void main_loop(void* pvParameters)
 {
     int loopcount = 0;
@@ -161,8 +165,8 @@ void main_loop(void* pvParameters)
             if (abs(ry) < MIN_DELTA)
                 ry = 0;
 
-            // Map right pot (0-255) to pivot value (?-?)
-            const int pivot = 0.1 + frame.right_pot/64.0;
+            // Map right pot (0-255) to pivot value
+            const int pivot = 5 + frame.right_pot/4.0;
             // Map left pot (0-255) to max_power (20-255)
             max_power = static_cast<int>(20 + (256-20)/256.0*frame.left_pot);
             compute_power(rx, ry, power_left, power_right, pivot, max_power);
@@ -181,21 +185,35 @@ void main_loop(void* pvParameters)
             }
             set_motors(power_left/255.0, power_right/255.0);
             is_halted = false;
-#if 1
-            if (is_toggle_up(frame, 3))
-                peripherals_set_pwm(0, 255);
-            else if (is_toggle_down(frame, 3))
-                peripherals_set_pwm(0, 0);
+            if (is_flashing)
+            {
+                if (++flash_count > 10)
+                {
+                    flash_count = 0;
+                    is_flashing = false;
+                }
+                else
+                {
+                    peripherals_set_pwm(pwm_lights, flash_count % 2 ? 255 : 0);
+                }
+            }
             else
-                peripherals_set_pwm(0, 64);
-
+            {
+                if (is_toggle_up(frame, 3))
+                    peripherals_set_pwm(pwm_lights, 255);
+                else if (is_toggle_down(frame, 3))
+                    peripherals_set_pwm(pwm_lights, 0);
+                else
+                    peripherals_set_pwm(pwm_lights, 64);
+            }
             if (is_pushed(frame, 0))
                 peripherals_play_sound(0);
             else if (is_pushed(frame, 1))
                 peripherals_play_sound(1);
             else if (is_pushed(frame, 2))
                 peripherals_play_sound(2);
-#endif
+            else if (is_pushed(frame, 3) && !is_flashing)
+                is_flashing = true;
         }
         else
         {
