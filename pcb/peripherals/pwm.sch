@@ -127,7 +127,7 @@ F 3 "~" H 2950 2000 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Q_NPN_BCE Q1
+L Device:Q_NPN_BEC Q1
 U 1 1 5F79BC18
 P 2850 2775
 F 0 "Q1" H 2600 2600 50  0000 L CNN
@@ -291,7 +291,7 @@ F 3 "~" H 2950 5125 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Q_NPN_BCE Q3
+L Device:Q_NPN_BEC Q3
 U 1 1 5F7FA94F
 P 2850 5900
 F 0 "Q3" H 2600 5725 50  0000 L CNN
@@ -455,7 +455,7 @@ F 3 "~" H 7525 1950 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Q_NPN_BCE Q5
+L Device:Q_NPN_BEC Q5
 U 1 1 5F80BDE4
 P 7425 2725
 F 0 "Q5" H 7175 2550 50  0000 L CNN
@@ -619,7 +619,7 @@ F 3 "~" H 7475 4700 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:Q_NPN_BCE Q7
+L Device:Q_NPN_BEC Q7
 U 1 1 5F814059
 P 7375 5475
 F 0 "Q7" H 7125 5300 50  0000 L CNN
