@@ -1,7 +1,6 @@
-#include <SoftwareSerial.h>
 #include <Wire.h>
 
-SoftwareSerial mySerial(A2, A3); // RX, TX
+#include "SerialMP3Player.h"
 
 const int LED_PIN = 13;
 const int BUSY_PIN = A0;
@@ -26,188 +25,7 @@ const int sounds_per_bank[] = {
     25
 };
 
-// http://www.mat54-wiki.nl/mat54/index.php/DFPlayer_Mini_SKU:DFR0299
-class DFPlayer
-{
-public:
-    DFPlayer(HardwareSerial& _s)
-        : m_hardware_serial(&_s),
-          m_software_serial(nullptr)
-    {
-        init_buf();
-    }
-   
-    DFPlayer(SoftwareSerial& _s)
-        : m_hardware_serial(nullptr),
-          m_software_serial(&_s)
-    {
-        init_buf();
-    }
-   
-    void play_physical(uint16_t num)
-    {
-        send_cmd(0x03, num);
-        while (1)
-        {
-            delay(50);
-            if (digitalRead(BUSY_PIN))
-                break;
-        }
-    }
-
-    void start_play_physical(uint16_t num)
-    {
-        send_cmd(0x03, num);
-    }
-
-    void stop_play()
-    {
-        send_cmd(0x16);
-    }
-
-    bool is_busy() const
-    {
-        return !digitalRead(BUSY_PIN);
-    }
-
-    void set_volume(uint16_t volume)
-    {
-        send_cmd(0x06, volume);
-    }
-
-    uint16_t get_num_flash_files()
-    {
-        flush();
-        send_cmd_feedback(0x48);
-        return get_reply();
-    }
-
-    void flush()
-    {
-        if (m_hardware_serial)
-            while (m_hardware_serial->available())
-                ;
-        else
-            while (m_software_serial->available())
-                ;
-    }
-   
-    uint16_t get_reply()
-    {
-        delay(50);
-      
-        uint8_t buf[10];
-        int n = 0;
-        while (n < 10)
-        {
-            uint8_t c;
-            if (!get_char(c))
-            {
-                Serial.println("exhausted");
-                return 0;
-            }
-            if ((n == 0) && (c != 0x7E))
-            {
-                Serial.println("wrong");
-                continue;
-            }
-            buf[n++] = c;
-        }
-#if 0
-      char s[40];
-      sprintf(s, "Reply: ");
-      for (int i = 0; i < 10; i++)
-         sprintf(s+strlen(s)-1, "%02X ", buf[i]);
-      Serial.println(s);
-#endif
-      if ((n == 10) && (buf[9] == 0xEF))
-         return buf[5]*256+buf[6];
-      return 0;
-   }
-   
-private:
-   bool get_char(uint8_t& c)
-   {
-      if (m_hardware_serial && m_hardware_serial->available())
-      {
-         c = m_hardware_serial->read();
-         return true;
-      }
-      if (m_software_serial && m_software_serial->available())
-      {
-         c = m_software_serial->read();
-         return true;
-      }
-      return false;
-   }
-   
-   void init_buf()
-   {
-      send_buf[0] = 0x7E;
-      send_buf[1] = 0xFF;
-      send_buf[2] = 0x06;
-      send_buf[9] = 0xEF;
-   }
-   
-   void send_cmd(uint8_t cmd, uint16_t arg = 0)
-   {
-      send_buf[3] = cmd;
-      send_buf[4] = 0;
-      fill_uint16_bigend((send_buf+5), arg);
-      fill_checksum();
-      send();
-   }
-
-   void send_cmd_feedback(uint8_t cmd, uint16_t arg = 0)
-   {
-      send_buf[3] = cmd;
-      send_buf[4] = 1;
-      fill_uint16_bigend((send_buf+5), arg);
-      fill_checksum();
-      send();
-   }
-
-   static void fill_uint16_bigend(uint8_t *thebuf, uint16_t data)
-   {
-      *thebuf =	(uint8_t)(data>>8);
-      *(thebuf+1) =	(uint8_t)data;
-   }
-
-   uint16_t get_checksum(uint8_t *thebuf)
-   {
-      uint16_t sum = 0;
-      for(int i = 1; i < 7; i++)
-      {
-         sum += thebuf[i];
-      }
-      return -sum;
-   }
-
-
-   void fill_checksum()
-   {
-      uint16_t checksum = get_checksum(send_buf);
-      fill_uint16_bigend(send_buf+7, checksum);
-   }
-
-   void send()
-   {
-      if (m_hardware_serial)
-         for (int i = 0; i < 10; i++)
-            m_hardware_serial->write(send_buf[i]);
-      else
-         for (int i = 0; i < 10; i++)
-            m_software_serial->write(send_buf[i]);
-	}
-
-   uint8_t send_buf[10];
-   HardwareSerial* m_hardware_serial;
-   SoftwareSerial* m_software_serial;
-};
-
-DFPlayer player(mySerial);
-
-int num_flash_files = 0;
+SerialMP3Player player(2, 4); // RX, TX
 
 // Index of sound to play. -1 means random.
 int sound_index = -1;
@@ -275,31 +93,21 @@ void sendData()
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("Peripherals v 0.1");
+    Serial.println("Peripherals v 0.2");
 
-    TCCR0B = TCCR0B & B11111000 | B00000001;
+    //TCCR0B = TCCR0B & B11111000 | B00000001;
 
     for (auto pin : PWM_PINS)
         pinMode(pin, OUTPUT);
-    
-    mySerial.begin(9600);
-	delay(10);
-    player.set_volume(10);
-	delay(10);
-    while (num_flash_files == 0)
-    {
-        num_flash_files = player.get_num_flash_files();
-        digitalWrite(LED_PIN, 1);
-        delay(100);
-        digitalWrite(LED_PIN, 0);
-        delay(100);
-    }
-    if (debug_on)
-    {
-        Serial.print("Files on flash: ");
-        Serial.println(num_flash_files);
-    }
 
+    player.begin(9600);
+    delay(500);
+    player.sendCommand(CMD_SEL_DEV, 0, 2);   //select sd-card
+    delay(500);
+
+    player.setVol(30);
+	delay(20);
+    
     Wire.begin(SLAVE_ADDRESS);
     Wire.onReceive(receiveData);
     Wire.onRequest(sendData);
@@ -353,10 +161,13 @@ void process(const char* buffer)
     case 'p':
         {
             int index;
-            const int n = get_int(buffer+1, BUF_SIZE-1, index); 
-            if (n < 0 || n >= num_flash_files)
+            const int n = get_int(buffer+1, BUF_SIZE-1, index);
+            int total = 0;
+            for (int i = 0; i < sizeof(sounds_per_bank)/sizeof(sounds_per_bank[0]); ++i)
+                total += sounds_per_bank[i];
+            if (n < 0 || n >= total)
             {
-                Serial.println("ERROR: Invalid parameters to 'G'");
+                Serial.println("ERROR: Invalid parameters to 'P'");
                 return;
             }
             sound_index = n;
@@ -392,7 +203,7 @@ void process(const char* buffer)
         {
             int index;
             const int port = get_int(buffer+1, BUF_SIZE-1, index);
-            if (port < 0 || port > sizeof(PWM_PINS)/sizeof(PWM_PINS[0]))
+            if (port < 0 || port > (int) (sizeof(PWM_PINS)/sizeof(PWM_PINS[0])))
             {
                 Serial.println("ERROR: Invalid port parameter to 'O'");
                 return;
@@ -411,7 +222,7 @@ void process(const char* buffer)
         // S: Stop play
     case 's':
     case 'S':
-        player.stop_play();
+        player.stop();
         Serial.println("OK");
         break;
         
@@ -431,6 +242,9 @@ void loop()
             int num = sound_index;
             do_play = false;
             digitalWrite(LED_PIN, HIGH);
+            int total = 0;
+            for (int i = 0; i < sizeof(sounds_per_bank)/sizeof(sounds_per_bank[0]); ++i)
+                total += sounds_per_bank[i];
             if (num < 0)
             {
                 if (sound_bank >= 0)
@@ -445,9 +259,9 @@ void loop()
                     Serial.println(num);
                 }
                 else
-                    num = random(num_flash_files);
+                    num = random(total);
             }
-            else if (num >= num_flash_files)
+            else if (num >= total)
             {
                 Serial.println("Invalid sound index");
                 break;
@@ -458,7 +272,7 @@ void loop()
                 Serial.println(num);
             }
             sound_bank = -1;
-            player.start_play_physical(num);
+            player.play(num);
             play_start = millis();
             state = STATE_PLAYING;
         }
@@ -466,7 +280,14 @@ void loop()
 
     case STATE_PLAYING:
         {
-            const bool busy = player.is_busy();
+            player.qStatus();
+            while (!player.available())
+                delay(10);
+            bool busy = false;
+            uint8_t status = 0;
+            uint16_t value = 0;
+            if (player.getAnswer(status, value))
+                busy = status == 1;
             if (!busy)
             {
                 digitalWrite(LED_PIN, LOW);
