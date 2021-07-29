@@ -31,5 +31,5 @@ static const auto SPI_CE = GPIO_NUM_17;
 static const auto GPIO_SDA = GPIO_NUM_21;
 static const auto GPIO_SCL = GPIO_NUM_22;
 
-static const auto max_radio_idle_time = 150/portTICK_PERIOD_MS;
+static const auto max_radio_idle_time = 200/portTICK_PERIOD_MS;
 
