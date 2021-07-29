@@ -252,7 +252,7 @@ void initialize_console()
      */
     uart_config_t uart_config;
     memset(&uart_config, 0, sizeof(uart_config));
-    uart_config.baud_rate = CONFIG_CONSOLE_UART_BAUDRATE;
+    uart_config.baud_rate = CONFIG_ESP_CONSOLE_UART_BAUDRATE;
     uart_config.data_bits = UART_DATA_8_BITS;
     uart_config.parity = UART_PARITY_DISABLE;
     uart_config.stop_bits = UART_STOP_BITS_1;
