@@ -199,16 +199,10 @@ void SerialMP3Player::sendCommand(byte command, byte dat1, byte dat2){
 String SerialMP3Player::sbyte2hex(byte b)
 {
     String shex;
-
-    //Serial.print("0x");
-    shex="0X";
-
-    //if (b < 16) Serial.print("0");
-    if (b < 16) shex+="0";
-    //Serial.print(b, HEX);
-    shex+=String(b,HEX);
-    //Serial.print(" ");
-    shex+=" ";
+    if (b < 16)
+        shex += "0";
+    shex += String(b, HEX);
+    shex +=" ";
     return shex;
 }
 
@@ -220,8 +214,10 @@ bool SerialMP3Player::getAnswer(uint8_t& status, uint16_t& value)
         Serial.println("No data");
         return false;
     }
+    String mp3recv = "";
     // FS (7E)
     uint8_t b = Serial3->read();
+    mp3recv += sbyte2hex(b);
     if (b != 0x7E)
     {
         Serial.println("No FS");
@@ -229,6 +225,7 @@ bool SerialMP3Player::getAnswer(uint8_t& status, uint16_t& value)
     }
     // Version (FF)
     b = Serial3->read();
+    mp3recv += sbyte2hex(b);
     if (b != 0xFF)
     {
         Serial.println("No version");
@@ -236,6 +233,7 @@ bool SerialMP3Player::getAnswer(uint8_t& status, uint16_t& value)
     }
     // Length (06)
     b = Serial3->read();
+    mp3recv += sbyte2hex(b);
     if (b != 6)
     {
         Serial.println("No length");
@@ -243,22 +241,31 @@ bool SerialMP3Player::getAnswer(uint8_t& status, uint16_t& value)
     }
     // Status
     status = Serial3->read();
+    mp3recv += sbyte2hex(status);
     // Feedback
     b = Serial3->read(); // Feedback
+    mp3recv += sbyte2hex(b);
     b = Serial3->read(); // Data high
-    Serial.println("HI");
-    Serial.println(b);
+    mp3recv += sbyte2hex(b);
     value = 256 * b;
     b = Serial3->read(); // Data low
-    Serial.println(b);
+    mp3recv += sbyte2hex(b);
     value += b;
     b = Serial3->read(); // Checksum high
+    mp3recv += sbyte2hex(b);
     b = Serial3->read(); // Checksum low
+    mp3recv += sbyte2hex(b);
     b = Serial3->read();
+    mp3recv += sbyte2hex(b);
     if (b != 0xEF)
     {
         Serial.println("No FE");
         return false;
+    }
+    if (_showDebugMessages)
+    {
+        Serial.print("Received: ");
+        Serial.println(mp3recv);
     }
     return true;
 }
