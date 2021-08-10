@@ -25,7 +25,7 @@ const int sounds_per_bank[] = {
     25
 };
 
-SerialMP3Player player(2, 4); // RX, TX
+SerialMP3Player player(4, 2); // RX, TX
 
 // Index of sound to play. -1 means random.
 int sound_index = -1;
@@ -101,13 +101,14 @@ void setup()
         pinMode(pin, OUTPUT);
 
     player.begin(9600);
+    //player.showDebug(true);
     delay(500);
     player.sendCommand(CMD_SEL_DEV, 0, 2);   //select sd-card
     delay(500);
-
+    
     player.setVol(30);
 	delay(20);
-    
+
     Wire.begin(SLAVE_ADDRESS);
     Wire.onReceive(receiveData);
     Wire.onRequest(sendData);
