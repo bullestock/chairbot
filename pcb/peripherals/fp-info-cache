@@ -1,4 +1,4 @@
-3589221348593606
+3589221359736706
 Capacitor_SMD
 CP_Elec_3x5.3
 SMT capacitor, aluminium electrolytic, 3x5.3, Cornell Dubilier Electronics 
@@ -8267,48 +8267,6 @@ Surface mounted pin header SMD 2x40 2.54mm double row
 80
 80
 Diode_SMD
-Diode_Bridge_Diotec_ABS
-SMD diode bridge ABS (Diotec), see https://diotec.com/tl_files/diotec/files/pdf/datasheets/abs2.pdf
-ABS MBLS
-0
-4
-4
-Diode_SMD
-Diode_Bridge_Diotec_MicroDil_3.0x3.0x1.8mm
-SMD package Diotec Diotec MicroDil, body 3.0x3.0x1.8mm (e.g. diode bridge), see https://diotec.com/tl_files/diotec/files/pdf/datasheets/mys40.pdf
-Diotec MicroDil diode bridge
-0
-4
-4
-Diode_SMD
-Diode_Bridge_Diotec_SO-DIL-Slim
-SMD diode bridge Diotec SO-DIL Slim, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/b40fs.pdf
-DFS SO-DIL Slim
-0
-4
-4
-Diode_SMD
-Diode_Bridge_Vishay_DFS
-SMD diode bridge DFS, see http://www.vishay.com/docs/88854/padlayouts.pdf
-DFS
-0
-4
-4
-Diode_SMD
-Diode_Bridge_Vishay_DFSFlat
-SMD diode bridge Low Profile DFS "Flat", see http://www.vishay.com/docs/88874/dfl15005.pdf
-DFS
-0
-4
-4
-Diode_SMD
-Diode_Bridge_Vishay_MBLS
-SMD diode bridge MBLS, see http://www.vishay.com/docs/89959/mbl104s.pdf http://www.vishay.com/docs/88854/padlayouts.pdf
-DFS
-0
-4
-4
-Diode_SMD
 D_0201_0603Metric
 Diode SMD 0201 (0603 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: https://www.vishay.com/docs/20052/crcw0201e3.pdf), generated with kicad-footprint-generator
 diode
@@ -8813,145 +8771,54 @@ TUMD2
 2
 2
 Diode_SMD
+Diode_Bridge_Diotec_ABS
+SMD diode bridge ABS (Diotec), see https://diotec.com/tl_files/diotec/files/pdf/datasheets/abs2.pdf
+ABS MBLS
+0
+4
+4
+Diode_SMD
+Diode_Bridge_Diotec_MicroDil_3.0x3.0x1.8mm
+SMD package Diotec Diotec MicroDil, body 3.0x3.0x1.8mm (e.g. diode bridge), see https://diotec.com/tl_files/diotec/files/pdf/datasheets/mys40.pdf
+Diotec MicroDil diode bridge
+0
+4
+4
+Diode_SMD
+Diode_Bridge_Diotec_SO-DIL-Slim
+SMD diode bridge Diotec SO-DIL Slim, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/b40fs.pdf
+DFS SO-DIL Slim
+0
+4
+4
+Diode_SMD
+Diode_Bridge_Vishay_DFS
+SMD diode bridge DFS, see http://www.vishay.com/docs/88854/padlayouts.pdf
+DFS
+0
+4
+4
+Diode_SMD
+Diode_Bridge_Vishay_DFSFlat
+SMD diode bridge Low Profile DFS "Flat", see http://www.vishay.com/docs/88874/dfl15005.pdf
+DFS
+0
+4
+4
+Diode_SMD
+Diode_Bridge_Vishay_MBLS
+SMD diode bridge MBLS, see http://www.vishay.com/docs/89959/mbl104s.pdf http://www.vishay.com/docs/88854/padlayouts.pdf
+DFS
+0
+4
+4
+Diode_SMD
 Littelfuse_PolyZen-LS
 http://m.littelfuse.com/~/media/electronics/datasheets/polyzen_devices/littelfuse_polyzen_standard_polyzen_catalog_datasheet.pdf.pdf
 Diode Polymer Protected Zener Diode Littelfuse LS
 0
 3
 3
-Diode_THT
-Diode_Bridge_15.1x15.1x6.3mm_P10.9mm
-Single phase bridge rectifier case 15.1x15.1mm, pitch 10.9mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/pb1000.pdf
-Diode Bridge PB10xxS
-0
-4
-4
-Diode_THT
-Diode_Bridge_15.2x15.2x6.3mm_P10.9mm
-Single phase bridge rectifier case 15.2x15.2mm, pitch 10.9mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/kbpc600.pdf
-Diode Bridge KBPC6xx
-0
-4
-4
-Diode_THT
-Diode_Bridge_15.7x15.7x6.3mm_P10.8mm
-Single phase bridge rectifier case 15.7x15.7
-Diode Bridge
-0
-4
-4
-Diode_THT
-Diode_Bridge_16.7x16.7x6.3mm_P10.8mm
-Single phase bridge rectifier case 16.7x16.7
-Diode Bridge
-0
-4
-4
-Diode_THT
-Diode_Bridge_19.0x3.5x10.0mm_P5.0mm
-Vishay GBU rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88606/g3sba20.pdf
-Vishay GBU rectifier diode bridge
-0
-4
-4
-Diode_THT
-Diode_Bridge_19.0x19.0x6.8mm_P12.7mm
-Single phase bridge rectifier case 19x19mm, pitch 12.7mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/pb1000.pdf
-Diode Bridge PB10xx
-0
-4
-4
-Diode_THT
-Diode_Bridge_28.6x28.6x7.3mm_P18.0mm_P11.6mm
-Single phase bridge rectifier case 28.6x28.6mm, pitch 18.0mm & 11.6mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/kbpc1500fw.pdf
-Diode Bridge KBPCxxxxWP
-0
-4
-4
-Diode_THT
-Diode_Bridge_32.0x5.6x17.0mm_P10.0mm_P7.5mm
-Diotec 32x5.6x17mm rectifier package, 7.5mm/10mm pitch, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/b40c3700.pdf
-Diotec rectifier diode bridge
-0
-4
-4
-Diode_THT
-Diode_Bridge_DIP-4_W5.08mm_P2.54mm
-4-lead dip package for diode bridges, row spacing 5.08mm, pin-spacing 2.54mm, see http://www.vishay.com/docs/88898/b2m.pdf
-DIL DIP PDIP 5.08mm 2.54
-0
-4
-4
-Diode_THT
-Diode_Bridge_DIP-4_W7.62mm_P5.08mm
-4-lead dip package for diode bridges, row spacing 7.62 mm (300 mils), see http://cdn-reichelt.de/documents/datenblatt/A400/HDBL101G_20SERIES-TSC.pdf
-DIL DIP PDIP 5.08mm 7.62mm 300mil
-0
-4
-4
-Diode_THT
-Diode_Bridge_Round_D8.9mm
-4-lead round diode bridge package, diameter 8.9mm, pin pitch 5.08mm, see http://cdn-reichelt.de/documents/datenblatt/A400/W005M-W10M_SEP.PDF
-diode bridge 8.9mm 8.85mm WOB pitch 5.08mm
-0
-4
-4
-Diode_THT
-Diode_Bridge_Round_D9.0mm
-4-lead round diode bridge package, diameter 9.0mm, pin pitch 5.0mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/b40r.pdf
-diode bridge 9.0mm 8.85mm WOB pitch 5.0mm
-0
-4
-4
-Diode_THT
-Diode_Bridge_Round_D9.8mm
-4-lead round diode bridge package, diameter 9.8mm, pin pitch 5.08mm, see http://www.vishay.com/docs/88769/woo5g.pdf
-diode bridge 9.8mm WOG pitch 5.08mm
-0
-4
-4
-Diode_THT
-Diode_Bridge_Vishay_GBL
-Vishay GBL rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88609/gbl005.pdf
-Vishay GBL rectifier diode bridge
-0
-4
-4
-Diode_THT
-Diode_Bridge_Vishay_GBU
-Vishay GBU rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88606/g3sba20.pdf
-Vishay GBU rectifier diode bridge
-0
-4
-4
-Diode_THT
-Diode_Bridge_Vishay_KBL
-Vishay KBL rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88655/kbl005.pdf
-Vishay KBL rectifier diode bridge
-0
-4
-4
-Diode_THT
-Diode_Bridge_Vishay_KBPC1
-Single phase bridge rectifier case KBPC1, see http://www.vishay.com/docs/93585/vs-kbpc1series.pdf
-Diode Bridge
-0
-4
-4
-Diode_THT
-Diode_Bridge_Vishay_KBPC6
-Single phase bridge rectifier case KBPC6, see http://www.vishay.com/docs/93585/vs-kbpc1series.pdf
-Diode Bridge
-0
-4
-4
-Diode_THT
-Diode_Bridge_Vishay_KBU
-Vishay KBU rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88656/kbu4.pdf
-Vishay KBU rectifier diode bridge
-0
-4
-4
 Diode_THT
 D_5KPW_P7.62mm_Vertical_AnodeUp
 Diode, 5KPW series, Axial, Vertical, pin pitch=7.62mm, , length*diameter=9*8mm^2, , http://www.diodes.com/_files/packages/8686949.gif
@@ -9533,6 +9400,139 @@ Diode T-1 series Axial Horizontal pin pitch 12.7mm  length 3.2mm diameter 2.6mm
 0
 2
 2
+Diode_THT
+Diode_Bridge_15.1x15.1x6.3mm_P10.9mm
+Single phase bridge rectifier case 15.1x15.1mm, pitch 10.9mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/pb1000.pdf
+Diode Bridge PB10xxS
+0
+4
+4
+Diode_THT
+Diode_Bridge_15.2x15.2x6.3mm_P10.9mm
+Single phase bridge rectifier case 15.2x15.2mm, pitch 10.9mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/kbpc600.pdf
+Diode Bridge KBPC6xx
+0
+4
+4
+Diode_THT
+Diode_Bridge_15.7x15.7x6.3mm_P10.8mm
+Single phase bridge rectifier case 15.7x15.7
+Diode Bridge
+0
+4
+4
+Diode_THT
+Diode_Bridge_16.7x16.7x6.3mm_P10.8mm
+Single phase bridge rectifier case 16.7x16.7
+Diode Bridge
+0
+4
+4
+Diode_THT
+Diode_Bridge_19.0x3.5x10.0mm_P5.0mm
+Vishay GBU rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88606/g3sba20.pdf
+Vishay GBU rectifier diode bridge
+0
+4
+4
+Diode_THT
+Diode_Bridge_19.0x19.0x6.8mm_P12.7mm
+Single phase bridge rectifier case 19x19mm, pitch 12.7mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/pb1000.pdf
+Diode Bridge PB10xx
+0
+4
+4
+Diode_THT
+Diode_Bridge_28.6x28.6x7.3mm_P18.0mm_P11.6mm
+Single phase bridge rectifier case 28.6x28.6mm, pitch 18.0mm & 11.6mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/kbpc1500fw.pdf
+Diode Bridge KBPCxxxxWP
+0
+4
+4
+Diode_THT
+Diode_Bridge_32.0x5.6x17.0mm_P10.0mm_P7.5mm
+Diotec 32x5.6x17mm rectifier package, 7.5mm/10mm pitch, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/b40c3700.pdf
+Diotec rectifier diode bridge
+0
+4
+4
+Diode_THT
+Diode_Bridge_DIP-4_W5.08mm_P2.54mm
+4-lead dip package for diode bridges, row spacing 5.08mm, pin-spacing 2.54mm, see http://www.vishay.com/docs/88898/b2m.pdf
+DIL DIP PDIP 5.08mm 2.54
+0
+4
+4
+Diode_THT
+Diode_Bridge_DIP-4_W7.62mm_P5.08mm
+4-lead dip package for diode bridges, row spacing 7.62 mm (300 mils), see http://cdn-reichelt.de/documents/datenblatt/A400/HDBL101G_20SERIES-TSC.pdf
+DIL DIP PDIP 5.08mm 7.62mm 300mil
+0
+4
+4
+Diode_THT
+Diode_Bridge_Round_D8.9mm
+4-lead round diode bridge package, diameter 8.9mm, pin pitch 5.08mm, see http://cdn-reichelt.de/documents/datenblatt/A400/W005M-W10M_SEP.PDF
+diode bridge 8.9mm 8.85mm WOB pitch 5.08mm
+0
+4
+4
+Diode_THT
+Diode_Bridge_Round_D9.0mm
+4-lead round diode bridge package, diameter 9.0mm, pin pitch 5.0mm, see https://diotec.com/tl_files/diotec/files/pdf/datasheets/b40r.pdf
+diode bridge 9.0mm 8.85mm WOB pitch 5.0mm
+0
+4
+4
+Diode_THT
+Diode_Bridge_Round_D9.8mm
+4-lead round diode bridge package, diameter 9.8mm, pin pitch 5.08mm, see http://www.vishay.com/docs/88769/woo5g.pdf
+diode bridge 9.8mm WOG pitch 5.08mm
+0
+4
+4
+Diode_THT
+Diode_Bridge_Vishay_GBL
+Vishay GBL rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88609/gbl005.pdf
+Vishay GBL rectifier diode bridge
+0
+4
+4
+Diode_THT
+Diode_Bridge_Vishay_GBU
+Vishay GBU rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88606/g3sba20.pdf
+Vishay GBU rectifier diode bridge
+0
+4
+4
+Diode_THT
+Diode_Bridge_Vishay_KBL
+Vishay KBL rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88655/kbl005.pdf
+Vishay KBL rectifier diode bridge
+0
+4
+4
+Diode_THT
+Diode_Bridge_Vishay_KBPC1
+Single phase bridge rectifier case KBPC1, see http://www.vishay.com/docs/93585/vs-kbpc1series.pdf
+Diode Bridge
+0
+4
+4
+Diode_THT
+Diode_Bridge_Vishay_KBPC6
+Single phase bridge rectifier case KBPC6, see http://www.vishay.com/docs/93585/vs-kbpc1series.pdf
+Diode Bridge
+0
+4
+4
+Diode_THT
+Diode_Bridge_Vishay_KBU
+Vishay KBU rectifier package, 5.08mm pitch, see http://www.vishay.com/docs/88656/kbu4.pdf
+Vishay KBU rectifier diode bridge
+0
+4
+4
 Jumper
 SolderJumper-2_P1.3mm_Bridged2Bar_Pad1.0x1.5mm
 SMD Solder Jumper, 1x1.5mm Pads, 0.3mm gap, bridged with 2 copper strips
@@ -12187,13 +12187,6 @@ LSOP 2.54mm 300mil
 8
 8
 Package_DIP
-PowerIntegrations_eDIP-12B
-Power Integrations eDIP-12B, see https://www.power.com/sites/default/files/product-docs/linkswitch-pl_family_datasheet.pdf
-THT DIP DIL PDIP 2.54mm 7.62mm 300mil
-0
-11
-11
-Package_DIP
 PowerIntegrations_PDIP-8B
 Power Integrations variant of 8-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils), LongPads, see https://www.power.com/sites/default/files/product-docs/lnk520.pdf
 THT DIP DIL PDIP 2.54mm 7.62mm 300mil LongPads
@@ -12235,6 +12228,13 @@ SMD DIP DIL PDIP SMDIP 2.54mm 7.62mm 300mil
 0
 7
 7
+Package_DIP
+PowerIntegrations_eDIP-12B
+Power Integrations eDIP-12B, see https://www.power.com/sites/default/files/product-docs/linkswitch-pl_family_datasheet.pdf
+THT DIP DIL PDIP 2.54mm 7.62mm 300mil
+0
+11
+11
 Package_DIP
 SMDIP-4_W7.62mm
 4-lead surface-mounted (SMD) DIP package, row spacing 7.62 mm (300 mils)
@@ -12628,19 +12628,19 @@ THT DIP DIL PDIP 2.54mm 7.62mm 300mil Vishay HVMDIP HEXDIP
 4
 3
 Package_TO_SOT_SMD
-Analog_KS-4
-Analog Devices KS-4, http://www.analog.com/media/en/package-pcb-resources/package/pkg_pdf/sc70ks/ks_4.pdf
-Analog Devices KS-4 (like EIAJ SC-82)
-0
-4
-4
-Package_TO_SOT_SMD
 ATPAK-2
 ATPAK SMD package, http://www.onsemi.com/pub/Collateral/ENA2192-D.PDF
 ATPAK 
 0
 7
 3
+Package_TO_SOT_SMD
+Analog_KS-4
+Analog Devices KS-4, http://www.analog.com/media/en/package-pcb-resources/package/pkg_pdf/sc70ks/ks_4.pdf
+Analog Devices KS-4 (like EIAJ SC-82)
+0
+4
+4
 Package_TO_SOT_SMD
 Diodes_SOT-553
 Diodes SOT-553, https://www.diodes.com/assets/Package-Files/SOT553.pdf
@@ -12719,6 +12719,13 @@ LFPAK56 SOT669 Thermical Vias Power-SO8
 30
 5
 Package_TO_SOT_SMD
+PQFN_8x8
+Low profile 8x8mm PQFN package e.g. https://www.fairchildsemi.com/datasheets/FD/FDMT80080DC.pdf
+pqfn vdfn mosfet
+0
+16
+3
+Package_TO_SOT_SMD
 PowerMacro_M234_NoHole
 TO-50-4 Power Macro Package Style M234
 TO-50-4 Power Macro Package Style M234
@@ -12732,13 +12739,6 @@ TO-50-4 Power Macro Package Style M234
 0
 4
 4
-Package_TO_SOT_SMD
-PQFN_8x8
-Low profile 8x8mm PQFN package e.g. https://www.fairchildsemi.com/datasheets/FD/FDMT80080DC.pdf
-pqfn vdfn mosfet
-0
-16
-3
 Package_TO_SOT_SMD
 Rohm_HRP7
 Rohm HRP7 SMD package, http://rohmfs.rohm.com/en/techdata_basic/ic/package/hrp7_1-e.pdf, http://rohmfs.rohm.com/en/products/databook/datasheet/ic/motor/dc/bd621x-e.pdf
@@ -13160,20 +13160,6 @@ tdson
 13
 5
 Package_TO_SOT_SMD
-Texas_DRT-3
-Texas Instrument DRT-3 1x0.8mm Pitch 0.7mm http://www.ti.com/lit/ds/symlink/tpd2eusb30.pdf
-DRT-3 1x0.8mm Pitch 0.7mm
-0
-3
-3
-Package_TO_SOT_SMD
-Texas_R-PDSO-G6
-R-PDSO-G6, http://www.ti.com/lit/ds/slis144b/slis144b.pdf
-R-PDSO-G6 SC-70-6
-0
-6
-6
-Package_TO_SOT_SMD
 TO-50-3_LongPad-NoHole_Housing
 TO-50-3 Macro T Package Style M236
 TO-50-3 Macro T Package Style M236
@@ -13447,6 +13433,27 @@ TSOT-23 Hand-soldering
 3
 3
 Package_TO_SOT_SMD
+Texas_DRT-3
+Texas Instrument DRT-3 1x0.8mm Pitch 0.7mm http://www.ti.com/lit/ds/symlink/tpd2eusb30.pdf
+DRT-3 1x0.8mm Pitch 0.7mm
+0
+3
+3
+Package_TO_SOT_SMD
+Texas_R-PDSO-G6
+R-PDSO-G6, http://www.ti.com/lit/ds/slis144b/slis144b.pdf
+R-PDSO-G6 SC-70-6
+0
+6
+6
+Package_TO_SOT_SMD
+VSOF5
+VSOF5
+VSOF5
+0
+5
+5
+Package_TO_SOT_SMD
 Vishay_PowerPAK_SC70-6L_Dual
 Vishay PowerPAK SC70 dual transistor package http://www.vishay.com/docs/70487/70487.pdf
 powerpak sc70 sc-70 dual
@@ -13460,13 +13467,6 @@ powerpak sc70 sc-70
 0
 10
 3
-Package_TO_SOT_SMD
-VSOF5
-VSOF5
-VSOF5
-0
-5
-5
 Package_TO_SOT_THT
 Fairchild_TO-220F-6L
 Fairchild TO-220F-6L, http://www.mouser.com/ds/2/149/FSL136MRT-113334.pdf
@@ -15113,13 +15113,6 @@ TO-264-5 Vertical RM 3.81mm
 5
 5
 Peripherals
-buck-converter
-
-
-0
-4
-4
-Peripherals
 DFPlayer
 
 
@@ -15135,6 +15128,13 @@ DFPlayer_V2
 16
 Peripherals
 MP1584-module
+
+
+0
+4
+4
+Peripherals
+buck-converter
 
 
 0
