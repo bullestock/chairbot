@@ -16,22 +16,10 @@ const int FLASH_RATE = 100; // Flash half period in ms
 
 bool debug_on = true;
 
-const int sounds_per_bank[] = {
-    // 01/001-081
-    81,
-    // 01/082-084
-    3,
-    // 01/085-109
-    25
-};
-
 SerialMP3Player player(4, 2); // RX, TX
 
-// Index of sound to play. -1 means random.
-int sound_index = -1;
-
-// Bank of sound to play. -1 means random.
-int sound_bank = -1;
+// Index of sound to play (1-255)
+int sound_index = 0;
 
 // Flag to start playing sound
 bool do_play = false;
@@ -42,31 +30,17 @@ void receiveData(int byteCount)
     --byteCount;
     switch (c)
     {
-    case 0:
-        // Play random sound
-        sound_index = -1;
-        do_play = true;
-        break;
-
     case 1:
-        // Play specific sound
+        // Play sound
         sound_index = Wire.read();
         --byteCount;
         do_play = true;
         break;
 
-    case 2:
-        // Play random sound from specific bank
-        sound_bank = Wire.read();
-        sound_index = -1;
-        do_play = true;
-        break;
-
-    case 3:
-        // Play specific sound from specific bank
-        sound_bank = Wire.read();
-        sound_index = Wire.read();
-        do_play = true;
+    case 4:
+        // Set volume
+        player.setVol(Wire.read() & 31);
+        --byteCount;
         break;
 
     case 10:
@@ -95,8 +69,6 @@ void setup()
     Serial.begin(115200);
     Serial.println("Peripherals v 0.2");
 
-    //TCCR0B = TCCR0B & B11111000 | B00000001;
-
     for (auto pin : PWM_PINS)
         pinMode(pin, OUTPUT);
 
@@ -106,7 +78,7 @@ void setup()
     player.sendCommand(CMD_SEL_DEV, 0, 2);   //select sd-card
     delay(500);
     
-    player.setVol(30);
+    player.setVol(10);
 	delay(20);
 
     Wire.begin(SLAVE_ADDRESS);
@@ -123,7 +95,7 @@ enum State {
 unsigned long wait_start = 0;
 unsigned long play_start = 0;
 
-int get_int(const char* buffer, int len, int& next)
+int get_int(const char* buffer, int len, int* next = nullptr)
 {
     int index = 0;
     while (buffer[index] && isspace(buffer[index]) && len)
@@ -145,7 +117,8 @@ int get_int(const char* buffer, int len, int& next)
     char intbuf[BS];
     memcpy(intbuf, buffer, index);
     intbuf[index] = 0;
-    next = index+1;
+    if (next)
+        *next = index+1;
     return atoi(intbuf);
 }
 
@@ -160,40 +133,23 @@ void process(const char* buffer)
         // P<n>: Play sound <n>
     case 'P':
     case 'p':
-        {
-            int index;
-            const int n = get_int(buffer+1, BUF_SIZE-1, index);
-            int total = 0;
-            for (int i = 0; i < sizeof(sounds_per_bank)/sizeof(sounds_per_bank[0]); ++i)
-                total += sounds_per_bank[i];
-            if (n < 0 || n >= total)
-            {
-                Serial.println("ERROR: Invalid parameters to 'P'");
-                return;
-            }
-            sound_index = n;
-            do_play = true;
-            Serial.println("OK");
-        }
-        break;
-
-        // R: Play random sound
-    case 'R':
-    case 'r':
-        sound_index = -1;
+        sound_index = get_int(buffer+1, BUF_SIZE-1);
         do_play = true;
         Serial.println("OK");
         break;
 
-        // R: Play random sound from bank <n>
-    case 'B':
-    case 'b':
+        // V: Set volume
+    case 'v':
+    case 'V':
         {
-            int index;
-            const int n = get_int(buffer+1, BUF_SIZE-1, index); 
-            sound_index = -1;
-            sound_bank = n;
-            do_play = true;
+            const int vol = get_int(buffer+1, BUF_SIZE-1);
+            if (vol < 0 || vol > 30)
+            {
+                Serial.println("ERROR: Invalid volume");
+                return;
+            }
+            player.setVol(vol);
+            delay(20);
             Serial.println("OK");
         }
         break;
@@ -203,13 +159,13 @@ void process(const char* buffer)
     case 'O':
         {
             int index;
-            const int port = get_int(buffer+1, BUF_SIZE-1, index);
+            const int port = get_int(buffer+1, BUF_SIZE-1, &index);
             if (port < 0 || port > (int) (sizeof(PWM_PINS)/sizeof(PWM_PINS[0])))
             {
                 Serial.println("ERROR: Invalid port parameter to 'O'");
                 return;
             }
-            const int value = get_int(buffer+index, BUF_SIZE-1, index);
+            const int value = get_int(buffer+index, BUF_SIZE-1, &index);
             if (value < 0 || value > 255)
             {
                 Serial.println("ERROR: Invalid value parameter to 'O'");
@@ -240,40 +196,14 @@ void loop()
     case STATE_IDLE:
         if (do_play)
         {
-            int num = sound_index;
             do_play = false;
             digitalWrite(LED_PIN, HIGH);
-            int total = 0;
-            for (int i = 0; i < sizeof(sounds_per_bank)/sizeof(sounds_per_bank[0]); ++i)
-                total += sounds_per_bank[i];
-            if (num < 0)
-            {
-                if (sound_bank >= 0)
-                {
-                    num = 1;
-                    for (int i = 0; i < sound_bank; ++i)
-                        num += sounds_per_bank[i];
-                    num += random(sounds_per_bank[sound_bank]+1);
-                    Serial.print("Bank ");
-                    Serial.print(sound_bank);
-                    Serial.print(" random: ");
-                    Serial.println(num);
-                }
-                else
-                    num = random(total);
-            }
-            else if (num >= total)
-            {
-                Serial.println("Invalid sound index");
-                break;
-            }
             if (debug_on)
             {
                 Serial.print("Play ");
-                Serial.println(num);
+                Serial.println(sound_index);
             }
-            sound_bank = -1;
-            player.play(num);
+            player.play(sound_index);
             play_start = millis();
             state = STATE_PLAYING;
         }
