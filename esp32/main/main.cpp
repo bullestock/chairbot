@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <chrono>
+#include <random>
 #include <utility>
 
 #include <freertos/FreeRTOS.h>
@@ -54,9 +56,41 @@ bool is_toggle_down(const ForwardAirFrame& frame, int sw)
     return frame.toggles & (2 << 2*sw);
 }
 
+const int NOF_SOUND_BANKS = 3;
+int nof_sounds_per_bank[NOF_SOUND_BANKS] = {
+    50,
+    50,
+    50
+};
+
+void play_random_sound(int bank)
+{
+    if (bank >= NOF_SOUND_BANKS)
+        return;
+    int lower_bound = 0;
+    int nof_sounds = nof_sounds_per_bank[bank];
+    int index = 0;
+    int count = bank;
+    while (count > 0)
+    {
+        lower_bound += nof_sounds_per_bank[index];
+        ++index;
+        --count;
+    }
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
+    std::uniform_int_distribution<int> distribution(lower_bound, lower_bound + nof_sounds - 1);
+    int sound = distribution(generator);
+    printf("Bank %d: [%d %d] -> Sound %d\n", bank,
+           lower_bound, lower_bound + nof_sounds - 1,
+           sound);
+    peripherals_play_sound(sound);
+}
+
 const int pwm_lights = 0;
 bool is_flashing = false;
 int flash_count = 0;
+int volume = 10;
 
 void main_loop(void* pvParameters)
 {
@@ -199,6 +233,7 @@ void main_loop(void* pvParameters)
             }
             else
             {
+                // Toggle 3: Headlights
                 if (is_toggle_up(frame, 3))
                     peripherals_set_pwm(pwm_lights, 255);
                 else if (is_toggle_down(frame, 3))
@@ -206,14 +241,36 @@ void main_loop(void* pvParameters)
                 else
                     peripherals_set_pwm(pwm_lights, 64);
             }
+            // Toggle 0: Amp power
+            if (is_toggle_up(frame, 0))
+                peripherals_set_pwm(3, 255);
+            else
+                peripherals_set_pwm(3, 0);
+
+            // Push 0, 1, 2: Random sounds
             if (is_pushed(frame, 0))
-                peripherals_play_sound(0);
+                play_random_sound(0);
             else if (is_pushed(frame, 1))
-                peripherals_play_sound(1);
+                play_random_sound(1);
             else if (is_pushed(frame, 2))
-                peripherals_play_sound(2);
+                play_random_sound(2);
+            // Push 3: Flash headlights
             else if (is_pushed(frame, 3) && !is_flashing)
                 is_flashing = true;
+            // Push 4: Volume up
+            else if (is_pushed(frame, 4))
+            {
+                if (volume < 20)
+                    ++volume;
+                peripherals_set_volume(volume);
+            }
+            // Push 5: Volume down
+            else if (is_pushed(frame, 5))
+            {
+                if (volume > 1)
+                    --volume;
+                peripherals_set_volume(volume);
+            }
         }
         else
         {
