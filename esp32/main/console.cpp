@@ -193,6 +193,7 @@ int control_peripherals(int argc, char** argv)
     static const char* peripherals_usage =
        "Valid commands:\n"
        "sound <number>     Play sound\n"
+       "volume <number>    Set volume\n"
        "pwm <addr> <data>  Set PWM output\n";
 
     if (argc < 2)
@@ -210,6 +211,17 @@ int control_peripherals(int argc, char** argv)
         }
         int sound = atoi(argv[2]);
         peripherals_play_sound(sound);
+        return 0;
+    }
+    if (!strcmp(argv[1], "volume"))
+    {
+        if (argc < 3)
+        {
+            printf("Error: Missing volume level\n");
+            return -1;
+        }
+        int volume = atoi(argv[2]);
+        peripherals_set_volume(volume);
         return 0;
     }
     if (!strcmp(argv[1], "pwm"))

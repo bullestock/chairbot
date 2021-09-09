@@ -15,6 +15,7 @@ struct Queue_item
     enum class Type
     {
         Sound,
+        Volume,
         Pwm
     } type = Type::Sound;
     int param1 = 0;
@@ -58,31 +59,53 @@ void init_peripherals()
 
 const int i2c_address = 5;
 
-const int SOUND_RANDOM = 0x00;
-const int SOUND_BANK = 0x02;
-
-void peripherals_play_sound(int bank)
+void peripherals_play_sound(int sound)
 {
     Queue_item i;
     i.type = Queue_item::Type::Sound;
-    i.param1 = bank;
+    i.param1 = sound;
     xQueueSend(sound_queue, &i, 0);
 }
 
-void peripherals_do_play_sound(int bank)
+void peripherals_do_play_sound(int sound)
 {
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
-    const uint8_t data = (uint8_t) SOUND_BANK;
+    const uint8_t data = (uint8_t) sound;
+    i2c_master_write_byte(cmd, 1, 1); // 1: Play sound
     i2c_master_write_byte(cmd, data, 1);
-    i2c_master_write_byte(cmd, (uint8_t) bank, 1);
     i2c_master_stop(cmd);
     esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_RATE_MS);
     if (ret == ESP_ERR_TIMEOUT)
         printf("Error [sound]: Bus is busy\n");
     else if (ret != ESP_OK)
         printf("Error [sound]: Write failed: %d", ret);
+    i2c_cmd_link_delete(cmd);        
+}
+
+void peripherals_set_volume(int volume)
+{
+    Queue_item i;
+    i.type = Queue_item::Type::Volume;
+    i.param1 = volume;
+    xQueueSend(sound_queue, &i, 0);
+}
+
+void peripherals_do_set_volume(int volume)
+{
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
+    const uint8_t data = (uint8_t) volume;
+    i2c_master_write_byte(cmd, 4, 1); // 4: Set volume
+    i2c_master_write_byte(cmd, data, 1);
+    i2c_master_stop(cmd);
+    esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_RATE_MS);
+    if (ret == ESP_ERR_TIMEOUT)
+        printf("Error [volume]: Bus is busy\n");
+    else if (ret != ESP_OK)
+        printf("Error [volume]: Write failed: %d", ret);
     i2c_cmd_link_delete(cmd);        
 }
 
@@ -100,7 +123,7 @@ void peripherals_do_set_pwm(int chan, int value)
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
-    i2c_master_write_byte(cmd, 10 + chan, 1);
+    i2c_master_write_byte(cmd, 10 + chan, 1); // 10-13: Set PWM output
     i2c_master_write_byte(cmd, (uint8_t) value, 1);
     i2c_master_stop(cmd);
     esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_RATE_MS);
@@ -124,6 +147,10 @@ void sound_loop(void*)
             {
             case Queue_item::Type::Sound:
                 peripherals_do_play_sound(i.param1);
+                break;
+
+            case Queue_item::Type::Volume:
+                peripherals_do_set_volume(i.param1);
                 break;
 
             case Queue_item::Type::Pwm:
