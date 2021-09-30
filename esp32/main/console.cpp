@@ -16,6 +16,23 @@
 #include "linenoise/linenoise.h"
 #include "argtable3/argtable3.h"
 
+int led_test(int argc, char** argv)
+{
+    int count = 10;
+    if (argc > 1)
+        count = atoi(argv[1]);
+
+    printf("Running LED test (%d)\n", count);
+    for (int j = 0; j < count; ++j)
+    {
+        gpio_set_level(GPIO_INTERNAL_LED, 1);
+        vTaskDelay(500/portTICK_PERIOD_MS);
+        gpio_set_level(GPIO_INTERNAL_LED, 0);
+        vTaskDelay(500/portTICK_PERIOD_MS);
+    }
+    return 0;
+}
+
 int motor_test(int argc, char** argv)
 {
     int count = 1;
@@ -268,7 +285,7 @@ void initialize_console()
     uart_config.data_bits = UART_DATA_8_BITS;
     uart_config.parity = UART_PARITY_DISABLE;
     uart_config.stop_bits = UART_STOP_BITS_1;
-    uart_config.use_ref_tick = true;
+    uart_config.source_clk = UART_SCLK_REF_TICK;
     ESP_ERROR_CHECK(uart_param_config((uart_port_t) CONFIG_ESP_CONSOLE_UART_NUM, &uart_config));
 
     /* Install UART driver for interrupt-driven reads and writes */
@@ -344,6 +361,15 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd4));
+
+    const esp_console_cmd_t cmd5 = {
+        .command = "ledtest",
+        .help = "Test the LED",
+        .hint = NULL,
+        .func = &led_test,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd5));
 
     /* Prompt to be printed before each line.
      * This can be customized, made dynamic, etc.
