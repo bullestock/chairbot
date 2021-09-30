@@ -58,9 +58,9 @@ bool is_toggle_down(const ForwardAirFrame& frame, int sw)
 
 const int NOF_SOUND_BANKS = 3;
 int nof_sounds_per_bank[NOF_SOUND_BANKS] = {
-    50,
-    50,
-    50
+    81,
+    3,
+    25
 };
 
 void play_random_sound(int bank)
@@ -129,6 +129,8 @@ void main_loop(void* pvParameters)
     assert(radio_init(radio));
     printf("Radio initialized\n");
 
+    bool is_zeroed = false;
+
 	while (1)
 	{
         ++loopcount;
@@ -186,7 +188,14 @@ void main_loop(void* pvParameters)
 
             radio.startListening();
 
-            frame.right_x = 1023 - frame.right_x; // hack!
+            frame.right_x = 1023 - frame.right_x; // flip direction
+
+            if (!is_zeroed)
+            {
+                is_zeroed = true;
+                right_x_zero = frame.right_x;
+                right_y_zero = frame.right_y;
+            }
 
 #define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
 #define TOGGLE(bit) (is_toggle_down(frame, bit) ? 'D' : (is_toggle_up(frame, bit) ? 'U' : '-'))
@@ -208,11 +217,12 @@ void main_loop(void* pvParameters)
             if (count > 10)
             {
                 count = 0;
+                // L <left stick> R <right stick> (<right mapped>) Pot <pots>
                 printf("L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c%c%c"
                        " Toggle %c%c%c%c"
                        " Power %d/%d Pivot %d\n",
                        (int) frame.left_x, (int) frame.left_y, (int) frame.right_x, (int) frame.right_y, rx, ry,
-                       int(frame.left_pot), int(frame.right_pot),
+                       (int) frame.left_pot, (int) frame.right_pot,
                        PUSH(0), PUSH(1), PUSH(2), PUSH(3), PUSH(4), PUSH(5),
                        TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
                        power_left, power_right, pivot);
@@ -288,12 +298,13 @@ void main_loop(void* pvParameters)
         const auto cur_time = xTaskGetTickCount();
         if (cur_time - last_led_flip > 3000/portTICK_PERIOD_MS)
         {
+            printf("flip %d\n", led_state);
             last_led_flip = cur_time;
             led_state = !led_state;
             gpio_set_level(GPIO_INTERNAL_LED, led_state);
         }
 
-        vTaskDelay(1/portTICK_PERIOD_MS);
+        vTaskDelay(10/portTICK_PERIOD_MS);
 
         //xTaskNotifyWait(0, 0, NULL, 1);
     }
