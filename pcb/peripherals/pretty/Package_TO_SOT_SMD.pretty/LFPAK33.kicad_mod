@@ -49,7 +49,7 @@
   (pad "" smd rect (at 1.575 -0.325) (size 0.75 0.3) (layers F.Paste))
   (pad "" smd rect (at 1.575 0.325) (size 0.75 0.3) (layers F.Paste))
   (pad "" smd rect (at 1.575 0.975) (size 0.75 0.3) (layers F.Paste))
-  (model ${KISYS3DMOD}/Package_TO_SOT_SMD.3dshapes/LFPAK33.wrl
+  (model ${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/LFPAK33.wrl
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))
