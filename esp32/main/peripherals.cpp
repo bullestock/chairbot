@@ -41,15 +41,15 @@ void init_peripherals()
     ESP_ERROR_CHECK(gpio_set_level(GPIO_ENABLE, 0));
 
     i2c_config_t conf;
-	conf.mode = I2C_MODE_MASTER;
-	conf.sda_io_num = GPIO_SDA;
-	conf.scl_io_num = GPIO_SCL;
-	conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-	conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-	conf.master.clk_speed = 100000;
-	ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_0, &conf));
+    conf.mode = I2C_MODE_MASTER;
+    conf.sda_io_num = GPIO_SDA;
+    conf.scl_io_num = GPIO_SCL;
+    conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+    conf.master.clk_speed = 100000;
+    ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_0, &conf));
 
-	ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
+    ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
 
         /*
     adc1_config_width(ADC_WIDTH_BIT_12);

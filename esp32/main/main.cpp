@@ -21,16 +21,7 @@
 
 #include "config.h"
 
-static const int pwm_freq = 200;
-
-namespace std
-{
-    template<typename T, typename ...Args>
-    std::unique_ptr<T> make_unique(Args&& ...args)
-    {
-        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-    }
-}
+static const unsigned pwm_freq = 200;
 
 std::unique_ptr<Motor> motor_a;
 std::unique_ptr<Motor> motor_b;
@@ -296,8 +287,8 @@ void app_main()
 {
     init_peripherals();
 
-    //!!motor_a = std::make_unique<Motor>(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, MCPWM0B, GPIO_PWM0A_OUT, GPIO_PWM0B_OUT, pwm_freq);
-    //!!motor_b = std::make_unique<Motor>(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM1A, MCPWM1B, GPIO_PWM1A_OUT, GPIO_PWM1B_OUT, pwm_freq);
+    motor_a = std::make_unique<Motor>(LEDC_TIMER_0, LEDC_CHANNEL_0, LEDC_CHANNEL_1, GPIO_PWM0A_OUT, GPIO_PWM0B_OUT, pwm_freq);
+    motor_b = std::make_unique<Motor>(LEDC_TIMER_1, LEDC_CHANNEL_2, LEDC_CHANNEL_3, GPIO_PWM1A_OUT, GPIO_PWM1B_OUT, pwm_freq);
 
     printf("Press a key to enter console\n");
     bool debug = false;

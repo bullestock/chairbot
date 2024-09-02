@@ -5,27 +5,51 @@
 #include <math.h>
 #include <sys/time.h>
 
-#include "soc/mcpwm_reg.h"
-#include "soc/mcpwm_struct.h"
+#include <driver/gpio.h>
+#include <driver/ledc.h>
 
-Motor::Motor(mcpwm_unit_t _unit,
-             mcpwm_timer_t _timer,
-             mcpwm_io_signals_t _pwm_a,
-             mcpwm_io_signals_t _pwm_b,
-             int _gpio_a, int _gpio_b,
-             int _frequency)
-    : unit(_unit),
-      timer(_timer)
+Motor::Motor(ledc_timer_t _timer,
+             ledc_channel_t _channel_a,
+             ledc_channel_t _channel_b,
+             gpio_num_t _pwm_a,
+             gpio_num_t _pwm_b,
+             unsigned _frequency)
+    : timer(_timer),
+      channel_a(_channel_a),
+      channel_b(_channel_b)
 {
-    mcpwm_gpio_init(unit, _pwm_a, _gpio_a);
-    mcpwm_gpio_init(unit, _pwm_b, _gpio_b);
-    mcpwm_config_t pwm_config;
-    pwm_config.frequency = _frequency;
-    pwm_config.cmpr_a = 0;
-    pwm_config.cmpr_b = 0;
-    pwm_config.counter_mode = MCPWM_UP_COUNTER;
-    pwm_config.duty_mode = MCPWM_DUTY_MODE_0;
-    mcpwm_init(unit, timer, &pwm_config);  
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << _pwm_a) | (1ULL << _pwm_b),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&io_conf);
+
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .duty_resolution = LEDC_TIMER_8_BIT,
+        .timer_num = _timer,
+        .freq_hz = _frequency,
+        .clk_cfg = LEDC_AUTO_CLK,
+    };
+    ledc_timer_config(&ledc_timer);
+
+    ledc_channel_config_t pwm_channel = {
+        .gpio_num = _pwm_a,
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = _channel_a,
+        .intr_type = LEDC_INTR_DISABLE,
+        .timer_sel = LEDC_TIMER_0,
+        .duty = 0,
+        .hpoint = 0,
+    };
+    ledc_channel_config(&pwm_channel);
+
+    pwm_channel.gpio_num = _pwm_b;
+    pwm_channel.channel = _channel_b;
+    ledc_channel_config(&pwm_channel);
 }
 
 // Max 10 percent per second = 0.0001 per millisecond
@@ -56,19 +80,17 @@ void Motor::set_speed(float speed)
     last_speed = speed;
     last_millis = millis;
 
-    if (speed >= 0)
+    ledc_channel_t c1 = channel_a;
+    ledc_channel_t c2 = channel_a;
+    if (speed < 0)
     {
-        mcpwm_set_signal_low(unit, timer, MCPWM_OPR_B);
-        mcpwm_set_duty(unit, timer, MCPWM_OPR_A, speed*100);
-        mcpwm_set_duty_type(unit, timer, MCPWM_OPR_A, MCPWM_DUTY_MODE_0);
-    }
-    else
-    {
+        std::swap(c1, c2);
         speed = -speed;
-        mcpwm_set_signal_low(unit, timer, MCPWM_OPR_A);
-        mcpwm_set_duty(unit, timer, MCPWM_OPR_B, speed*100);
-        mcpwm_set_duty_type(unit, timer, MCPWM_OPR_B, MCPWM_DUTY_MODE_0);
     }
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, c2, speed*100);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, c2);
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, c1, 0);
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, c1);
 }
 
 static const int max_range = 512;

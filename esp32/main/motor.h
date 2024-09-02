@@ -1,24 +1,26 @@
 #pragma once
 
-#include <driver/mcpwm.h>
+#include <driver/ledc.h>
 
 #include <memory>
 
 class Motor
 {
 public:
-    Motor(mcpwm_unit_t unit,
-          mcpwm_timer_t timer,
-          mcpwm_io_signals_t pwm_a, mcpwm_io_signals_t pwm_b,
-          int gpio_a, int gpio_b,
-          int _frequency = 1000);
+    Motor(ledc_timer_t _timer,
+          ledc_channel_t _channel_a,
+          ledc_channel_t _channel_b,
+          gpio_num_t _pwm_a,
+          gpio_num_t _pwm_b,
+          unsigned _frequency = 1000);
 
     // -1.0 to 1.0
     void set_speed(float speed);
 
 private:
-    mcpwm_unit_t unit = (mcpwm_unit_t) 0;
-    mcpwm_timer_t timer = (mcpwm_timer_t) 0;
+    ledc_timer_t timer = (ledc_timer_t) 0;
+    ledc_channel_t channel_a = (ledc_channel_t) 0;
+    ledc_channel_t channel_b = (ledc_channel_t) 0;
     float last_speed = 0.0;
     uint32_t last_millis = 0;
 };

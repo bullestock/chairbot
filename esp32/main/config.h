@@ -8,10 +8,10 @@ static const auto GPIO_INTERNAL_LED = GPIO_NUM_22;
 
 // Motor control
 
-static const int GPIO_PWM0A_OUT = 5;
-static const int GPIO_PWM0B_OUT = 18;
-static const int GPIO_PWM1A_OUT = 19;
-static const int GPIO_PWM1B_OUT = 23;
+static const auto GPIO_PWM0A_OUT = GPIO_NUM_5;
+static const auto GPIO_PWM0B_OUT = GPIO_NUM_18;
+static const auto GPIO_PWM1A_OUT = GPIO_NUM_19;
+static const auto GPIO_PWM1B_OUT = GPIO_NUM_23;
 static const auto GPIO_ENABLE = GPIO_NUM_25;
 
 // Battery voltage measurement
