@@ -8,14 +8,8 @@
 #include <freertos/queue.h>
 #include <freertos/task.h>
 
-#include <driver/adc.h>
-
-#include "esp_wifi.h"
 #include "sdkconfig.h"
-#include "esp_event.h"
 #include "nvs_flash.h"
-
-#include "RF24.h"
 
 #include "battery.h"
 #include "console.h"
@@ -109,7 +103,7 @@ void main_loop(void* pvParameters)
     int right_y_zero = 512;
     
     auto last_packet = xTaskGetTickCount();
-    printf("Start at %d\n", last_packet);
+    printf("Start at %lu\n", last_packet);
 
     const int NOF_BATTERY_READINGS = 100;
     float battery_readings[NOF_BATTERY_READINGS];
@@ -125,34 +119,23 @@ void main_loop(void* pvParameters)
     auto last_led_flip = xTaskGetTickCount();
     bool is_halted = false;
 
-    RF24 radio(SPI_CE, SPI_CS);
-    assert(radio_init(radio));
+    NRF24_t radio;
+    assert(init_radio(radio));
     printf("Radio initialized\n");
 
     bool is_zeroed = false;
-
-	while (1)
-	{
+    
+    while (1)
+    {
         ++loopcount;
         if (loopcount >= 100)
             loopcount = 0;
 
-        // if there is data ready
-        if (radio.available())
+        ForwardAirFrame frame;
+        Nrf24_getData(&radio, reinterpret_cast<uint8_t*>(&frame));
+        if (frame.magic == ForwardAirFrame::MAGIC_VALUE)
         {
-            //printf("Radio has data\n");
             last_packet = xTaskGetTickCount();
-
-            ForwardAirFrame frame;
-            // Fetch the payload, and see if this was the last one.
-            while (radio.available())
-                radio.read(&frame, sizeof(frame));
-
-            if (frame.magic != ForwardAirFrame::MAGIC_VALUE)
-            {
-                printf("Bad magic value; expected %x, got %x\n", ForwardAirFrame::MAGIC_VALUE, frame.magic);
-                continue;
-            }
 
             if (!check_crc(frame))
             {
@@ -161,7 +144,6 @@ void main_loop(void* pvParameters)
             }
 
             // Echo back tick value so we can compute round trip time
-            radio.stopListening();
 
             ReturnAirFrame ret_frame;
             ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
@@ -184,11 +166,9 @@ void main_loop(void* pvParameters)
             ret_frame.battery = n ? sum/n*1000 : 0;
 #endif
             set_crc(ret_frame);
-            radio.write(&ret_frame, sizeof(ret_frame));
+            //!!radio.write(&ret_frame, sizeof(ret_frame));
 
-            radio.startListening();
-
-            frame.right_x = 1023 - frame.right_x; // flip direction
+            //!!radio.startListening();
 
             if (!is_zeroed)
             {
@@ -289,7 +269,7 @@ void main_loop(void* pvParameters)
             if ((cur_time - last_packet > max_radio_idle_time) && !is_halted)
             {
                 is_halted = true;
-                printf("HALT: Last packet was seen at %d\n", last_packet);
+                printf("HALT: Last packet was seen at %lu\n", last_packet);
                 set_motors(0, 0);
             }
         }
@@ -305,23 +285,19 @@ void main_loop(void* pvParameters)
         }
 
         vTaskDelay(10/portTICK_PERIOD_MS);
-
-        //xTaskNotifyWait(0, 0, NULL, 1);
     }
 }
 
 static TaskHandle_t xMainTask = nullptr;
 static TaskHandle_t xSoundTask = nullptr;
 
-static const uint8_t pipes[][6] = {"1BULL","2BULL"};
-
 extern "C"
 void app_main()
 {
     init_peripherals();
 
-    motor_a = std::make_unique<Motor>(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, MCPWM0B, GPIO_PWM0A_OUT, GPIO_PWM0B_OUT, pwm_freq);
-    motor_b = std::make_unique<Motor>(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM1A, MCPWM1B, GPIO_PWM1A_OUT, GPIO_PWM1B_OUT, pwm_freq);
+    //!!motor_a = std::make_unique<Motor>(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, MCPWM0B, GPIO_PWM0A_OUT, GPIO_PWM0B_OUT, pwm_freq);
+    //!!motor_b = std::make_unique<Motor>(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM1A, MCPWM1B, GPIO_PWM1A_OUT, GPIO_PWM1B_OUT, pwm_freq);
 
     printf("Press a key to enter console\n");
     bool debug = false;
@@ -343,5 +319,5 @@ void app_main()
 }
 
 // Local Variables:
-// compile-command: "(cd ..; make)"
+// compile-command: "(cd ..; idf.py build)"
 // End:

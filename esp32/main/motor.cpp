@@ -50,7 +50,8 @@ void Motor::set_speed(float speed)
             clamped = true;
         }
         if (clamped)
-            printf("Delta %f T %d ms, clamp to %f\n", initial_delta, elapsed, speed);
+            printf("Delta %f T %d ms, clamp to %f\n",
+                   initial_delta, (int) elapsed, speed);
     }
     last_speed = speed;
     last_millis = millis;

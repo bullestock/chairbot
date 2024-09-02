@@ -178,7 +178,7 @@ int i2c_cmd(int argc, char** argv)
         i2c_master_write_byte(cmd, address << 1 | I2C_MASTER_WRITE, 1);
         i2c_master_write_byte(cmd, data, 1);
         i2c_master_stop(cmd);
-        esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_RATE_MS);
+        esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS);
         if (ret == ESP_OK)
             printf("I2C write %d to %d OK\n", data, address);
         else if (ret == ESP_ERR_TIMEOUT)

@@ -1,5 +1,6 @@
 #pragma once
 
-class RF24;
+#include "mirf.h"
 
-bool radio_init(RF24& radio);
+bool init_radio(NRF24_t& dev);
+
