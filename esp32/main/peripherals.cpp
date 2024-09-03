@@ -1,5 +1,7 @@
 #include "peripherals.h"
 
+#include <esp_adc/adc_oneshot.h>
+#include <esp_adc/adc_cali_scheme.h>
 #include <driver/i2c.h>
 #include <freertos/queue.h>
 
@@ -7,6 +9,10 @@
 #include "config.h"
 
 #define DEFAULT_VREF    1100        //Use adc2_vref_to_gpio() to obtain a better estimate
+
+adc_oneshot_unit_handle_t adc_handle = 0;
+adc_cali_handle_t adc_cali_handle = 0;
+bool adc_do_calibration = false;
 
 static QueueHandle_t sound_queue;
 
@@ -21,6 +27,55 @@ struct Queue_item
     int param1 = 0;
     int param2 = 0;
 };
+
+static bool adc_calibration_init(adc_unit_t unit, adc_channel_t channel,
+                                 adc_atten_t atten, adc_cali_handle_t& out_handle)
+{
+    adc_cali_handle_t handle = 0;
+    esp_err_t ret = ESP_FAIL;
+    bool calibrated = false;
+
+#if ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED
+    if (!calibrated)
+    {
+        printf("calibration scheme version is Curve Fitting\n");
+        adc_cali_curve_fitting_config_t cali_config = {
+            .unit_id = unit,
+            .chan = channel,
+            .atten = atten,
+            .bitwidth = ADC_BITWIDTH_DEFAULT,
+        };
+        ret = adc_cali_create_scheme_curve_fitting(&cali_config, &handle);
+        if (ret == ESP_OK)
+            calibrated = true;
+    }
+#endif
+
+#if ADC_CALI_SCHEME_LINE_FITTING_SUPPORTED
+    if (!calibrated)
+    {
+        printf("calibration scheme version is Line Fitting\n");
+        adc_cali_line_fitting_config_t cali_config = {
+            .unit_id = unit,
+            .atten = atten,
+            .bitwidth = ADC_BITWIDTH_DEFAULT,
+        };
+        ret = adc_cali_create_scheme_line_fitting(&cali_config, &handle);
+        if (ret == ESP_OK)
+            calibrated = true;
+    }
+#endif
+
+    out_handle = handle;
+    if (ret == ESP_OK)
+        printf("Calibration Success\n");
+    else if (ret == ESP_ERR_NOT_SUPPORTED || !calibrated)
+        printf("eFuse not burnt, skip software calibration\n");
+    else
+        printf("Invalid arg or no memory\n");
+
+    return calibrated;
+}
 
 void init_peripherals()
 {
@@ -51,12 +106,19 @@ void init_peripherals()
 
     ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
 
-        /*
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten((adc1_channel_t) ADC_CHANNEL_7, ADC_ATTEN_DB_11);
-    adc_chars = (esp_adc_cal_characteristics_t*) calloc(1, sizeof(esp_adc_cal_characteristics_t));
-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, DEFAULT_VREF, adc_chars);
-        */
+    adc_oneshot_unit_init_cfg_t init_config1 = {
+        .unit_id = ADC_UNIT_1,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc_handle));
+
+    adc_oneshot_chan_cfg_t config = {
+        .atten = ADC_ATTEN_DB_12,
+        .bitwidth = ADC_BITWIDTH_12,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle, ADC_CHANNEL_7, &config));
+    
+    adc_do_calibration = adc_calibration_init(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12,
+                                              adc_cali_handle);
 }
 
 const int i2c_address = 5;
