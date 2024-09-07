@@ -20,10 +20,18 @@ bool init_radio(NRF24_t& dev)
 
     // Set my own address using 5 characters
     if (Nrf24_setRADDR(&dev, pipes[1]) != ESP_OK)
+    {
+        printf("Nrf24_setRADDR() failed\n");
         return false;
+    }
 
     // Set destination address using 5 characters
-    return Nrf24_setTADDR(&dev, pipes[0]) == ESP_OK;
+    if (Nrf24_setTADDR(&dev, pipes[0]) != ESP_OK)
+    {
+        printf("Nrf24_setTADDR() failed\n");
+        return false;
+    }
+    return true;
 }
 
 // Local Variables:

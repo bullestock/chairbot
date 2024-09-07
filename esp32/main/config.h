@@ -18,14 +18,6 @@ static const auto GPIO_ENABLE = GPIO_NUM_25;
 
 static const auto GPIO_V_BAT = GPIO_NUM_35;
 
-// nRF24L01
-
-static const int SPI_SCLK = 4;
-static const int SPI_MISO = 27;
-static const int SPI_MOSI = 2;
-static const auto SPI_CS = GPIO_NUM_16;
-static const auto SPI_CE = GPIO_NUM_17;
-
 // I2C
 
 static const auto GPIO_SDA = GPIO_NUM_21;
