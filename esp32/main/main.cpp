@@ -124,6 +124,7 @@ void main_loop(void* pvParameters)
 
         ForwardAirFrame frame;
         Nrf24_getData(&radio, reinterpret_cast<uint8_t*>(&frame));
+        printf("Payload: %02X  Magic: %04X\n", radio.payload, frame.magic);
         if (frame.magic == ForwardAirFrame::MAGIC_VALUE)
         {
             last_packet = xTaskGetTickCount();

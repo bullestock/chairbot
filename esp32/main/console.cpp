@@ -10,7 +10,7 @@
 #include "esp_console.h"
 #include "esp_vfs_dev.h"
 
-#include <driver/i2c.h>
+#include <driver/i2c_master.h>
 #include <driver/uart.h>
 
 #include "linenoise/linenoise.h"
@@ -125,6 +125,7 @@ int i2c_cmd(int argc, char** argv)
         if (argc > 2)
             count = atoi(argv[2]);
         printf("Scanning for I2C devices (%d)\n", count);
+        /*
         for (int j = 0; j < count; ++j)
         {
             printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
@@ -133,7 +134,7 @@ int i2c_cmd(int argc, char** argv)
             {
                 i2c_cmd_handle_t cmd = i2c_cmd_link_create();
                 i2c_master_start(cmd);
-                i2c_master_write_byte(cmd, (i << 1) | I2C_MASTER_WRITE, 1 /* expect ack */);
+                i2c_master_write_byte(cmd, (i << 1) | I2C_MASTER_WRITE, 1); // expect ack
                 i2c_master_stop(cmd);
 
                 const auto espRc = i2c_master_cmd_begin(I2C_NUM_0, cmd, 10/portTICK_PERIOD_MS);
@@ -149,6 +150,7 @@ int i2c_cmd(int argc, char** argv)
             printf("\n");
             vTaskDelay(100/portTICK_PERIOD_MS);
         }
+*/
         return 0;
     }
     if (!strcmp(argv[1],"read"))
@@ -173,6 +175,7 @@ int i2c_cmd(int argc, char** argv)
         }
         const int data = atoi(argv[3]);
 
+        /*
         i2c_cmd_handle_t cmd = i2c_cmd_link_create();
         i2c_master_start(cmd);
         i2c_master_write_byte(cmd, address << 1 | I2C_MASTER_WRITE, 1);
@@ -185,7 +188,8 @@ int i2c_cmd(int argc, char** argv)
             printf("Error: Bus is busy\n");
         else
             printf("Error: Write failed: %d", ret);
-        i2c_cmd_link_delete(cmd);        
+        i2c_cmd_link_delete(cmd);
+        */
         return 0;
     }
     printf("Error: Unknown command\n");
@@ -422,5 +426,5 @@ void run_console()
 }
 
 // Local Variables:
-// compile-command: "(cd ..; make)"
+// compile-command: "(cd ..; idf.py build)"
 // End:

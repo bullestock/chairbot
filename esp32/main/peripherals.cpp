@@ -2,7 +2,8 @@
 
 #include <esp_adc/adc_oneshot.h>
 #include <esp_adc/adc_cali_scheme.h>
-#include <driver/i2c.h>
+#include <driver/i2c_master.h>
+#include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
 #include "battery.h"
@@ -13,6 +14,8 @@
 adc_oneshot_unit_handle_t adc_handle = 0;
 adc_cali_handle_t adc_cali_handle = 0;
 bool adc_do_calibration = false;
+
+i2c_master_dev_handle_t sound_handle;
 
 static QueueHandle_t sound_queue;
 
@@ -95,16 +98,27 @@ void init_peripherals()
     gpio_config(&io_conf);
     ESP_ERROR_CHECK(gpio_set_level(GPIO_ENABLE, 0));
 
-    i2c_config_t conf;
-    conf.mode = I2C_MODE_MASTER;
-    conf.sda_io_num = GPIO_SDA;
-    conf.scl_io_num = GPIO_SCL;
-    conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-    conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-    conf.master.clk_speed = 100000;
-    ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_0, &conf));
+    i2c_master_bus_config_t i2c_mst_config = {
+        .i2c_port = I2C_NUM_0,
+        .sda_io_num = GPIO_SDA,
+        .scl_io_num = GPIO_SCL,
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .glitch_ignore_cnt = 7,
+        .intr_priority = 0,
+        //trans_queue_depth = 
+    };
+    i2c_mst_config.flags.enable_internal_pullup = true;
 
-    ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
+    i2c_master_bus_handle_t i2c_bus_handle;
+    ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle));
+
+    i2c_device_config_t sound_cfg = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = 5,
+        .scl_speed_hz = 100000,
+    };
+
+    ESP_ERROR_CHECK(i2c_master_bus_add_device(i2c_bus_handle, &sound_cfg, &sound_handle));
 
     adc_oneshot_unit_init_cfg_t init_config1 = {
         .unit_id = ADC_UNIT_1,
@@ -121,8 +135,6 @@ void init_peripherals()
                                               adc_cali_handle);
 }
 
-const int i2c_address = 5;
-
 void peripherals_play_sound(int sound)
 {
     Queue_item i;
@@ -133,6 +145,7 @@ void peripherals_play_sound(int sound)
 
 void peripherals_do_play_sound(int sound)
 {
+    /*
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
@@ -145,7 +158,8 @@ void peripherals_do_play_sound(int sound)
         printf("Error [sound]: Bus is busy\n");
     else if (ret != ESP_OK)
         printf("Error [sound]: Write failed: %d", ret);
-    i2c_cmd_link_delete(cmd);        
+    i2c_cmd_link_delete(cmd);
+    */
 }
 
 void peripherals_set_volume(int volume)
@@ -158,6 +172,7 @@ void peripherals_set_volume(int volume)
 
 void peripherals_do_set_volume(int volume)
 {
+    /*
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
@@ -170,7 +185,8 @@ void peripherals_do_set_volume(int volume)
         printf("Error [volume]: Bus is busy\n");
     else if (ret != ESP_OK)
         printf("Error [volume]: Write failed: %d", ret);
-    i2c_cmd_link_delete(cmd);        
+    i2c_cmd_link_delete(cmd);
+    */
 }
 
 void peripherals_set_pwm(int chan, int value)
@@ -184,6 +200,7 @@ void peripherals_set_pwm(int chan, int value)
 
 void peripherals_do_set_pwm(int chan, int value)
 {
+    /*
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
@@ -195,7 +212,8 @@ void peripherals_do_set_pwm(int chan, int value)
         printf("Error [pwm]: Bus is busy\n");
     else if (ret != ESP_OK)
         printf("Error [pwm]: Write failed: %d", ret);
-    i2c_cmd_link_delete(cmd);        
+    i2c_cmd_link_delete(cmd);
+    */
 }
 
 void sound_loop(void*)
