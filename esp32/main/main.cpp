@@ -107,7 +107,6 @@ void main_loop(void* pvParameters)
     
     int count = 0;
     bool led_state = false;
-    auto last_led_flip = xTaskGetTickCount();
     bool is_halted = false;
 
     NRF24_t radio;
@@ -264,16 +263,6 @@ void main_loop(void* pvParameters)
                 printf("HALT: Last packet was seen at %lu\n", last_packet);
                 set_motors(0, 0);
             }
-        }
-
-        // Change LED state every 3 seconds
-        const auto cur_time = xTaskGetTickCount();
-        if (cur_time - last_led_flip > 3000/portTICK_PERIOD_MS)
-        {
-            printf("flip %d\n", led_state);
-            last_led_flip = cur_time;
-            led_state = !led_state;
-            gpio_set_level(GPIO_INTERNAL_LED, led_state);
         }
 
         vTaskDelay(10/portTICK_PERIOD_MS);

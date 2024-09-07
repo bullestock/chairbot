@@ -16,23 +16,6 @@
 #include "linenoise/linenoise.h"
 #include "argtable3/argtable3.h"
 
-int led_test(int argc, char** argv)
-{
-    int count = 10;
-    if (argc > 1)
-        count = atoi(argv[1]);
-
-    printf("Running LED test (%d)\n", count);
-    for (int j = 0; j < count; ++j)
-    {
-        gpio_set_level(GPIO_INTERNAL_LED, 1);
-        vTaskDelay(500/portTICK_PERIOD_MS);
-        gpio_set_level(GPIO_INTERNAL_LED, 0);
-        vTaskDelay(500/portTICK_PERIOD_MS);
-    }
-    return 0;
-}
-
 int motor_test(int argc, char** argv)
 {
     int count = 1;
@@ -48,27 +31,21 @@ int motor_test(int argc, char** argv)
             if (!(i % 10))
                 printf("A %d\n", i);
             set_motors(i/100.0, 0);
-            gpio_set_level(GPIO_INTERNAL_LED, 1);
             vTaskDelay(50/portTICK_PERIOD_MS);
-            gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
         for (int i = 100; i >= -100; --i)
         {
             if (!(i % 10))
                 printf("A %d\n", i);
             set_motors(i/100.0, 0);
-            gpio_set_level(GPIO_INTERNAL_LED, 1);
             vTaskDelay(50/portTICK_PERIOD_MS);
-            gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
         for (int i = -100; i <= 0; ++i)
         {
             if (!(i % 10))
                 printf("A %d\n", i);
             set_motors(i/100.0, 0);
-            gpio_set_level(GPIO_INTERNAL_LED, 1);
             vTaskDelay(50/portTICK_PERIOD_MS);
-            gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
         set_motors(0, 0);
         vTaskDelay(1000/portTICK_PERIOD_MS);
@@ -77,27 +54,21 @@ int motor_test(int argc, char** argv)
             if (!(i % 10))
                 printf("B %d\n", i);
             set_motors(0, i/100.0);
-            gpio_set_level(GPIO_INTERNAL_LED, 1);
             vTaskDelay(50/portTICK_PERIOD_MS);
-            gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
         for (int i = 100; i >= -100; --i)
         {
             if (!(i % 10))
                 printf("B %d\n", i);
             set_motors(0, i/100.0);
-            gpio_set_level(GPIO_INTERNAL_LED, 1);
             vTaskDelay(50/portTICK_PERIOD_MS);
-            gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
         for (int i = -100; i <= 0; ++i)
         {
             if (!(i % 10))
                 printf("B %d\n", i);
             set_motors(0, i/100.0);
-            gpio_set_level(GPIO_INTERNAL_LED, 1);
             vTaskDelay(50/portTICK_PERIOD_MS);
-            gpio_set_level(GPIO_INTERNAL_LED, 0);
         }
         set_motors(0, 0);
         vTaskDelay(1000/portTICK_PERIOD_MS);
@@ -365,15 +336,6 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd4));
-
-    const esp_console_cmd_t cmd5 = {
-        .command = "ledtest",
-        .help = "Test the LED",
-        .hint = NULL,
-        .func = &led_test,
-        .argtable = nullptr
-    };
-    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd5));
 
     /* Prompt to be printed before each line.
      * This can be customized, made dynamic, etc.

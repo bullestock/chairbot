@@ -4,8 +4,6 @@
 #include <freertos/task.h>
 #include <driver/gpio.h>
 
-static const auto GPIO_INTERNAL_LED = GPIO_NUM_22;
-
 // Motor control
 
 static const auto GPIO_PWM0A_OUT = GPIO_NUM_5;
