@@ -31,7 +31,23 @@ bool init_radio(NRF24_t& dev)
         printf("Nrf24_setTADDR() failed\n");
         return false;
     }
+
+    Nrf24_printDetails(&dev);
+
     return true;
+}
+
+bool send_frame(NRF24_t& dev,
+                ReturnAirFrame& frame)
+{
+    Nrf24_send(&dev, reinterpret_cast<uint8_t*>(&frame));
+
+    return Nrf24_isSend(&dev, 1000);
+}
+
+bool data_ready(NRF24_t& dev)
+{
+    return Nrf24_dataReady(&dev);
 }
 
 // Local Variables:
