@@ -103,14 +103,13 @@ void handle_frame(NRF24_t& radio,
         printf("Bad CRC\n");
         return;
     }
-    printf("CRC OK\n");
         
     // Echo back tick value so we can compute round trip time
 
     ReturnAirFrame ret_frame;
     ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
     ret_frame.ticks = frame.ticks;
-#if 1
+
     battery_readings[battery_reading_index] = battery.read_voltage();
     ++battery_reading_index;
     if (battery_reading_index >= NOF_BATTERY_READINGS)
@@ -123,10 +122,8 @@ void handle_frame(NRF24_t& radio,
             sum += battery_readings[i];
             ++n;
         }
-    // Round to nearest 0.1 V to prevent flickering
-    //ret_frame.battery = n ? 100*((sum/n+50)/100) : 0;
     ret_frame.battery = n ? sum/n*1000 : 0;
-#endif
+
     set_crc(ret_frame);
     send_frame(radio, ret_frame);
 
@@ -251,7 +248,6 @@ void main_loop(void* pvParameters)
         {
             ForwardAirFrame frame;
             Nrf24_getData(&radio, reinterpret_cast<uint8_t*>(&frame));
-            printf("Payload: %02X  Magic: %04X\n", radio.payload, frame.magic);
             if (frame.magic == ForwardAirFrame::MAGIC_VALUE)
             {
                 handle_frame(radio, frame, battery);
