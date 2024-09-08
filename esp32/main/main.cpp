@@ -8,9 +8,6 @@
 #include <freertos/queue.h>
 #include <freertos/task.h>
 
-#include "sdkconfig.h"
-#include "nvs_flash.h"
-
 #include "battery.h"
 #include "console.h"
 #include "motor.h"

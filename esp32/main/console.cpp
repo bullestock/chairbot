@@ -96,36 +96,33 @@ int i2c_cmd(int argc, char** argv)
         if (argc > 2)
             count = atoi(argv[2]);
         printf("Scanning for I2C devices (%d)\n", count);
-        /*
         for (int j = 0; j < count; ++j)
         {
             printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
-            printf("00:         ");
-            for (int i = 3; i < 0x78; ++i)
+            for (int i = 0; i < 128; i += 16)
             {
-                i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-                i2c_master_start(cmd);
-                i2c_master_write_byte(cmd, (i << 1) | I2C_MASTER_WRITE, 1); // expect ack
-                i2c_master_stop(cmd);
-
-                const auto espRc = i2c_master_cmd_begin(I2C_NUM_0, cmd, 10/portTICK_PERIOD_MS);
-                if (i%16 == 0)
-                    printf("\n%.2x:", i);
-                if (espRc == 0)
-                    printf(" %.2x", i);
-                else
-                    printf(" --");
-                //ESP_LOGD(tag, "i=%d, rc=%d (0x%x)", i, espRc, espRc);
-                i2c_cmd_link_delete(cmd);
+                printf("%02X: ", i);
+                for (int j = 0; j < 16; j++)
+                {
+                    fflush(stdout);
+                    uint8_t address = i + j;
+                    esp_err_t ret = i2c_master_probe(i2c_bus_handle, address, 50);
+                    if (ret == ESP_OK)
+                        printf("%02X ", address);
+                    else if (ret == ESP_ERR_TIMEOUT)
+                        printf("UU ");
+                    else
+                        printf("-- ");
+                }
+                printf("\n");
             }
-            printf("\n");
             vTaskDelay(100/portTICK_PERIOD_MS);
         }
-*/
         return 0;
     }
-    if (!strcmp(argv[1],"read"))
+    if (!strcmp(argv[1], "read"))
     {
+        printf("Error: Read not implemented\n");
         return 0;
     }
     if (!strcmp(argv[1], "write"))
@@ -136,7 +133,7 @@ int i2c_cmd(int argc, char** argv)
             printf(i2c_usage);
             return -1;
         }
-        const int address = atoi(argv[2]);
+        const uint16_t address = atoi(argv[2]);
 
         if (argc < 4)
         {
@@ -144,23 +141,37 @@ int i2c_cmd(int argc, char** argv)
             printf(i2c_usage);
             return -1;
         }
-        const int data = atoi(argv[3]);
+        const uint8_t data = atoi(argv[3]);
 
-        /*
-        i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-        i2c_master_start(cmd);
-        i2c_master_write_byte(cmd, address << 1 | I2C_MASTER_WRITE, 1);
-        i2c_master_write_byte(cmd, data, 1);
-        i2c_master_stop(cmd);
-        esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS);
-        if (ret == ESP_OK)
-            printf("I2C write %d to %d OK\n", data, address);
+        i2c_device_config_t i2c_dev_conf = {
+            .device_address = address,
+            .scl_speed_hz = 100000,
+        };
+        i2c_master_dev_handle_t dev_handle;
+        auto ret = i2c_master_bus_add_device(i2c_bus_handle, &i2c_dev_conf, &dev_handle);
+        if (ret != ESP_OK)
+        {
+            printf("i2c_master_bus_add_device() failed: %d\n", ret);
+            return 1;
+        }
+
+        uint8_t bytes[2];
+        bytes[0] = 0; // address
+        bytes[1] = data;
+        
+        ret = i2c_master_transmit(dev_handle, bytes, 1 + 1, 50);
+        if (ret == ESP_OK) 
+            printf("Write OK\n");
         else if (ret == ESP_ERR_TIMEOUT)
-            printf("Error: Bus is busy\n");
-        else
-            printf("Error: Write failed: %d", ret);
-        i2c_cmd_link_delete(cmd);
-        */
+            printf("Bus is busy\n");
+        else 
+            printf("i2c_master_transmit() failed: %d\n", ret);
+
+        if (i2c_master_bus_rm_device(dev_handle) != ESP_OK)
+        {
+            printf("i2c_master_bus_rm_device() failed\n");
+            return 1;
+        }
         return 0;
     }
     printf("Error: Unknown command\n");

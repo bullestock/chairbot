@@ -2,18 +2,17 @@
 
 #include <esp_adc/adc_oneshot.h>
 #include <esp_adc/adc_cali_scheme.h>
-#include <driver/i2c_master.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
 #include "battery.h"
 #include "config.h"
 
-#define DEFAULT_VREF    1100        //Use adc2_vref_to_gpio() to obtain a better estimate
-
 adc_oneshot_unit_handle_t adc_handle = 0;
 adc_cali_handle_t adc_cali_handle = 0;
 bool adc_do_calibration = false;
+
+i2c_master_bus_handle_t i2c_bus_handle;
 
 i2c_master_dev_handle_t sound_handle;
 
@@ -103,7 +102,6 @@ void init_peripherals()
     };
     i2c_mst_config.flags.enable_internal_pullup = true;
 
-    i2c_master_bus_handle_t i2c_bus_handle;
     ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle));
 
     i2c_device_config_t sound_cfg = {
