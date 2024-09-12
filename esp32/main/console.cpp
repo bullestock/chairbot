@@ -155,11 +155,10 @@ int i2c_cmd(int argc, char** argv)
             return 1;
         }
 
-        uint8_t bytes[2];
-        bytes[0] = 0; // address
-        bytes[1] = data;
+        uint8_t bytes[1];
+        bytes[0] = data;
         
-        ret = i2c_master_transmit(dev_handle, bytes, 1 + 1, 50);
+        ret = i2c_master_transmit(dev_handle, bytes, 1, 50);
         if (ret == ESP_OK) 
             printf("Write OK\n");
         else if (ret == ESP_ERR_TIMEOUT)
