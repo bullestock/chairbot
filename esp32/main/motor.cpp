@@ -41,7 +41,7 @@ Motor::Motor(ledc_timer_t _timer,
         .speed_mode = LEDC_LOW_SPEED_MODE,
         .channel = _channel_a,
         .intr_type = LEDC_INTR_DISABLE,
-        .timer_sel = LEDC_TIMER_0,
+        .timer_sel = _timer,
         .duty = 0,
         .hpoint = 0,
     };
