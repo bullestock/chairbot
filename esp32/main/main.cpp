@@ -165,6 +165,8 @@ void handle_frame(NRF24_t& radio,
     }
     set_motors(power_left/255.0, power_right/255.0);
     is_halted = false;
+
+#if 0
     if (is_flashing)
     {
         if (++flash_count > 10)
@@ -217,6 +219,7 @@ void handle_frame(NRF24_t& radio,
             --volume;
         peripherals_set_volume(volume);
     }
+#endif
 }
 
 void main_loop(void* pvParameters)
