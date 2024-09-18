@@ -81,7 +81,7 @@ void Motor::set_speed(float speed)
     last_millis = millis;
 
     ledc_channel_t c1 = channel_a;
-    ledc_channel_t c2 = channel_a;
+    ledc_channel_t c2 = channel_b;
     if (speed < 0)
     {
         std::swap(c1, c2);
