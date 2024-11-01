@@ -11,6 +11,7 @@
 #include "battery.h"
 #include "console.h"
 #include "motor.h"
+#include "nvs.h"
 #include "peripherals.h"
 #include "radio.h"
 
@@ -260,7 +261,7 @@ void main_loop(void* pvParameters)
             if ((cur_time - last_packet > max_radio_idle_time) && !is_halted)
             {
                 is_halted = true;
-                printf("HALT: Last packet was seen at %lu\n", last_packet);
+                printf("%lu: HALT: Last packet was seen at %lu\n", cur_time, last_packet);
                 set_motors(0, 0);
             }
         }
@@ -276,6 +277,7 @@ extern "C"
 void app_main()
 {
     init_peripherals();
+    init_nvs();
 
     motor_a = std::make_unique<Motor>(LEDC_TIMER_0, LEDC_CHANNEL_0, LEDC_CHANNEL_1, GPIO_PWM0A_OUT, GPIO_PWM0B_OUT, pwm_freq);
     motor_b = std::make_unique<Motor>(LEDC_TIMER_1, LEDC_CHANNEL_2, LEDC_CHANNEL_3, GPIO_PWM1A_OUT, GPIO_PWM1B_OUT, pwm_freq);

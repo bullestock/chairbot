@@ -3,6 +3,7 @@
 #include "battery.h"
 #include "config.h"
 #include "motor.h"
+#include "nvs.h"
 #include "peripherals.h"
 
 #include "esp_system.h"
@@ -251,6 +252,30 @@ int control_peripherals(int argc, char** argv)
     return -1;
 }
 
+struct
+{
+    struct arg_str* peer_mac;
+    struct arg_end* end;
+} set_peer_mac_args;
+
+int set_peer_mac(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_peer_mac_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_peer_mac_args.end, argv[0]);
+        return 1;
+    }
+    const auto peer_mac = set_peer_mac_args.peer_mac->sval[0];
+    if (!set_peer_mac(peer_mac))
+    {
+        printf("ERROR: Invalid MAC\n");
+        return 1;
+    }
+    printf("OK: Peer MAC set to %s\n", peer_mac);
+    return 0;
+}
+
 void initialize_console()
 {
     /* Disable buffering on stdin */
@@ -347,9 +372,17 @@ void run_console()
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd4));
 
-    /* Prompt to be printed before each line.
-     * This can be customized, made dynamic, etc.
-     */
+    set_peer_mac_args.peer_mac = arg_str1(NULL, NULL, "<ident>", "Peer_Mac");
+    set_peer_mac_args.end = arg_end(2);
+    const esp_console_cmd_t set_peer_mac_cmd = {
+        .command = "mac",
+        .help = "Set peer MAC",
+        .hint = nullptr,
+        .func = &set_peer_mac,
+        .argtable = &set_peer_mac_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_peer_mac_cmd));
+
     const char* prompt = LOG_COLOR_I "esp32> " LOG_RESET_COLOR;
 
     printf("\n"
