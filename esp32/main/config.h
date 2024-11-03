@@ -27,3 +27,4 @@ static const auto max_radio_idle_time = 200/portTICK_PERIOD_MS;
 
 constexpr const char* MAC_KEY = "mac";
 
+constexpr const char* TAG = "CHB";

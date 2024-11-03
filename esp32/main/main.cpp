@@ -88,20 +88,13 @@ const int NOF_BATTERY_READINGS = 100;
 float battery_readings[NOF_BATTERY_READINGS];
 int battery_reading_index = 0;
 
-void handle_frame(NRF24_t& radio,
-                  const ForwardAirFrame& frame,
+void handle_frame(const ForwardAirFrame& frame,
                   const Battery& battery)
 {
     static int count = 0;
 
     last_packet = xTaskGetTickCount();
 
-    if (!check_crc(frame))
-    {
-        printf("Bad CRC\n");
-        return;
-    }
-        
     // Echo back tick value so we can compute round trip time
 
     ReturnAirFrame ret_frame;
@@ -123,7 +116,7 @@ void handle_frame(NRF24_t& radio,
     ret_frame.battery = n ? sum/n*1000 : 0;
 
     set_crc(ret_frame);
-    send_frame(radio, ret_frame);
+    send_frame(ret_frame);
 
     if (!is_zeroed)
     {
@@ -235,8 +228,7 @@ void main_loop(void* pvParameters)
         battery_readings[i] = 0.0;
     Battery battery;
 
-    NRF24_t radio;
-    assert(init_radio(radio));
+    assert(init_radio());
     printf("Radio initialized\n");
 
     while (1)
@@ -245,14 +237,25 @@ void main_loop(void* pvParameters)
         if (loopcount >= 100)
             loopcount = 0;
 
-        if (data_ready(radio))
+        ForwardAirFrame frame;
+        bool ready = false;
+        for (int i = 0; !ready && (i < 100); ++i)
         {
-            ForwardAirFrame frame;
-            Nrf24_getData(&radio, reinterpret_cast<uint8_t*>(&frame));
-            if (frame.magic == ForwardAirFrame::MAGIC_VALUE)
+            if (xSemaphoreTake(receive_mutex, portMAX_DELAY) == pdTRUE)
             {
-                handle_frame(radio, frame, battery);
+                if (data_ready)
+                {
+                    data_ready = false;
+                    memcpy(&frame, &received_frame, sizeof(ForwardAirFrame));
+                    ready = true;
+                }
+                xSemaphoreGive(receive_mutex);
             }
+            vTaskDelay(1);
+        }
+        if (ready)
+        {
+            handle_frame(frame, battery);
         }
         else
         {
