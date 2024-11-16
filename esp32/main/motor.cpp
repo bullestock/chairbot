@@ -73,9 +73,11 @@ void Motor::set_speed(float speed)
             delta = fabs(speed - last_speed);
             clamped = true;
         }
+#if 0
         if (clamped)
             printf("Delta %f T %d ms, clamp to %f\n",
                    initial_delta, (int) elapsed, speed);
+#endif
     }
     last_speed = speed;
     last_millis = millis;
