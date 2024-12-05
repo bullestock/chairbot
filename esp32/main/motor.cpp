@@ -89,7 +89,7 @@ void Motor::set_speed(float speed)
         std::swap(c1, c2);
         speed = -speed;
     }
-    ledc_set_duty(LEDC_LOW_SPEED_MODE, c2, speed*100);
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, c2, speed*255);
     ledc_update_duty(LEDC_LOW_SPEED_MODE, c2);
     ledc_set_duty(LEDC_LOW_SPEED_MODE, c1, 0);
     ledc_update_duty(LEDC_LOW_SPEED_MODE, c1);
