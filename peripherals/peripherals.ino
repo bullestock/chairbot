@@ -19,28 +19,48 @@ bool debug_on = true;
 SerialMP3Player player(4, 2); // RX, TX
 
 // Index of sound to play (1-255)
-int sound_index = 0;
+uint8_t sound_index = 0;
 
 // Flag to start playing sound
 bool do_play = false;
 
 void receiveData(int byteCount)
 {
-    int c = Wire.read();
+    uint8_t c = Wire.read();
+    if (debug_on)
+    {
+        Serial.print("i2c rcv ");
+        Serial.print(byteCount);
+        Serial.print(": ");
+        Serial.println(c);
+    }
     --byteCount;
     switch (c)
     {
     case 1:
         // Play sound
         sound_index = Wire.read();
+        if (debug_on)
+        {
+            Serial.print("i2c sound ");
+            Serial.println(sound_index);
+        }
         --byteCount;
         do_play = true;
         break;
 
     case 4:
         // Set volume
-        player.setVol(Wire.read() & 31);
-        --byteCount;
+        {
+            uint8_t vol = Wire.read() & 31;
+            player.setVol(vol);
+            if (debug_on)
+            {
+                Serial.print("i2c vol ");
+                Serial.println(vol);
+            }
+            --byteCount;
+        }
         break;
 
     case 10:
@@ -48,8 +68,16 @@ void receiveData(int byteCount)
     case 12:
     case 13:
         // PWM 1-4
-        analogWrite(PWM_PINS[c - 10], Wire.read());
-        --byteCount;
+        {
+            uint8_t val = Wire.read();
+            analogWrite(PWM_PINS[c - 10], val);
+            if (debug_on)
+            {
+                Serial.print("i2c pwm ");
+                Serial.println(val);
+            }
+            --byteCount;
+        }
         break;
 
     default:
@@ -67,7 +95,7 @@ void sendData()
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("Peripherals v 0.2");
+    Serial.println("Peripherals v 0.3");
 
     for (auto pin : PWM_PINS)
         pinMode(pin, OUTPUT);
