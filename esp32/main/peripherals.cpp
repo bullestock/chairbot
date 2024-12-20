@@ -8,7 +8,7 @@
 #include "battery.h"
 #include "config.h"
 
-const int i2c_address = 5;
+const int I2C_ADDRESS = 5;
 
 adc_oneshot_unit_handle_t adc_handle = 0;
 adc_cali_handle_t adc_cali_handle = 0;
@@ -108,7 +108,7 @@ void init_peripherals()
 
     i2c_device_config_t sound_cfg = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,
-        .device_address = 5,
+        .device_address = I2C_ADDRESS,
         .scl_speed_hz = 100000,
     };
 
@@ -140,31 +140,14 @@ void peripherals_play_sound(int sound)
 void peripherals_do_play_sound(int sound)
 {
     uint8_t bytes[2];
-    bytes[0] = i2c_address;
-    bytes[1] = 1; // 1: Play sound
-    bytes[2] = sound;
+    bytes[0] = 1; // 1: Play sound
+    bytes[1] = sound;
     
     const auto ret = i2c_master_transmit(sound_handle, bytes, sizeof(bytes), 50);
     if (ret == ESP_ERR_TIMEOUT)
         printf("Error [sound]: Bus is busy\n");
     else if (ret != ESP_OK)
         printf("Error [sound]: Write failed: %d", ret);
-
-    /*
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
-    const uint8_t data = (uint8_t) sound;
-    i2c_master_write_byte(cmd, 1, 1); // 1: Play sound
-    i2c_master_write_byte(cmd, data, 1);
-    i2c_master_stop(cmd);
-    esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS);
-    if (ret == ESP_ERR_TIMEOUT)
-        printf("Error [sound]: Bus is busy\n");
-    else if (ret != ESP_OK)
-        printf("Error [sound]: Write failed: %d", ret);
-    i2c_cmd_link_delete(cmd);
-    */
 }
 
 void peripherals_set_volume(int volume)
@@ -178,31 +161,14 @@ void peripherals_set_volume(int volume)
 void peripherals_do_set_volume(int volume)
 {
     uint8_t bytes[2];
-    bytes[0] = i2c_address;
-    bytes[1] = 4; // 4: Set volume
-    bytes[2] = volume;
+    bytes[0] = 4; // 4: Set volume
+    bytes[1] = volume;
     
     const auto ret = i2c_master_transmit(sound_handle, bytes, sizeof(bytes), 50);
     if (ret == ESP_ERR_TIMEOUT)
         printf("Error [volume]: Bus is busy\n");
     else if (ret != ESP_OK)
         printf("Error [volume]: Write failed: %d", ret);
-
-    /*
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
-    const uint8_t data = (uint8_t) volume;
-    i2c_master_write_byte(cmd, 4, 1); // 4: Set volume
-    i2c_master_write_byte(cmd, data, 1);
-    i2c_master_stop(cmd);
-    esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS);
-    if (ret == ESP_ERR_TIMEOUT)
-        printf("Error [volume]: Bus is busy\n");
-    else if (ret != ESP_OK)
-        printf("Error [volume]: Write failed: %d", ret);
-    i2c_cmd_link_delete(cmd);
-    */
 }
 
 void peripherals_set_pwm(int chan, int value)
@@ -217,30 +183,14 @@ void peripherals_set_pwm(int chan, int value)
 void peripherals_do_set_pwm(int chan, int value)
 {
     uint8_t bytes[2];
-    bytes[0] = i2c_address;
-    bytes[1] = 10 + chan; // 10-13: Set PWM output
-    bytes[2] = value;
+    bytes[0] = 10 + chan; // 10-13: Set PWM output
+    bytes[1] = value;
     
     const auto ret = i2c_master_transmit(sound_handle, bytes, sizeof(bytes), 50);
     if (ret == ESP_ERR_TIMEOUT)
         printf("Error [volume]: Bus is busy\n");
     else if (ret != ESP_OK)
         printf("Error [volume]: Write failed: %d", ret);
-
-    /*
-    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, i2c_address << 1 | I2C_MASTER_WRITE, 1);
-    i2c_master_write_byte(cmd, 10 + chan, 1); // 10-13: Set PWM output
-    i2c_master_write_byte(cmd, (uint8_t) value, 1);
-    i2c_master_stop(cmd);
-    esp_err_t ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS);
-    if (ret == ESP_ERR_TIMEOUT)
-        printf("Error [pwm]: Bus is busy\n");
-    else if (ret != ESP_OK)
-        printf("Error [pwm]: Write failed: %d", ret);
-    i2c_cmd_link_delete(cmd);
-    */
 }
 
 void sound_loop(void*)
