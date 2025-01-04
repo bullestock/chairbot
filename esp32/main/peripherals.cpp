@@ -13,10 +13,11 @@ const int I2C_ADDRESS = 5;
 adc_oneshot_unit_handle_t adc_handle = 0;
 adc_cali_handle_t adc_cali_handle = 0;
 bool adc_do_calibration = false;
+static bool is_peripherals_present = false;
 
 i2c_master_bus_handle_t i2c_bus_handle;
 
-i2c_master_dev_handle_t sound_handle;
+static i2c_master_dev_handle_t sound_handle;
 
 static QueueHandle_t sound_queue;
 
@@ -100,7 +101,6 @@ void init_peripherals()
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .glitch_ignore_cnt = 7,
         .intr_priority = 0,
-        //trans_queue_depth = 
     };
     i2c_mst_config.flags.enable_internal_pullup = true;
 
@@ -127,6 +127,17 @@ void init_peripherals()
     
     adc_do_calibration = adc_calibration_init(ADC_UNIT_1, ADC_CHANNEL_7, ADC_ATTEN_DB_12,
                                               adc_cali_handle);
+
+    // Check if peripherals board is present on the I2C bus
+    uint8_t byte = 0; // 0: Noop
+    const auto ret = i2c_master_transmit(sound_handle, &byte, 1, 50);
+    is_peripherals_present = ret == ESP_OK;
+    printf("Peripherals present: %s\n", is_peripherals_present ? "yes" : "no");
+}
+
+bool peripherals_present()
+{
+    return is_peripherals_present;
 }
 
 void peripherals_play_sound(int sound)

@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 #include <chrono>
@@ -75,92 +76,15 @@ bool is_flashing = false;
 int flash_count = 0;
 int volume = 10;
 bool is_zeroed = false;
-bool is_halted = false;
 #if 0
 int left_x_zero = 512;
 int left_y_zero = 512;
 #endif
 int right_x_zero = 512;
 int right_y_zero = 512;
-    
-unsigned long last_packet = 0;
-const int NOF_BATTERY_READINGS = 100;
-float battery_readings[NOF_BATTERY_READINGS];
-int battery_reading_index = 0;
 
-void handle_frame(const ForwardAirFrame& frame,
-                  const Battery& battery)
+void handle_peripherals(const ForwardAirFrame& frame)
 {
-    static int count = 0;
-
-    last_packet = xTaskGetTickCount();
-
-    // Echo back tick value so we can compute round trip time
-
-    ReturnAirFrame ret_frame;
-    ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
-    ret_frame.ticks = frame.ticks;
-
-    battery_readings[battery_reading_index] = battery.read_voltage();
-    ++battery_reading_index;
-    if (battery_reading_index >= NOF_BATTERY_READINGS)
-        battery_reading_index = 0;
-    int n = 0;
-    float sum = 0;
-    for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
-        if (battery_readings[i])
-        {
-            sum += battery_readings[i];
-            ++n;
-        }
-    ret_frame.battery = n ? sum/n*1000 : 0;
-
-    set_crc(ret_frame);
-    send_frame(ret_frame);
-
-    if (!is_zeroed)
-    {
-        is_zeroed = true;
-        right_x_zero = frame.right_x;
-        right_y_zero = frame.right_y;
-    }
-
-#define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
-#define TOGGLE(bit) (is_toggle_down(frame, bit) ? 'D' : (is_toggle_up(frame, bit) ? 'U' : '-'))
-
-    const int MIN_DELTA = 7;
-    int rx = frame.right_x - right_x_zero;
-    if (abs(rx) < MIN_DELTA)
-        rx = 0;
-    int ry = frame.right_y - right_y_zero;
-    if (abs(ry) < MIN_DELTA)
-        ry = 0;
-
-    // Map right pot (0-255) to pivot value
-    const int pivot = 5 + frame.right_pot/4.0;
-    // Map left pot (0-255) to max_power (20-255)
-    const int max_power = static_cast<int>(20 + (256-20)/256.0*frame.left_pot);
-    int power_left = 0;
-    int power_right = 0;
-    compute_power(rx, ry, power_left, power_right, pivot, max_power);
-    ++count;
-    if (count > 10)
-    {
-        count = 0;
-        // L <left stick> R <right stick> (<right mapped>) Pot <pots>
-        printf("L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c%c%c"
-               " Toggle %c%c%c%c"
-               " Power %d/%d Pivot %d\n",
-               (int) frame.left_x, (int) frame.left_y, (int) frame.right_x, (int) frame.right_y, rx, ry,
-               (int) frame.left_pot, (int) frame.right_pot,
-               PUSH(0), PUSH(1), PUSH(2), PUSH(3), PUSH(4), PUSH(5),
-               TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
-               power_left, power_right, pivot);
-    }
-    set_motors(power_left/255.0, power_right/255.0);
-    is_halted = false;
-
-#if 0
     if (is_flashing)
     {
         if (++flash_count > 10)
@@ -213,13 +137,94 @@ void handle_frame(const ForwardAirFrame& frame,
             --volume;
         peripherals_set_volume(volume);
     }
-#endif
+}
+
+unsigned long last_packet = 0;
+int64_t total_packets = 0;
+const int NOF_BATTERY_READINGS = 100;
+float battery_readings[NOF_BATTERY_READINGS];
+int battery_reading_index = 0;
+
+void handle_frame(const ForwardAirFrame& frame,
+                  const Battery& battery)
+{
+    ++total_packets;
+
+    last_packet = xTaskGetTickCount();
+
+    // Echo back tick value so we can compute round trip time
+
+    ReturnAirFrame ret_frame;
+    ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
+    ret_frame.ticks = frame.ticks;
+
+    battery_readings[battery_reading_index] = battery.read_voltage();
+    ++battery_reading_index;
+    if (battery_reading_index >= NOF_BATTERY_READINGS)
+        battery_reading_index = 0;
+    int n = 0;
+    float sum = 0;
+    for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
+        if (battery_readings[i])
+        {
+            sum += battery_readings[i];
+            ++n;
+        }
+    ret_frame.battery = n ? sum/n*1000 : 0;
+    
+    set_crc(ret_frame);
+    send_frame(ret_frame);
+
+    if (!is_zeroed)
+    {
+        is_zeroed = true;
+        right_x_zero = frame.right_x;
+        right_y_zero = frame.right_y;
+    }
+
+#define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
+#define TOGGLE(bit) (is_toggle_down(frame, bit) ? 'D' : (is_toggle_up(frame, bit) ? 'U' : '-'))
+
+    const int MIN_DELTA = 7;
+    int rx = frame.right_x - right_x_zero;
+    if (abs(rx) < MIN_DELTA)
+        rx = 0;
+    int ry = frame.right_y - right_y_zero;
+    if (abs(ry) < MIN_DELTA)
+        ry = 0;
+
+    // Map right pot (0-255) to pivot value
+    const int pivot = 5 + frame.right_pot/4.0;
+    // Map left pot (0-255) to max_power (20-255)
+    const int max_power = static_cast<int>(20 + (256-20)/256.0*frame.left_pot);
+    int power_left = 0;
+    int power_right = 0;
+    compute_power(rx, ry, power_left, power_right, pivot, max_power);
+    static int count = 0;
+    ++count;
+    if (count > 100)
+    {
+        count = 0;
+        // L <left stick> R <right stick> (<right mapped>) Pot <pots>
+        printf("[%" PRId64 "] L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c%c%c"
+               " Toggle %c%c%c%c"
+               " Power %d/%d Pivot %d\n",
+               total_packets,
+               (int) frame.left_x, (int) frame.left_y, (int) frame.right_x, (int) frame.right_y, rx, ry,
+               (int) frame.left_pot, (int) frame.right_pot,
+               PUSH(0), PUSH(1), PUSH(2), PUSH(3), PUSH(4), PUSH(5),
+               TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
+               power_left, power_right, pivot);
+    }
+    set_motors(power_left/255.0, power_right/255.0);
+
+    if (peripherals_present())
+        handle_peripherals(frame);
 }
 
 void main_loop(void* pvParameters)
 {
     int loopcount = 0;
-#define SHOW_DEBUG() 0 //((my_state == RUNNING) && (loopcount == 0))
 
     last_packet = xTaskGetTickCount();
     printf("Start at %lu\n", last_packet);
@@ -237,36 +242,12 @@ void main_loop(void* pvParameters)
         if (loopcount >= 100)
             loopcount = 0;
 
-        ForwardAirFrame frame;
-        bool ready = false;
-        for (int i = 0; !ready && (i < 100); ++i)
-        {
-            if (xSemaphoreTake(receive_mutex, portMAX_DELAY) == pdTRUE)
-            {
-                if (data_ready)
-                {
-                    data_ready = false;
-                    memcpy(&frame, &received_frame, sizeof(ForwardAirFrame));
-                    ready = true;
-                }
-                xSemaphoreGive(receive_mutex);
-            }
-            vTaskDelay(1);
-        }
-        if (ready)
-        {
-            handle_frame(frame, battery);
-        }
+        if (is_halted())
+            set_motors(0, 0);
         else
         {
-            // No data from radio
-            const auto cur_time = xTaskGetTickCount();
-            if ((cur_time - last_packet > max_radio_idle_time) && !is_halted)
-            {
-                is_halted = true;
-                printf("%lu: HALT: Last packet was seen at %lu\n", cur_time, last_packet);
-                set_motors(0, 0);
-            }
+            const auto frame = get_received_frame();
+            handle_frame(frame, battery);
         }
 
         vTaskDelay(10/portTICK_PERIOD_MS);

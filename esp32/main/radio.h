@@ -11,23 +11,27 @@
 
 #define ESPNOW_QUEUE_SIZE           6
 
-enum espnow_event_id_t {
+enum espnow_event_id_t
+{
     ESPNOW_SEND_CB,
     ESPNOW_RECV_CB,
 };
 
-struct espnow_event_recv_cb_t {
+struct espnow_event_recv_cb_t
+{
     uint8_t* data;
     int data_len;
 };
 
-union espnow_event_info_t {
+union espnow_event_info_t
+{
     esp_now_send_status_t send_status;
     espnow_event_recv_cb_t recv_cb;
 };
 
 // Event posted to task
-struct espnow_event_t {
+struct espnow_event_t
+{
     espnow_event_id_t id;
     espnow_event_info_t info;
 };
@@ -36,8 +40,8 @@ bool init_radio();
 
 bool send_frame(ReturnAirFrame& frame);
 
-// Received data
+/// Get last received frame
+ForwardAirFrame get_received_frame();
 
-extern SemaphoreHandle_t receive_mutex;
-extern bool data_ready;       // protected by receive_mutex
-extern ForwardAirFrame received_frame; // protected by receive_mutex
+/// Is most recent frame too old?
+bool is_halted();

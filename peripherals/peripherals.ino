@@ -5,12 +5,12 @@
 const int LED_PIN = 13;
 const int BUSY_PIN = A0;
 const int PWM_PINS[] =
-    {
-        3, // TCCR2B
-        5, // TCCR0B
-        6, // 
-        9  // 
-    };
+{
+    3, // TCCR2B
+    5, // TCCR0B
+    6, // 
+    9  // 
+};
 const int SLAVE_ADDRESS = 0x05;
 const int FLASH_RATE = 100; // Flash half period in ms
 

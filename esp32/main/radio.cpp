@@ -10,6 +10,7 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <mutex>
 
 // Ticks to wait for queue to become available
 #define ESPNOW_MAXDELAY 512
@@ -17,9 +18,9 @@
 static SemaphoreHandle_t send_mutex;
 static bool send_pending = false; // protected by send_mutex
 
-SemaphoreHandle_t receive_mutex;
-bool data_ready = false;       // protected by receive_mutex
-ForwardAirFrame received_frame; // protected by receive_mutex
+static std::mutex receive_mutex;
+static ForwardAirFrame received_frame; // protected by receive_mutex
+static bool halted = true;
 
 static QueueHandle_t s_espnow_queue;
 
@@ -28,6 +29,18 @@ static uint8_t s_other_mac[ESP_NOW_ETH_ALEN];
 static void espnow_send_cb(const uint8_t* mac_addr, esp_now_send_status_t status);
 static void espnow_recv_cb(const esp_now_recv_info_t *recv_info, const uint8_t *data, int len);
 static void espnow_task(void *pvParameter);
+
+ForwardAirFrame get_received_frame()
+{
+    std::lock_guard<std::mutex> g(receive_mutex);
+    return received_frame;
+}
+
+bool is_halted()
+{
+    std::lock_guard<std::mutex> g(receive_mutex);
+    return halted;
+}
 
 void fatal_error(const char* why)
 {
@@ -102,16 +115,8 @@ bool init_radio()
     free(peer);
 
     send_mutex = xSemaphoreCreateMutex();
-    receive_mutex = xSemaphoreCreateMutex();
     
-    /* Initialize sending parameters. */
-    auto frame = reinterpret_cast<ReturnAirFrame*>(malloc(sizeof(ReturnAirFrame)));
-    if (!frame)
-        fatal_error("Malloc send parameter fail");
-
-    set_crc(*frame);
-
-    xTaskCreate(espnow_task, "espnow_task", 4096, frame, 4, NULL);
+    xTaskCreate(espnow_task, "espnow_task", 4096, NULL, 4, NULL);
     
     return true;
 }
@@ -155,21 +160,35 @@ static void espnow_recv_cb(const esp_now_recv_info_t *recv_info, const uint8_t *
     }
 }
 
-static void espnow_task(void *pvParameter)
+static void espnow_task(void*)
 {
-    espnow_event_t evt;
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-    ESP_LOGI(TAG, "Start sending data");
+    auto last_receive_tick = xTaskGetTickCount();
 
-    auto frame = (ForwardAirFrame*) pvParameter;
-    ESP_ERROR_CHECK(esp_now_send(s_other_mac, (uint8_t*) frame, sizeof(ForwardAirFrame)));
-
-    while (xQueueReceive(s_espnow_queue, &evt, portMAX_DELAY) == pdTRUE)
+    while (1)
     {
-        switch (evt.id)
+        const auto now_tick = xTaskGetTickCount();
+        espnow_event_t evt;
+        if (!xQueueReceive(s_espnow_queue, &evt, 10 / portTICK_PERIOD_MS))
+        {
+            if (now_tick - last_receive_tick > max_radio_idle_time)
             {
-            case ESPNOW_SEND_CB:
+                bool was_halted = false;
+                {
+                    std::lock_guard<std::mutex> g(receive_mutex);
+                    was_halted = halted;
+                    halted = true;
+                }
+                if (was_halted)
+                    printf("%lu: HALT: Last packet was seen at %lu\n", now_tick, last_receive_tick);
+            }
+            continue;
+        }
+
+        switch (evt.id)
+        {
+        case ESPNOW_SEND_CB:
             {
                 const auto send_status = evt.info.send_status;
 
@@ -182,7 +201,7 @@ static void espnow_task(void *pvParameter)
                 }
                 break;
             }
-            case ESPNOW_RECV_CB:
+        case ESPNOW_RECV_CB:
             {
                 const auto recv_cb = &evt.info.recv_cb;
 
@@ -190,23 +209,24 @@ static void espnow_task(void *pvParameter)
                     ESP_LOGE(TAG, "Received ESPNOW data too short, len:%d", recv_cb->data_len);
                 else
                 {
+                    last_receive_tick = now_tick;
                     auto frame = reinterpret_cast<const ForwardAirFrame*>(recv_cb->data);
-                    if (xSemaphoreTake(receive_mutex, portMAX_DELAY) == pdTRUE)
+                    bool was_halted = false;
                     {
-                        if (!data_ready)
-                        {
-                            data_ready = true;
-                            memcpy(&received_frame, frame, sizeof(ForwardAirFrame));
-                        }
-                        xSemaphoreGive(receive_mutex);
+                        std::lock_guard<std::mutex> g(receive_mutex);
+                        was_halted = halted;
+                        halted = false;
+                        memcpy(&received_frame, frame, sizeof(ForwardAirFrame));
                     }
+                    if (was_halted)
+                        printf("%lu: RESUME\n", now_tick);
                 }
                 free(recv_cb->data);
                 break;
             }
-            default:
-                ESP_LOGE(TAG, "Callback type error: %d", evt.id);
-                break;
+        default:
+            ESP_LOGE(TAG, "Callback type error: %d", evt.id);
+            break;
         }
     }
 }
@@ -219,6 +239,7 @@ bool send_frame(ReturnAirFrame& frame)
         {
             // A frame is already pending.
             xSemaphoreGive(send_mutex);
+            printf("PENDING\n");
             return true; //false;
         }
         send_pending = true;
