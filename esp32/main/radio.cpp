@@ -180,7 +180,7 @@ static void espnow_task(void*)
                     was_halted = halted;
                     halted = true;
                 }
-                if (was_halted)
+                if (!was_halted && halted)
                     printf("%lu: HALT: Last packet was seen at %lu\n", now_tick, last_receive_tick);
             }
             continue;

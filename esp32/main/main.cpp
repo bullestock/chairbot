@@ -75,7 +75,6 @@ const int pwm_lights = 0;
 bool is_flashing = false;
 int flash_count = 0;
 int volume = 10;
-bool is_zeroed = false;
 #if 0
 int left_x_zero = 512;
 int left_y_zero = 512;
@@ -175,11 +174,15 @@ void handle_frame(const ForwardAirFrame& frame,
     set_crc(ret_frame);
     send_frame(ret_frame);
 
-    if (!is_zeroed)
+    static bool is_zeroed = false;
+    if (!is_zeroed &&
+        abs(frame.right_x - 2048) < 128 &&
+        abs(frame.right_y - 2048) < 128)
     {
         is_zeroed = true;
         right_x_zero = frame.right_x;
         right_y_zero = frame.right_y;
+        printf("ZERO: %d/%d\n", right_x_zero, right_y_zero);
     }
 
 #define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
