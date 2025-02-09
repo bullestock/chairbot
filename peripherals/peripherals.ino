@@ -1,18 +1,17 @@
+#include <TimerOne.h>
 #include <Wire.h>
 
 #include "SerialMP3Player.h"
 
-const int LED_PIN = 13;
 const int BUSY_PIN = A0;
 const int PWM_PINS[] =
 {
-    3, // TCCR2B
-    5, // TCCR0B
-    6, // 
-    9  // 
+    3, // Timer2
+    5, // Timer0
+    6, // Timer0
+    9  // Timer1
 };
 const int SLAVE_ADDRESS = 0x05;
-const int FLASH_RATE = 100; // Flash half period in ms
 
 bool debug_on = true;
 
@@ -24,8 +23,13 @@ uint8_t sound_index = 0;
 // Flag to start playing sound
 bool do_play = false;
 
+// milliseconds
+int blink_interval = 0;
+int blink_count = 0;
+
 void receiveData(int byteCount)
 {
+    digitalWrite(LED_BUILTIN, 1);
     uint8_t c = Wire.read();
     if (debug_on)
     {
@@ -69,6 +73,8 @@ void receiveData(int byteCount)
     case 13:
         // PWM 1-4
         {
+            blink_count = 2;
+            blink_interval = 100;
             uint8_t val = Wire.read();
             analogWrite(PWM_PINS[c - 10], val);
             if (debug_on)
@@ -81,6 +87,7 @@ void receiveData(int byteCount)
         break;
 
     default:
+        digitalWrite(LED_BUILTIN, 0);
         break;
     }
 
@@ -92,13 +99,35 @@ void sendData()
 {
 }
 
+void timer_interrupt()
+{
+    static bool on = false;
+    static int ticks_left = 0;
+
+    if (blink_interval <= 0)
+        return;
+    if (++ticks_left >= blink_interval)
+    {
+        ticks_left = 0;
+        on = !on;
+        if (blink_count > 0)
+            --blink_count;
+        if (blink_count == 0)
+            blink_interval = 0;
+    }
+    digitalWrite(LED_BUILTIN, on);
+}
+
 void setup()
 {
     Serial.begin(115200);
-    Serial.println("Peripherals v 0.3");
+    Serial.println("Peripherals v 0.4");
 
     for (auto pin : PWM_PINS)
         pinMode(pin, OUTPUT);
+
+    Timer1.initialize(1020);
+    Timer1.attachInterrupt(timer_interrupt);
 
     player.begin(9600);
     //player.showDebug(true);
@@ -107,7 +136,7 @@ void setup()
     delay(500);
     
     player.setVol(10);
-	delay(20);
+    delay(20);
 
     Wire.begin(SLAVE_ADDRESS);
     Wire.onReceive(receiveData);
@@ -186,6 +215,8 @@ void process(const char* buffer)
     case 'o':
     case 'O':
         {
+            blink_count = 2;
+            blink_interval = 100;
             int index;
             const int port = get_int(buffer+1, BUF_SIZE-1, &index);
             if (port < 0 || port > (int) (sizeof(PWM_PINS)/sizeof(PWM_PINS[0])))
@@ -210,6 +241,15 @@ void process(const char* buffer)
         player.stop();
         Serial.println("OK");
         break;
+
+    case 'h':
+    case 'H':
+        Serial.println("Commands:\r\n"
+                       "p <idx>\t\t"            "Play sound\r\n"
+                       "v <vol>\t\t"            "Set volume\r\n"
+                       "o <idx> <val>\t"        "Set PWM output\r\n"
+                       "s\t\t"                    "Stop sound");
+        break;
         
     default:
         Serial.println("ERROR: Unknown command");
@@ -224,8 +264,9 @@ void loop()
     case STATE_IDLE:
         if (do_play)
         {
+            blink_count = 1000;
+            blink_interval = 50;
             do_play = false;
-            digitalWrite(LED_PIN, HIGH);
             if (debug_on)
             {
                 Serial.print("Play ");
@@ -240,8 +281,18 @@ void loop()
     case STATE_PLAYING:
         {
             player.qStatus();
+            int i = 0;
             while (!player.available())
+            {
+                if (i++ < 100)
+                {
+                    Serial.println("TIMEOUT");
+                    blink_interval = 0;
+                    state = STATE_IDLE;
+                    break;
+                }
                 delay(10);
+            }
             bool busy = false;
             uint8_t status = 0;
             uint16_t value = 0;
@@ -249,14 +300,18 @@ void loop()
                 busy = status == 1;
             if (!busy)
             {
-                digitalWrite(LED_PIN, LOW);
                 state = STATE_WAIT;
                 wait_start = millis();
             }
-            else if ((millis() - play_start) > 3000)
+            else
             {
-                Serial.println("TIMEOUT");
-                state = STATE_IDLE;
+                const auto elapsed = millis() - play_start;
+                if (elapsed > 3000)
+                {
+                    Serial.println("TIMEOUT");
+                    blink_interval = 0;
+                    state = STATE_IDLE;
+                }
             }
         }
         break;
@@ -264,6 +319,7 @@ void loop()
     case STATE_WAIT:
         if ((millis() - wait_start) > 2000)
         {
+            blink_interval = 0;
             state = STATE_IDLE;
             if (debug_on)
                 Serial.println("Ready");
