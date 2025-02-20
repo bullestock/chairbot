@@ -221,7 +221,9 @@ void handle_frame(const ForwardAirFrame& frame,
     }
     set_motors(power_left/255.0, power_right/255.0);
 
+#if 0
     if (peripherals_present())
+#endif
         handle_peripherals(frame);
 }
 
@@ -280,7 +282,7 @@ void app_main()
         }
         vTaskDelay(100/portTICK_PERIOD_MS);
     }
-    xTaskCreate(&sound_loop, "Sound loop", 10240, NULL, 1, &xSoundTask);
+    xTaskCreate(&peripherals_loop, "Sound loop", 10240, NULL, 1, &xSoundTask);
     if (debug)
         run_console();        // never returns
     printf("\nStarting application\n");

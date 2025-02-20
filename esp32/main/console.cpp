@@ -276,6 +276,13 @@ int set_peer_mac(int argc, char** argv)
     return 0;
 }
 
+static int reboot(int, char**)
+{
+    printf("Reboot...\n");
+    esp_restart();
+    return 0;
+}
+
 void initialize_console()
 {
     /* Disable buffering on stdin */
@@ -383,6 +390,15 @@ void run_console()
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_peer_mac_cmd));
 
+    const esp_console_cmd_t reboot_cmd = {
+        .command = "reboot",
+        .help = "Reboot",
+        .hint = nullptr,
+        .func = &reboot,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&reboot_cmd));
+    
     const char* prompt = LOG_COLOR_I "esp32> " LOG_RESET_COLOR;
 
     printf("\n"

@@ -17,9 +17,9 @@ static bool is_peripherals_present = false;
 
 i2c_master_bus_handle_t i2c_bus_handle;
 
-static i2c_master_dev_handle_t sound_handle;
+static i2c_master_dev_handle_t i2c_handle;
 
-static QueueHandle_t sound_queue;
+static QueueHandle_t queue;
 
 struct Queue_item
 {
@@ -106,13 +106,13 @@ void init_peripherals()
 
     ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle));
 
-    i2c_device_config_t sound_cfg = {
+    i2c_device_config_t i2c_cfg = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,
         .device_address = I2C_ADDRESS,
         .scl_speed_hz = 100000,
     };
 
-    ESP_ERROR_CHECK(i2c_master_bus_add_device(i2c_bus_handle, &sound_cfg, &sound_handle));
+    ESP_ERROR_CHECK(i2c_master_bus_add_device(i2c_bus_handle, &i2c_cfg, &i2c_handle));
 
     adc_oneshot_unit_init_cfg_t init_config1 = {
         .unit_id = ADC_UNIT_1,
@@ -130,7 +130,7 @@ void init_peripherals()
 
     // Check if peripherals board is present on the I2C bus
     uint8_t byte = 0; // 0: Noop
-    const auto ret = i2c_master_transmit(sound_handle, &byte, 1, 50);
+    const auto ret = i2c_master_transmit(i2c_handle, &byte, 1, 50);
     is_peripherals_present = ret == ESP_OK;
     printf("Peripherals present: %s\n", is_peripherals_present ? "yes" : "no");
 }
@@ -145,7 +145,7 @@ void peripherals_play_sound(int sound)
     Queue_item i;
     i.type = Queue_item::Type::Sound;
     i.param1 = sound;
-    xQueueSend(sound_queue, &i, 0);
+    xQueueSend(queue, &i, 0);
 }
 
 void peripherals_do_play_sound(int sound)
@@ -154,7 +154,7 @@ void peripherals_do_play_sound(int sound)
     bytes[0] = 1; // 1: Play sound
     bytes[1] = sound;
     
-    const auto ret = i2c_master_transmit(sound_handle, bytes, sizeof(bytes), 50);
+    const auto ret = i2c_master_transmit(i2c_handle, bytes, sizeof(bytes), 50);
     if (ret == ESP_ERR_TIMEOUT)
         printf("Error [sound]: Bus is busy\n");
     else if (ret != ESP_OK)
@@ -163,10 +163,15 @@ void peripherals_do_play_sound(int sound)
 
 void peripherals_set_volume(int volume)
 {
+    static int last_volume = -1;
+    if (volume == last_volume)
+        return;
+    last_volume = volume;
+
     Queue_item i;
     i.type = Queue_item::Type::Volume;
     i.param1 = volume;
-    xQueueSend(sound_queue, &i, 0);
+    xQueueSend(queue, &i, 0);
 }
 
 void peripherals_do_set_volume(int volume)
@@ -175,7 +180,7 @@ void peripherals_do_set_volume(int volume)
     bytes[0] = 4; // 4: Set volume
     bytes[1] = volume;
     
-    const auto ret = i2c_master_transmit(sound_handle, bytes, sizeof(bytes), 50);
+    const auto ret = i2c_master_transmit(i2c_handle, bytes, sizeof(bytes), 50);
     if (ret == ESP_ERR_TIMEOUT)
         printf("Error [volume]: Bus is busy\n");
     else if (ret != ESP_OK)
@@ -184,11 +189,16 @@ void peripherals_do_set_volume(int volume)
 
 void peripherals_set_pwm(int chan, int value)
 {
+    static int last_value[4];
+    if (value == last_value[chan])
+        return;
+    last_value[chan] = value;
+
     Queue_item i;
     i.type = Queue_item::Type::Pwm;
     i.param1 = chan;
     i.param2 = value;
-    xQueueSend(sound_queue, &i, 0);
+    xQueueSend(queue, &i, 0);
 }
 
 void peripherals_do_set_pwm(int chan, int value)
@@ -197,22 +207,22 @@ void peripherals_do_set_pwm(int chan, int value)
     bytes[0] = 10 + chan; // 10-13: Set PWM output
     bytes[1] = value;
     
-    const auto ret = i2c_master_transmit(sound_handle, bytes, sizeof(bytes), 50);
+    const auto ret = i2c_master_transmit(i2c_handle, bytes, sizeof(bytes), 50);
     if (ret == ESP_ERR_TIMEOUT)
         printf("Error [volume]: Bus is busy\n");
     else if (ret != ESP_OK)
         printf("Error [volume]: Write failed: %d", ret);
 }
 
-void sound_loop(void*)
+void peripherals_loop(void*)
 {
     // Create a queue capable of containing 10 items.
-    sound_queue = xQueueCreate(10, sizeof(Queue_item));
+    queue = xQueueCreate(10, sizeof(Queue_item));
 
     while (1)
     {
         Queue_item i;
-        if (xQueueReceive(sound_queue, &i, 0))
+        if (xQueueReceive(queue, &i, 0))
             switch (i.type)
             {
             case Queue_item::Type::Sound:

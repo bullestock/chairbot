@@ -2,7 +2,7 @@
 
 #include <driver/i2c_master.h>
 
-void sound_loop(void*);
+void peripherals_loop(void*);
 
 void init_peripherals();
 
