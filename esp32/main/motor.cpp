@@ -95,7 +95,7 @@ void Motor::set_speed(float speed)
     ledc_update_duty(LEDC_LOW_SPEED_MODE, c1);
 }
 
-static const int max_range = 512;
+static const int max_range = 4096;
 
 int apply_s_curve(int x)
 {

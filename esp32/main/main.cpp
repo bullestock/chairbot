@@ -21,6 +21,7 @@
 #include "config.h"
 
 static const unsigned pwm_freq = 200;
+static const int POT_MAX = 3950;
 
 std::unique_ptr<Motor> motor_a;
 std::unique_ptr<Motor> motor_b;
@@ -199,7 +200,7 @@ void handle_frame(const ForwardAirFrame& frame,
     // Map right pot (0-255) to pivot value
     const int pivot = 5 + frame.right_pot/4.0;
     // Map left pot (0-255) to max_power (20-255)
-    const int max_power = static_cast<int>(20 + (256-20)/256.0*frame.left_pot);
+    const int max_power = std::min(4095, static_cast<int>(20 + (POT_MAX-20)/static_cast<float>(POT_MAX)*frame.left_pot));
     int power_left = 0;
     int power_right = 0;
     compute_power(rx, ry, power_left, power_right, pivot, max_power);
@@ -209,17 +210,18 @@ void handle_frame(const ForwardAirFrame& frame,
     {
         count = 0;
         // L <left stick> R <right stick> (<right mapped>) Pot <pots>
-        printf("[%" PRId64 "] L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c%c%c"
+        printf("[%" PRId64 "] Max %4d L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c%c%c"
                " Toggle %c%c%c%c"
                " Power %d/%d Pivot %d\n",
                total_packets,
+               (int) max_power,
                (int) frame.left_x, (int) frame.left_y, (int) frame.right_x, (int) frame.right_y, rx, ry,
                (int) frame.left_pot, (int) frame.right_pot,
                PUSH(0), PUSH(1), PUSH(2), PUSH(3), PUSH(4), PUSH(5),
                TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
                power_left, power_right, pivot);
     }
-    set_motors(power_left/255.0, power_right/255.0);
+    set_motors(power_left/4095.0, power_right/4095.0);
 
 #if 0
     if (peripherals_present())
