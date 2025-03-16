@@ -29,6 +29,26 @@ const char* get_peer_mac()
     return peer_mac;
 }
 
+static char my_mac[2*ESP_NOW_ETH_ALEN + 1];
+
+bool set_my_mac(const char* mac)
+{
+    if (strlen(mac) != 2*ESP_NOW_ETH_ALEN)
+        return false;
+    strcpy(my_mac, mac);
+    nvs_handle my_handle;
+    ESP_ERROR_CHECK(nvs_open("storage", NVS_READWRITE, &my_handle));
+    ESP_ERROR_CHECK(nvs_set_str(my_handle, MY_MAC_KEY, my_mac));
+    ESP_ERROR_CHECK(nvs_commit(my_handle));
+    nvs_close(my_handle);
+    return true;
+}
+
+const char* get_my_mac()
+{
+    return my_mac;
+}
+
 void init_nvs()
 {
     esp_err_t ret = nvs_flash_init();
@@ -57,6 +77,23 @@ void init_nvs()
         }
         else
             printf("Peer MAC %s\n", peer_mac);
+    }
+    sz = 0;
+    if (nvs_get_str(my_handle, MY_MAC_KEY, nullptr, &sz) != ESP_OK ||
+        sz != 2*ESP_NOW_ETH_ALEN + 1)
+    {
+        printf("My MAC not set\n");
+        my_mac[0] = 0;
+    }
+    else
+    {
+        if (nvs_get_str(my_handle, MY_MAC_KEY, my_mac, &sz) != ESP_OK)
+        {
+            printf("Error reading my MAC\n");
+            my_mac[0] = 0;
+        }
+        else
+            printf("My MAC %s\n", my_mac);
     }
     nvs_close(my_handle);
 }

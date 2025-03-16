@@ -5,17 +5,20 @@
 #include "motor.h"
 #include "nvs.h"
 #include "peripherals.h"
+#include "radio.h"
 
-#include "esp_system.h"
-#include "esp_log.h"
-#include "esp_console.h"
-#include "esp_vfs_dev.h"
+#include <string.h>
+
+#include <esp_system.h>
+#include <esp_log.h>
+#include <esp_console.h>
 
 #include <driver/i2c_master.h>
 #include <driver/uart.h>
+#include <driver/uart_vfs.h>
 
-#include "linenoise/linenoise.h"
-#include "argtable3/argtable3.h"
+#include <linenoise/linenoise.h>
+#include <argtable3/argtable3.h>
 
 int motor_test(int argc, char** argv)
 {
@@ -252,11 +255,13 @@ int control_peripherals(int argc, char** argv)
     return -1;
 }
 
-struct
+struct set_mac_args
 {
-    struct arg_str* peer_mac;
+    struct arg_str* mac;
     struct arg_end* end;
-} set_peer_mac_args;
+};
+
+set_mac_args set_peer_mac_args;
 
 int set_peer_mac(int argc, char** argv)
 {
@@ -266,13 +271,33 @@ int set_peer_mac(int argc, char** argv)
         arg_print_errors(stderr, set_peer_mac_args.end, argv[0]);
         return 1;
     }
-    const auto peer_mac = set_peer_mac_args.peer_mac->sval[0];
+    const auto peer_mac = set_peer_mac_args.mac->sval[0];
     if (!set_peer_mac(peer_mac))
     {
         printf("ERROR: Invalid MAC\n");
         return 1;
     }
     printf("OK: Peer MAC set to %s\n", peer_mac);
+    return 0;
+}
+
+set_mac_args set_my_mac_args;
+
+int set_my_mac(int argc, char** argv)
+{
+    int nerrors = arg_parse(argc, argv, (void**) &set_my_mac_args);
+    if (nerrors != 0)
+    {
+        arg_print_errors(stderr, set_my_mac_args.end, argv[0]);
+        return 1;
+    }
+    const auto my_mac = set_my_mac_args.mac->sval[0];
+    if (!set_my_mac(my_mac))
+    {
+        printf("ERROR: Invalid MAC\n");
+        return 1;
+    }
+    printf("OK: My MAC set to %s\n", my_mac);
     return 0;
 }
 
@@ -289,9 +314,9 @@ void initialize_console()
     setvbuf(stdin, NULL, _IONBF, 0);
 
     /* Minicom, screen, idf_monitor send CR when ENTER key is pressed */
-    esp_vfs_dev_uart_port_set_rx_line_endings(0, ESP_LINE_ENDINGS_CR);
+    uart_vfs_dev_port_set_rx_line_endings(0, ESP_LINE_ENDINGS_CR);
     /* Move the caret to the beginning of the next line on '\n' */
-    esp_vfs_dev_uart_port_set_tx_line_endings(0, ESP_LINE_ENDINGS_CRLF);
+    uart_vfs_dev_port_set_tx_line_endings(0, ESP_LINE_ENDINGS_CRLF);
 
     /* Configure UART. Note that REF_TICK is used so that the baud rate remains
      * correct while APB frequency is changing in light sleep mode.
@@ -310,7 +335,7 @@ void initialize_console()
                                          256, 0, 0, NULL, 0));
 
     /* Tell VFS to use UART driver */
-    esp_vfs_dev_uart_use_driver(CONFIG_ESP_CONSOLE_UART_NUM);
+    uart_vfs_dev_use_driver(CONFIG_ESP_CONSOLE_UART_NUM);
 
     /* Initialize the console */
     esp_console_config_t console_config;
@@ -379,16 +404,27 @@ void run_console()
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd4));
 
-    set_peer_mac_args.peer_mac = arg_str1(NULL, NULL, "<mac>", "Peer MAC");
+    set_peer_mac_args.mac = arg_str1(NULL, NULL, "<mac>", "MAC");
     set_peer_mac_args.end = arg_end(2);
     const esp_console_cmd_t set_peer_mac_cmd = {
-        .command = "mac",
+        .command = "peermac",
         .help = "Set peer MAC",
         .hint = nullptr,
         .func = &set_peer_mac,
         .argtable = &set_peer_mac_args
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&set_peer_mac_cmd));
+
+    set_my_mac_args.mac = arg_str1(NULL, NULL, "<mac>", "MAC");
+    set_my_mac_args.end = arg_end(2);
+    const esp_console_cmd_t set_my_mac_cmd = {
+        .command = "mymac",
+        .help = "Set my MAC",
+        .hint = nullptr,
+        .func = &set_my_mac,
+        .argtable = &set_my_mac_args
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&set_my_mac_cmd));
 
     const esp_console_cmd_t reboot_cmd = {
         .command = "reboot",

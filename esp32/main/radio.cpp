@@ -69,6 +69,15 @@ bool init_radio()
     ESP_ERROR_CHECK(esp_wifi_set_mode(ESPNOW_WIFI_MODE));
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_ESPNOW_CHANNEL, WIFI_SECOND_CHAN_NONE));
+    const auto my_mac_str = get_my_mac();
+    if (my_mac_str[0])
+    {
+        uint8_t my_mac[ESP_NOW_ETH_ALEN];
+        for (size_t i = 0; i < ESP_NOW_ETH_ALEN; ++i)
+            my_mac[i] = 16 * to_int(my_mac_str[2*i]) + to_int(my_mac_str[2*i+1]);
+        ESP_ERROR_CHECK(esp_wifi_set_mac(WIFI_IF_STA, my_mac));
+        ESP_LOGI(TAG, "Set MAC successfully");
+    }
 
 #if CONFIG_ESPNOW_ENABLE_LONG_RANGE
     ESP_ERROR_CHECK(esp_wifi_set_protocol(ESPNOW_WIFI_IF,

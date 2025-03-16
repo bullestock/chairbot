@@ -65,15 +65,19 @@ void Motor::set_speed(float speed)
     {
         const auto elapsed = millis - last_millis;
         auto delta = fabs(speed - last_speed);
+#if DEBUG_CLAMPING
         const auto initial_delta = delta;
         bool clamped = false;
+#endif
         while (delta/elapsed > MAX_DELTA && fabs(speed) > 0.01)
         {
             speed *= 0.9;
             delta = fabs(speed - last_speed);
+#if DEBUG_CLAMPING
             clamped = true;
+#endif
         }
-#if 0
+#if DEBUG_CLAMPING
         if (clamped)
             printf("Delta %f T %d ms, clamp to %f\n",
                    initial_delta, (int) elapsed, speed);
