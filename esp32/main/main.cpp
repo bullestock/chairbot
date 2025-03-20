@@ -197,10 +197,10 @@ void handle_frame(const ForwardAirFrame& frame,
     if (abs(ry) < MIN_DELTA)
         ry = 0;
 
-    // Map right pot (0-255) to pivot value
-    const int pivot = 5 + frame.right_pot/4.0;
-    // Map left pot (0-255) to max_power (20-255)
-    const int max_power = std::min(4095, static_cast<int>(20 + (POT_MAX-20)/static_cast<float>(POT_MAX)*frame.left_pot));
+    // Map right pot (0-4095) to pivot value
+    const int pivot = 5 + frame.right_pot/64.0;
+    // Map left pot (0-4095) to max_power (20-255)
+    const int max_power = std::min(255, static_cast<int>(20 + (POT_MAX-20)/static_cast<float>(POT_MAX)*frame.left_pot));
     int power_left = 0;
     int power_right = 0;
     compute_power(rx, ry, power_left, power_right, pivot, max_power);
@@ -209,7 +209,7 @@ void handle_frame(const ForwardAirFrame& frame,
     if (count > 100)
     {
         count = 0;
-        // L <left stick> R <right stick> (<right mapped>) Pot <pots>
+        // Max <maxpwr> L <left stick> R <right stick> (<right mapped>) Pot <pots>
         printf("[%" PRId64 "] Max %4d L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c%c%c"
                " Toggle %c%c%c%c"
                " Power %d/%d Pivot %d\n",
