@@ -22,7 +22,7 @@ private:
     ledc_channel_t channel_a = (ledc_channel_t) 0;
     ledc_channel_t channel_b = (ledc_channel_t) 0;
     float last_speed = 0.0;
-    uint32_t last_millis = 0;
+    int64_t last_tick = 0;
 };
 
 void compute_power(int rx, int ry, int& power_left, int& power_right, float pivot, int max_power = 100);

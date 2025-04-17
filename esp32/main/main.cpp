@@ -257,9 +257,11 @@ void main_loop(void* pvParameters)
         if (loopcount >= 100)
             loopcount = 0;
 
+#if 0
         if (is_halted())
             set_motors(0, 0);
         else
+#endif
         {
             const auto frame = get_received_frame();
             handle_frame(frame, battery);

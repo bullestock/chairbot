@@ -7,6 +7,7 @@
 
 #include <driver/gpio.h>
 #include <driver/ledc.h>
+#include <esp_timer.h>
 
 Motor::Motor(ledc_timer_t _timer,
              ledc_channel_t _channel_a,
@@ -53,38 +54,41 @@ Motor::Motor(ledc_timer_t _timer,
 }
 
 // Max 10 percent per second = 0.0001 per millisecond
-const float MAX_DELTA = 0.002;
+const float MAX_DELTA = 0.001;
 
 void Motor::set_speed(float speed)
 {
+#define DEBUG_CLAMPING 1
+#if 1
     struct timeval tv;
     struct timezone tz;
     gettimeofday(&tv, &tz);
-    const uint32_t millis = tv.tv_sec + tv.tv_usec/1000;
-    if (fabs(speed) > fabs(last_speed))
+    const int64_t tick = esp_timer_get_time();
+    if (fabs(speed) > last_speed)
     {
-        const auto elapsed = millis - last_millis;
-        auto delta = fabs(speed - last_speed);
+        const auto elapsed = tick - last_tick;
+        auto delta = fabs(speed) - last_speed;
 #if DEBUG_CLAMPING
-        const auto initial_delta = delta;
+        const auto initial_delta = delta/elapsed;
         bool clamped = false;
 #endif
         while (delta/elapsed > MAX_DELTA && fabs(speed) > 0.01)
         {
             speed *= 0.9;
-            delta = fabs(speed - last_speed);
+            delta = fabs(speed) - last_speed;
 #if DEBUG_CLAMPING
             clamped = true;
 #endif
         }
 #if DEBUG_CLAMPING
         if (clamped)
-            printf("Delta %f T %d ms, clamp to %f\n",
+            printf("Delta %f T %d us, clamp to %f\n",
                    initial_delta, (int) elapsed, speed);
 #endif
     }
-    last_speed = speed;
-    last_millis = millis;
+    last_speed = fabs(speed);
+    last_tick = tick;
+#endif
 
     ledc_channel_t c1 = channel_a;
     ledc_channel_t c2 = channel_b;
@@ -156,7 +160,7 @@ void set_motors(double m1, double m2)
 {
     motor_a->set_speed(m1);
     motor_b->set_speed(m2);
-    gpio_set_level(GPIO_ENABLE, fabs(m1) > 0.001 || fabs(m2) > 0.001);
+    gpio_set_level(GPIO_ENABLE, 1); //fabs(m1) > 0.001 || fabs(m2) > 0.001);
 }
 
 // Local Variables:
