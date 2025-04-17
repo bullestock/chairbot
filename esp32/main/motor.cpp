@@ -115,49 +115,39 @@ int apply_s_curve(int x)
     return -log(1.0/scaled - 1)*(x > 0 ? max_range/max_logit : -max_range/max_logit);
 }
 
-void compute_power(int rx, int ry, int& power_left, int& power_right, double pivot, int max_power)
+void compute_power(int rx, int ry, int& power_left, int& power_right, float pivot, int max_power)
 {
-    if (pivot < 0.1)
-        pivot = 0.1;
-    // rx = apply_s_curve(rx);
-    // ry = apply_s_curve(ry);
-    rx = -rx;
-                
-    int premix_l = 0;
-    int premix_r = 0;
-    // Calculate Drive Turn output due to Joystick X input
-    if (ry >= 0)
-    {
-        // Forward
-        premix_l = rx >= 0 ? max_range : max_range + rx;    // max_range
-        premix_r = rx >= 0 ? max_range - rx : max_range;    // max_range
-    }
-    else
-    {
-        // Reverse
-        premix_l = rx >= 0 ? max_range - rx : max_range;
-        premix_r = rx >= 0 ? max_range : max_range + rx;
-    }
+    // Map relative X/Y to (-1, 1)
+    const float x = -rx/static_cast<float>(max_range/2.0) * pivot/100;
+    const float y = ry/static_cast<float>(max_range/2.0);
 
-    // Scale Drive output due to Joystick Y input (throttle)
-    premix_l = premix_l * ry/(max_range+1.0);   // 0
-    premix_r = premix_r * ry/(max_range+1.0);   // 0
+    // Convert from Cartesian to polar
+    const float r = hypot(x, y);
+    float t = atan2(y, x);
 
-    // Now calculate pivot amount
-    // - Strength of pivot (nPivSpeed) based on Joystick X input
-    // - Blending of pivot vs drive (fPivScale) based on Joystick Y input
-    const auto piv_speed = rx;  // 0
-    float piv_diff = abs(ry)/pivot;
-    auto piv_scale = abs(ry) > pivot ? 0.0 : 1.0 - piv_diff;
-    if (piv_scale > 1.0)
-        piv_scale = 1.0;
+    // Rotate by 45 degrees to change coordinate system,
+    // then by 90 degrees to swap axes
+    t += M_PI / 4 + M_PI / 2;
 
+    // Convert back to cartesian
+    float left = r * cos(t);
+    float right = r * sin(t);
+
+    // rescale the new coords
+    left = left * sqrt(2);
+    right = right * sqrt(2);
+
+    // clamp to (-1, 1)
+    left = std::max<float>(-1.0, std::min<float>(left, 1.0));
+    right = std::max<float>(-1.0, std::min<float>(right, 1.0));
+
+    // Convert to percent
+    power_left = static_cast<int>(left*100);
+    power_right = static_cast<int>(right*100);
+    
     const int min_power = 7;
-    // Calculate final mix of Drive and Pivot and convert to motor PWM range
-    power_left = int(-((1.0-piv_scale)*premix_l + piv_scale*(piv_speed))/float(max_range)*max_power);
     if (abs(power_left) < min_power)
         power_left = 0;
-    power_right = int(-((1.0-piv_scale)*premix_r + piv_scale*(-piv_speed))/float(max_range)*max_power);
     if (abs(power_right) < min_power)
         power_right = 0;
 }
@@ -168,3 +158,7 @@ void set_motors(double m1, double m2)
     motor_b->set_speed(m2);
     gpio_set_level(GPIO_ENABLE, fabs(m1) > 0.001 || fabs(m2) > 0.001);
 }
+
+// Local Variables:
+// compile-command: "(cd ..; idf.py build)"
+// End:

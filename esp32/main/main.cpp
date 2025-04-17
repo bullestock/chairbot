@@ -197,8 +197,12 @@ void handle_frame(const ForwardAirFrame& frame,
     if (abs(ry) < MIN_DELTA)
         ry = 0;
 
-    // Map right pot (0-4095) to pivot value
-    const int pivot = 5 + frame.right_pot/64.0;
+    // Map right pot (0-4095) to pivot value (20-100)
+    const float pivot_pct = static_cast<float>(POT_MAX - frame.right_pot)/POT_MAX;
+    const int MIN_PIVOT = 20;
+    const int MAX_PIVOT = 100;
+    const int pivot = std::min(MAX_PIVOT,
+                               static_cast<int>(MIN_PIVOT + (MAX_PIVOT - MIN_PIVOT)*pivot_pct));
     // Map left pot (0-4095) to max_power (20-255)
     const float power_pct = static_cast<float>(frame.left_pot)/POT_MAX;
     const int MIN_POWER = 20;
@@ -225,7 +229,7 @@ void handle_frame(const ForwardAirFrame& frame,
                TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
                power_left, power_right, pivot);
     }
-    set_motors(power_left/4095.0, power_right/4095.0);
+    set_motors(power_left, power_right);
 
 #if 0
     if (peripherals_present())

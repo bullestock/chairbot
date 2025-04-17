@@ -25,13 +25,7 @@ private:
     uint32_t last_millis = 0;
 };
 
-// The threshold at which the pivot action starts
-// This threshold is measured in units on the Y-axis
-// away from the X-axis (Y=0). A greater value will assign
-// more of the joystick's range to pivot actions.
-const int PIVOT = 35;
-
-void compute_power(int rx, int ry, int& power_left, int& power_right, double pivot = PIVOT, int max_power = 100);
+void compute_power(int rx, int ry, int& power_left, int& power_right, float pivot, int max_power = 100);
 
 // -1 to +1
 void set_motors(double m1, double m2);
