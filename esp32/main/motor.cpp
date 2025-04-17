@@ -58,8 +58,8 @@ const float MAX_DELTA = 0.001;
 
 void Motor::set_speed(float speed)
 {
-#define DEBUG_CLAMPING 1
-#if 1
+#define DEBUG_CLAMPING 0
+
     struct timeval tv;
     struct timezone tz;
     gettimeofday(&tv, &tz);
@@ -88,7 +88,6 @@ void Motor::set_speed(float speed)
     }
     last_speed = fabs(speed);
     last_tick = tick;
-#endif
 
     ledc_channel_t c1 = channel_a;
     ledc_channel_t c2 = channel_b;
@@ -146,8 +145,8 @@ void compute_power(int rx, int ry, int& power_left, int& power_right, float pivo
     right = std::max<float>(-1.0, std::min<float>(right, 1.0));
 
     // Convert to percent
-    power_left = static_cast<int>(left*100);
-    power_right = static_cast<int>(right*100);
+    power_left = static_cast<int>(left*max_power);
+    power_right = static_cast<int>(right*max_power);
     
     const int min_power = 7;
     if (abs(power_left) < min_power)
