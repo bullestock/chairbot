@@ -200,7 +200,11 @@ void handle_frame(const ForwardAirFrame& frame,
     // Map right pot (0-4095) to pivot value
     const int pivot = 5 + frame.right_pot/64.0;
     // Map left pot (0-4095) to max_power (20-255)
-    const int max_power = std::min(255, static_cast<int>(20 + (POT_MAX-20)/static_cast<float>(POT_MAX)*frame.left_pot));
+    const float power_pct = static_cast<float>(frame.left_pot)/POT_MAX;
+    const int MIN_POWER = 20;
+    const int MAX_POWER = 255;
+    const int max_power = std::min(MAX_POWER,
+                                   static_cast<int>(MIN_POWER + (MAX_POWER - MIN_POWER)*power_pct));
     int power_left = 0;
     int power_right = 0;
     compute_power(rx, ry, power_left, power_right, pivot, max_power);
