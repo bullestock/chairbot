@@ -76,12 +76,6 @@ const int pwm_lights = 0;
 bool is_flashing = false;
 int flash_count = 0;
 int volume = 10;
-#if 0
-int left_x_zero = 512;
-int left_y_zero = 512;
-#endif
-int right_x_zero = 512;
-int right_y_zero = 512;
 
 void handle_peripherals(const ForwardAirFrame& frame)
 {
@@ -175,56 +169,36 @@ void handle_frame(const ForwardAirFrame& frame,
     set_crc(ret_frame);
     send_frame(ret_frame);
 
-    static bool is_zeroed = false;
-    if (!is_zeroed &&
-        abs(frame.right_x - 2048) < 128 &&
-        abs(frame.right_y - 2048) < 128)
-    {
-        is_zeroed = true;
-        right_x_zero = frame.right_x;
-        right_y_zero = frame.right_y;
-        printf("ZERO: %d/%d\n", right_x_zero, right_y_zero);
-    }
-
 #define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
 #define TOGGLE(bit) (is_toggle_down(frame, bit) ? 'D' : (is_toggle_up(frame, bit) ? 'U' : '-'))
 
-    const int MIN_DELTA = 7;
-    int rx = frame.right_x - right_x_zero;
-    if (abs(rx) < MIN_DELTA)
-        rx = 0;
-    int ry = frame.right_y - right_y_zero;
-    if (abs(ry) < MIN_DELTA)
-        ry = 0;
-
-    // Map right pot (0-4095) to pivot value (20-100)
-    const float pivot_pct = static_cast<float>(POT_MAX - frame.right_pot)/POT_MAX;
-    const int MIN_PIVOT = 20;
-    const int MAX_PIVOT = 100;
-    const int pivot = std::min(MAX_PIVOT,
-                               static_cast<int>(MIN_PIVOT + (MAX_PIVOT - MIN_PIVOT)*pivot_pct));
-    // Map left pot (0-4095) to max_power (20-255)
-    const float power_pct = static_cast<float>(frame.left_pot)/POT_MAX;
-    const int MIN_POWER = 20;
-    const int MAX_POWER = 255;
-    const int max_power = std::min(MAX_POWER,
-                                   static_cast<int>(MIN_POWER + (MAX_POWER - MIN_POWER)*power_pct));
-    int power_left = 0;
-    int power_right = 0;
-    compute_power(rx, ry, power_left, power_right, pivot, max_power);
+    // Map right pot (0-1) to pivot value (0.2-1.0)
+    const float MIN_PIVOT = 0.2;
+    const float MAX_PIVOT = 1.0;
+    const float pivot = std::min(MAX_PIVOT,
+                                 MIN_PIVOT + (MAX_PIVOT - MIN_PIVOT)*frame.right_pot);
+    // Map left pot (0-1) to max_power (0.2-1.0)
+    const float MIN_POWER = 0.2;
+    const float MAX_POWER = 1.0;
+    const float max_power = std::min(MAX_POWER,
+                                     MIN_POWER + (MAX_POWER - MIN_POWER)*frame.left_pot);
+    float power_left = 0.0;
+    float power_right = 0.0;
+    compute_power(frame.right_x, frame.right_y, power_left, power_right, pivot, max_power);
     static int count = 0;
     ++count;
     if (count > 100)
     {
         count = 0;
         // Max <maxpwr> L <left stick> R <right stick> (<right mapped>) Pot <pots>
-        printf("[%" PRId64 "] Max %4d L %4d/%4d R %4d/%4d (%d/%d) Pot %3d/%3d Push %c%c%c%c%c%c"
-               " Toggle %c%c%c%c"
-               " Power %d/%d Pivot %d\n",
+        printf("[%" PRId64 "] Max %1.2f L %2.3f/%2.3f R %2.3f/%2.3f Pot %1.2f/%1.2f "
+               "Push %c%c%c%c%c%c "
+               "Toggle %c%c%c%c "
+               "Power %2.2f/%2.2f Pivot %1.2f\n",
                total_packets,
-               (int) max_power,
-               (int) frame.left_x, (int) frame.left_y, (int) frame.right_x, (int) frame.right_y, rx, ry,
-               (int) frame.left_pot, (int) frame.right_pot,
+               max_power,
+               frame.left_x, frame.left_y, frame.right_x, frame.right_y,
+               frame.left_pot, frame.right_pot,
                PUSH(0), PUSH(1), PUSH(2), PUSH(3), PUSH(4), PUSH(5),
                TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
                power_left, power_right, pivot);

@@ -118,11 +118,10 @@ int apply_s_curve(int x)
     return -log(1.0/scaled - 1)*(x > 0 ? max_range/max_logit : -max_range/max_logit);
 }
 
-void compute_power(int rx, int ry, int& power_left, int& power_right, float pivot, int max_power)
+void compute_power(float rx, float ry, float& power_left, float& power_right, float pivot, float max_power)
 {
-    // Map relative X/Y to (-1, 1)
-    const float x = -rx/static_cast<float>(max_range/2.0) * pivot/100;
-    const float y = ry/static_cast<float>(max_range/2.0);
+    const float x = rx * pivot/1.0;
+    const float y = ry;
 
     // Convert from Cartesian to polar
     const float r = hypot(x, y);
@@ -144,22 +143,23 @@ void compute_power(int rx, int ry, int& power_left, int& power_right, float pivo
     left = std::max<float>(-1.0, std::min<float>(left, 1.0));
     right = std::max<float>(-1.0, std::min<float>(right, 1.0));
 
-    // Convert to percent
-    power_left = static_cast<int>(left*max_power);
-    power_right = static_cast<int>(right*max_power);
+    // Scale by max_power
+    power_left = left*max_power;
+    power_right = right*max_power;
     
-    const int min_power = 7;
+    const float min_power = 0.02;
     if (abs(power_left) < min_power)
-        power_left = 0;
+        power_left = 0.0;
     if (abs(power_right) < min_power)
-        power_right = 0;
+        power_right = 0.0;
 }
 
-void set_motors(double m1, double m2)
+void set_motors(float m1, float m2)
 {
+    // Brake is always off
+    gpio_set_level(GPIO_ENABLE, 1);
     motor_a->set_speed(m1);
     motor_b->set_speed(m2);
-    gpio_set_level(GPIO_ENABLE, 1); //fabs(m1) > 0.001 || fabs(m2) > 0.001);
 }
 
 // Local Variables:

@@ -25,10 +25,10 @@ private:
     int64_t last_tick = 0;
 };
 
-void compute_power(int rx, int ry, int& power_left, int& power_right, float pivot, int max_power = 100);
+void compute_power(float rx, float ry, float& power_left, float& power_right, float pivot, float max_power);
 
-// -1 to +1
-void set_motors(double m1, double m2);
+// -1.0 to 1.0
+void set_motors(float m1, float m2);
 
 extern std::unique_ptr<Motor> motor_a;
 extern std::unique_ptr<Motor> motor_b;
