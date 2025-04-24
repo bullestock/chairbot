@@ -142,6 +142,12 @@ int battery_reading_index = 0;
 void handle_frame(const ForwardAirFrame& frame,
                   const Battery& battery)
 {
+    if (frame.magic != ForwardAirFrame::MAGIC_VALUE)
+    {
+        printf("Bad magic: %04X\n", frame.magic);
+        return;
+    }
+
     ++total_packets;
 
     last_packet = xTaskGetTickCount();
