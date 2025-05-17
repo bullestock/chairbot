@@ -7,7 +7,7 @@
    viewBox="0 0 210 297"
    version="1.1"
    id="svg1"
-   inkscape:version="1.4.1 (93de688d07, 2025-03-30)"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
    sodipodi:docname="bearings.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -23,9 +23,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="44.334345"
-     inkscape:cx="308.36138"
-     inkscape:cy="36.439018"
+     inkscape:zoom="2.1880194"
+     inkscape:cx="170.01677"
+     inkscape:cy="132.31144"
      inkscape:window-width="2560"
      inkscape:window-height="1382"
      inkscape:window-x="0"
@@ -51,15 +51,11 @@
        cx="70"
        cy="20"
        r="11" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.921731;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+    <path
        id="rect9"
-       width="90"
-       height="70"
-       x="7.1054274e-15"
-       y="0"
-       rx="5"
-       ry="5" />
+       style="fill:none;stroke:#000000;stroke-width:0.921731;stroke-linejoin:round"
+       d="M 4.7056559,-30.000236 C 2.098597,-30.000236 0,-27.770024 0,-25.000024 V 5.0002116 65.000167 c 0,2.77 2.2302116,4.999695 5.0002116,4.999695 H 84.99998 c 2.77,0 5.000211,-2.229695 5.000211,-4.999695 V 5.0002116 -25.000024 c 0,-2.77 -2.099113,-5.000212 -4.706172,-5.000212 H 54.705705 c -2.607059,0 -4.705656,2.230212 -4.705656,5.000212 L 50,10 H 40 l 1.42e-4,-35.000024 c 1.1e-5,-2.77 -2.099113,-5.000212 -4.706172,-5.000212 z"
+       sodipodi:nodetypes="sscsssscssssccsss" />
     <g
        id="g10"
        transform="translate(17.5)">

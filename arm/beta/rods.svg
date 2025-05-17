@@ -25,7 +25,7 @@
      inkscape:document-units="mm"
      inkscape:zoom="8.3131767"
      inkscape:cx="141.7629"
-     inkscape:cy="47.214201"
+     inkscape:cy="47.214202"
      inkscape:window-width="2560"
      inkscape:window-height="1382"
      inkscape:window-x="0"
@@ -39,17 +39,17 @@
      inkscape:groupmode="layer"
      id="layer1">
     <circle
-       style="fill:none;stroke:#000000;stroke-width:0.569072;stroke-linejoin:round"
+       style="fill:none;stroke:#000000;stroke-width:0.571443;stroke-linejoin:round"
        id="path1"
        cx="12.5"
        cy="12.5"
-       r="6" />
+       r="6.0250001" />
     <circle
-       style="fill:none;stroke:#000000;stroke-width:0.569072;stroke-linejoin:round"
+       style="fill:none;stroke:#000000;stroke-width:0.571443;stroke-linejoin:round"
        id="circle1"
        cx="62.5"
        cy="12.5"
-       r="6" />
+       r="6.0250001" />
     <rect
        style="fill:none;stroke:#000000;stroke-width:1.48024;stroke-linejoin:round"
        id="rect1"
@@ -62,7 +62,13 @@
     <circle
        style="fill:none;stroke:#000000;stroke-width:0.183413;stroke-linejoin:round"
        id="path2"
-       cx="37.5"
+       cx="30"
+       cy="12.5"
+       r="2.5" />
+    <circle
+       style="fill:none;stroke:#000000;stroke-width:0.183413;stroke-linejoin:round"
+       id="circle2"
+       cx="45"
        cy="12.5"
        r="2.5" />
   </g>
