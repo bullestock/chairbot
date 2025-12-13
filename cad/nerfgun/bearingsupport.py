@@ -8,7 +8,7 @@ mount_th = 3
 b_crush = 0.35
 th = b_th + mount_th + 5
 rr = 4
-insert_r = 9/2
+insert_r = 9.1/2
 insert_l = 12.5
 
 pts = [
@@ -56,7 +56,25 @@ with BuildPart() as p:
         with PolarLocations(radius=25, count = 2):
             Circle(radius=insert_r)
     extrude(amount=-insert_l, mode=Mode.SUBTRACT)
+    # assorted holes
+    with BuildSketch(p.faces().sort_by(Axis.Z)[0]):
+        Circle(radius=12.5)
+        with PolarLocations(radius=27.5, count = 4, start_angle=-120):#, angular_range=280):
+            Circle(radius=8)
+    extrude(amount=-th, mode=Mode.SUBTRACT)
+    e = p.edges().sort_by(Axis.Z)
+    s = []
+    for i in range(1, 6):
+        s.append(e[i])
+    # 1
+    fillet(s, radius=2)
+    s = []
+    for i in range(70, 75):
+        s.append(e[i])
+    s.append(e[95])
+    fillet(s, radius=2)
 
 show(p)
 
-export_step(p.part, 'bearingsupport.step')
+export_step(p.part, 'bearingsupport-l.step')
+export_step(p.part.mirror(), 'bearingsupport-r.step')
