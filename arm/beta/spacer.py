@@ -2,7 +2,7 @@
 from build123d import *
 from ocp_vscode import *
 
-id, od, l = 6.5, 10, 5
+id, od, l = 6.5, 15, 10
 
 with BuildPart() as o:
     with BuildSketch() as sk:
