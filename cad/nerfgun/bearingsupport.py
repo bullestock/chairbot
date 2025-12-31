@@ -1,14 +1,14 @@
 from build123d import *
 from ocp_vscode import *
 
-b_od = 22.25
+b_od = 22.35
 b_th = 7
 mount_od = 14
 mount_th = 3
 b_crush = 0.35
 th = b_th + mount_th + 5
 rr = 4
-insert_r = 9.1/2
+insert_r = 9.2/2
 insert_l = 12.5
 
 pts = [
@@ -66,7 +66,6 @@ with BuildPart() as p:
     s = []
     for i in range(1, 6):
         s.append(e[i])
-    # 1
     fillet(s, radius=2)
     s = []
     for i in range(70, 75):
@@ -74,7 +73,7 @@ with BuildPart() as p:
     s.append(e[95])
     fillet(s, radius=2)
 
-show(p)
+show(p, reset_camera=Camera.KEEP)
 
 export_step(p.part, 'bearingsupport-l.step')
 export_step(p.part.mirror(), 'bearingsupport-r.step')

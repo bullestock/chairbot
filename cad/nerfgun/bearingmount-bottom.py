@@ -17,7 +17,7 @@ with BuildPart() as p:
     with BuildSketch():
         Circle(radius=id/2)
     extrude(amount=th + g_d, mode=Mode.SUBTRACT)
-    # bearing crush ribs
+    # slits
     with BuildSketch(p.faces().sort_by(Axis.Z).last):
         Rectangle(g_w, od)
         Rectangle(od, g_w)
