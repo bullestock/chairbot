@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="40.000141mm"
+   height="40.000141mm"
+   viewBox="0 0 40.000141 40.000141"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   sodipodi:docname="flange1.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="6.1292377"
+     inkscape:cx="162.9077"
+     inkscape:cy="63.384717"
+     inkscape:window-width="2560"
+     inkscape:window-height="1382"
+     inkscape:window-x="0"
+     inkscape:window-y="480"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g3"
+       transform="matrix(1,0,0,-1,0,40.000142)">
+      <g
+         id="g2"
+         transform="matrix(1,0,0,-1,0,40.000142)">
+        <path
+           id="rect1"
+           style="fill:none;stroke:#666366;stroke-width:0.5;stroke-linejoin:round;stroke-dasharray:none"
+           d="M 5.0002116,0 V 8.0000285 H 0 V 37.999748 40.000142 H 1.9998779 9.9999064 37.999748 c 1.108,0 2.000394,-0.892394 2.000394,-2.000394 V 1.9998779 C 40.000142,0.89187796 39.107748,0 37.999748,0 H 9.9999064 Z" />
+        <g
+           id="g1"
+           transform="translate(0.5,-7.5)"
+           style="stroke-width:0.5;stroke-dasharray:none">
+          <circle
+             style="fill:none;stroke:#666366;stroke-width:0.5;stroke-linejoin:round;stroke-dasharray:none"
+             id="path1"
+             cx="12.5"
+             cy="12.5"
+             r="2.5" />
+          <circle
+             style="fill:none;stroke:#666366;stroke-width:0.5;stroke-linejoin:round;stroke-dasharray:none"
+             id="circle1"
+             cx="32.5"
+             cy="12.5"
+             r="2.5" />
+        </g>
+      </g>
+      <circle
+         style="fill:none;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-dasharray:none"
+         id="path2"
+         cx="26.1"
+         cy="14.1"
+         r="9" />
+    </g>
+  </g>
+</svg>
