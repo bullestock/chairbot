@@ -158,8 +158,8 @@ void set_motors(float m1, float m2)
 {
     // Brake is always off
     gpio_set_level(GPIO_ENABLE, 1);
-    motor_a->set_speed(m1);
-    motor_b->set_speed(m2);
+    motor_a->set_speed(-m1);
+    motor_b->set_speed(-m2);
 }
 
 // Local Variables:
