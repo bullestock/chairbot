@@ -1,4 +1,4 @@
 esp32/components/cpp_utils
 esp32/components/ESP_IDF
 esp32/components/RF24
-esp32/sdkconfig*
+esp32/sdkconfig.old
