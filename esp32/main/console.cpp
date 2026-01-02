@@ -198,9 +198,9 @@ int control_peripherals(int argc, char** argv)
 {
     static const char* peripherals_usage =
        "Valid commands:\n"
-       "sound <number>     Play sound\n"
-       "volume <number>    Set volume\n"
-       "pwm <addr> <data>  Set PWM output\n";
+       "sound <number>            Play sound\n"
+       "volume <number>           Set volume\n"
+       "pwm <addr> <duty> <freq>  Set PWM output\n";
 
     if (argc < 2)
     {
@@ -216,7 +216,7 @@ int control_peripherals(int argc, char** argv)
             return -1;
         }
         int sound = atoi(argv[2]);
-        peripherals_play_sound(sound);
+        //!!peripherals_play_sound(sound);
         return 0;
     }
     if (!strcmp(argv[1], "volume"))
@@ -227,7 +227,7 @@ int control_peripherals(int argc, char** argv)
             return -1;
         }
         int volume = atoi(argv[2]);
-        peripherals_set_volume(volume);
+        //!!peripherals_set_volume(volume);
         return 0;
     }
     if (!strcmp(argv[1], "pwm"))
@@ -240,15 +240,16 @@ int control_peripherals(int argc, char** argv)
         }
         const int chan = atoi(argv[2]);
 
-        if (argc < 4)
+        if (argc < 5)
         {
             printf("Error: Missing data\n");
             printf(peripherals_usage);
             return -1;
         }
-        const int value = atoi(argv[3]);
+        const uint8_t duty = atoi(argv[3]);
+        const uint8_t freq = atoi(argv[4]);
 
-        peripherals_set_pwm(chan, value);
+        peripherals_set_pwm(chan, duty, freq);
         return 0;
     }
     printf("Error: Unknown command\n");

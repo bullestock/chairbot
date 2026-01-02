@@ -26,6 +26,7 @@ static const int POT_MAX = 3950;
 std::unique_ptr<Motor> motor_a;
 std::unique_ptr<Motor> motor_b;
 
+/*
 bool is_pushed(const ForwardAirFrame& frame, int button)
 {
     return frame.pushbuttons & (1 << button);
@@ -40,6 +41,8 @@ bool is_toggle_down(const ForwardAirFrame& frame, int sw)
 {
     return frame.toggles & (2 << 2*sw);
 }
+
+*/
 
 const int NOF_SOUND_BANKS = 3;
 int nof_sounds_per_bank[NOF_SOUND_BANKS] = {
@@ -69,7 +72,7 @@ void play_random_sound(int bank)
     printf("Bank %d: [%d %d] -> Sound %d\n", bank,
            lower_bound, lower_bound + nof_sounds - 1,
            sound);
-    peripherals_play_sound(sound);
+    //!!peripherals_play_sound(sound);
 }
 
 const int pwm_lights = 0;
@@ -79,58 +82,18 @@ int volume = 10;
 
 void handle_peripherals(const ForwardAirFrame& frame)
 {
-    if (is_flashing)
-    {
-        if (++flash_count > 10)
-        {
-            flash_count = 0;
-            is_flashing = false;
-        }
-        else
-        {
-            peripherals_set_pwm(pwm_lights, flash_count % 2 ? 255 : 0);
-        }
-    }
-    else
-    {
-        // Toggle 3: Headlights
-        if (is_toggle_up(frame, 3))
-            peripherals_set_pwm(pwm_lights, 255);
-        else if (is_toggle_down(frame, 3))
-            peripherals_set_pwm(pwm_lights, 0);
-        else
-            peripherals_set_pwm(pwm_lights, 64);
-    }
-    // Toggle 0: Amp power
-    if (is_toggle_up(frame, 0))
-        peripherals_set_pwm(3, 255);
-    else
-        peripherals_set_pwm(3, 0);
+    int i = 0;
+    for (const auto& e : frame.pwm)
+        peripherals_set_pwm(i++, e.duty, e.frequency);
 
-    // Push 0, 1, 2: Random sounds
-    if (is_pushed(frame, 0))
+    /*
+    if (frame.sound == ForwardAirFrame::SOUND_RANDOM)
         play_random_sound(0);
-    else if (is_pushed(frame, 1))
-        play_random_sound(1);
-    else if (is_pushed(frame, 2))
-        play_random_sound(2);
-    // Push 3: Flash headlights
-    else if (is_pushed(frame, 3) && !is_flashing)
-        is_flashing = true;
-    // Push 4: Volume up
-    else if (is_pushed(frame, 4))
-    {
-        if (volume < 20)
-            ++volume;
-        peripherals_set_volume(volume);
-    }
-    // Push 5: Volume down
-    else if (is_pushed(frame, 5))
-    {
-        if (volume > 1)
-            --volume;
-        peripherals_set_volume(volume);
-    }
+    else if (frame.sound == ForwardAirFrame::SOUND_ABORT)
+        abort_sound();
+    else if (frame.sound != 0)
+        play_sound(frame.sound);
+    */
 }
 
 unsigned long last_packet = 0;
@@ -144,7 +107,8 @@ void handle_frame(const ForwardAirFrame& frame,
 {
     if (frame.magic != ForwardAirFrame::MAGIC_VALUE)
     {
-        printf("Bad magic: %04X\n", frame.magic);
+        if (frame.magic)
+            printf("Bad magic: %04X\n", frame.magic);
         return;
     }
 
@@ -175,38 +139,24 @@ void handle_frame(const ForwardAirFrame& frame,
     set_crc(ret_frame);
     send_frame(ret_frame);
 
-#define PUSH(bit)   (is_pushed(frame, bit) ? '1' : '0')
-#define TOGGLE(bit) (is_toggle_down(frame, bit) ? 'D' : (is_toggle_up(frame, bit) ? 'U' : '-'))
-
-    // Map right pot (0-1) to pivot value (0.2-1.0)
     const float MIN_PIVOT = 0.2;
     const float MAX_PIVOT = 1.0;
-    const float pivot = std::min(MAX_PIVOT,
-                                 MIN_PIVOT + (MAX_PIVOT - MIN_PIVOT)*frame.right_pot);
-    // Map left pot (0-1) to max_power (0.2-1.0)
-    const float MIN_POWER = 0.2;
-    const float MAX_POWER = 1.0;
-    const float max_power = std::min(MAX_POWER,
-                                     MIN_POWER + (MAX_POWER - MIN_POWER)*frame.left_pot);
+    const float pivot = 0.5;
     float power_left = 0.0;
     float power_right = 0.0;
-    compute_power(frame.right_x, frame.right_y, power_left, power_right, pivot, max_power);
+    compute_power(frame.right_x, frame.right_y, power_left, power_right,
+                  pivot, 1.0);
     static int count = 0;
     ++count;
     if (count > 100)
     {
         count = 0;
         // Max <maxpwr> L <left stick> R <right stick> (<right mapped>) Pot <pots>
-        printf("[%" PRId64 "] Max %1.2f L %2.3f/%2.3f R %2.3f/%2.3f Pot %1.2f/%1.2f "
-               "Push %c%c%c%c%c%c "
-               "Toggle %c%c%c%c "
+        printf("[%" PRId64 "] L %2.3f/%2.3f R %2.3f/%2.3f Pot %1.2f/%1.2f "
                "Power %2.2f/%2.2f Pivot %1.2f\n",
                total_packets,
-               max_power,
                frame.left_x, frame.left_y, frame.right_x, frame.right_y,
-               frame.left_pot, frame.right_pot,
-               PUSH(0), PUSH(1), PUSH(2), PUSH(3), PUSH(4), PUSH(5),
-               TOGGLE(0), TOGGLE(1), TOGGLE(2), TOGGLE(3),
+               frame.volume, frame.analog,
                power_left, power_right, pivot);
     }
     set_motors(power_left, power_right);

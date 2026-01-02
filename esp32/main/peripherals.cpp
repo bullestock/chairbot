@@ -25,10 +25,8 @@ struct Queue_item
 {
     enum class Type
     {
-        Sound,
-        Volume,
         Pwm
-    } type = Type::Sound;
+    } type = Type::Pwm;
     int param1 = 0;
     int param2 = 0;
 };
@@ -140,78 +138,34 @@ bool peripherals_present()
     return is_peripherals_present;
 }
 
-void peripherals_play_sound(int sound)
+void peripherals_set_pwm(int chan, uint8_t duty, uint8_t freq)
 {
-    Queue_item i;
-    i.type = Queue_item::Type::Sound;
-    i.param1 = sound;
-    xQueueSend(queue, &i, 0);
-}
-
-void peripherals_do_play_sound(int sound)
-{
-    uint8_t bytes[2];
-    bytes[0] = 1; // 1: Play sound
-    bytes[1] = sound;
-    
-    const auto ret = i2c_master_transmit(i2c_handle, bytes, sizeof(bytes), 50);
-    if (ret == ESP_ERR_TIMEOUT)
-        printf("Error [sound]: Bus is busy\n");
-    else if (ret != ESP_OK)
-        printf("Error [sound]: Write failed: %d", ret);
-}
-
-void peripherals_set_volume(int volume)
-{
-    static int last_volume = -1;
-    if (volume == last_volume)
+    static uint8_t last_duty[4];
+    static uint8_t last_freq[4];
+    if (duty == last_duty[chan] && freq == last_freq[chan])
         return;
-    last_volume = volume;
-
-    Queue_item i;
-    i.type = Queue_item::Type::Volume;
-    i.param1 = volume;
-    xQueueSend(queue, &i, 0);
-}
-
-void peripherals_do_set_volume(int volume)
-{
-    uint8_t bytes[2];
-    bytes[0] = 4; // 4: Set volume
-    bytes[1] = volume;
-    
-    const auto ret = i2c_master_transmit(i2c_handle, bytes, sizeof(bytes), 50);
-    if (ret == ESP_ERR_TIMEOUT)
-        printf("Error [volume]: Bus is busy\n");
-    else if (ret != ESP_OK)
-        printf("Error [volume]: Write failed: %d", ret);
-}
-
-void peripherals_set_pwm(int chan, int value)
-{
-    static int last_value[4];
-    if (value == last_value[chan])
-        return;
-    last_value[chan] = value;
+    last_duty[chan] = duty;
+    last_freq[chan] = freq;
 
     Queue_item i;
     i.type = Queue_item::Type::Pwm;
     i.param1 = chan;
-    i.param2 = value;
+    i.param2 = duty | (freq << 8);
     xQueueSend(queue, &i, 0);
 }
 
-void peripherals_do_set_pwm(int chan, int value)
+void peripherals_do_set_pwm(int chan, uint8_t duty, uint8_t freq)
 {
-    uint8_t bytes[2];
+    uint8_t bytes[3];
     bytes[0] = 10 + chan; // 10-13: Set PWM output
-    bytes[1] = value;
+    bytes[1] = duty;
+    bytes[2] = freq;
     
     const auto ret = i2c_master_transmit(i2c_handle, bytes, sizeof(bytes), 50);
     if (ret == ESP_ERR_TIMEOUT)
-        printf("Error [volume]: Bus is busy\n");
+        printf("Error [pwm]: Bus is busy\n");
     else if (ret != ESP_OK)
-        printf("Error [volume]: Write failed: %d", ret);
+        printf("Error [pwm]: Write failed: %d", ret);
 }
 
 void peripherals_loop(void*)
@@ -225,16 +179,10 @@ void peripherals_loop(void*)
         if (xQueueReceive(queue, &i, 0))
             switch (i.type)
             {
-            case Queue_item::Type::Sound:
-                peripherals_do_play_sound(i.param1);
-                break;
-
-            case Queue_item::Type::Volume:
-                peripherals_do_set_volume(i.param1);
-                break;
-
             case Queue_item::Type::Pwm:
-                peripherals_do_set_pwm(i.param1, i.param2);
+                peripherals_do_set_pwm(i.param1,
+                                       i.param2 & 0xFF,
+                                       (i.param2 >> 8) & 0xFF);
                 break;
             }
 
