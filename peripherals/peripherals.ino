@@ -53,20 +53,6 @@ void receiveData(int byteCount)
         do_play = true;
         break;
 
-    case 4:
-        // Set volume
-        {
-            uint8_t vol = Wire.read() & 31;
-            player.setVol(vol);
-            if (debug_on)
-            {
-                Serial.print("i2c vol ");
-                Serial.println(vol);
-            }
-            --byteCount;
-        }
-        break;
-
     case 10:
     case 11:
     case 12:
@@ -75,12 +61,15 @@ void receiveData(int byteCount)
         {
             blink_count = 2;
             blink_interval = 100;
-            uint8_t val = Wire.read();
-            analogWrite(PWM_PINS[c - 10], val);
+            uint8_t duty = Wire.read();
+            uint8_t freq = Wire.read(); // not used yet
+            analogWrite(PWM_PINS[c - 10], duty);
             if (debug_on)
             {
                 Serial.print("i2c pwm ");
-                Serial.println(val);
+                Serial.print(duty);
+                Serial.print(" ");
+                Serial.println(freq);
             }
             --byteCount;
         }
