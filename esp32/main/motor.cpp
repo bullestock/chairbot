@@ -158,8 +158,18 @@ void set_motors(float m1, float m2)
 {
     // Brake is always off
     gpio_set_level(GPIO_ENABLE, 1);
-    motor_a->set_speed(-m1);
-    motor_b->set_speed(-m2);
+    static float old_m1 = 2.0;
+    static float old_m2 = 2.0;
+    if (abs(m1 - old_m1) > 0.005)
+    {
+        motor_a->set_speed(-m1);
+        old_m1 = m1;
+    }
+    if (abs(m2 - old_m2) > 0.005)
+    {
+        motor_b->set_speed(-m2);
+        old_m2 = m2;
+    }
 }
 
 // Local Variables:

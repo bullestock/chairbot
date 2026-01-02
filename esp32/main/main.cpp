@@ -158,12 +158,11 @@ void handle_frame(const ForwardAirFrame& frame,
                frame.left_x, frame.left_y, frame.right_x, frame.right_y,
                frame.volume, frame.analog,
                power_left, power_right, pivot);
+        vTaskDelay(10/portTICK_PERIOD_MS);
     }
     set_motors(power_left, power_right);
 
-#if 0
     if (peripherals_present())
-#endif
         handle_peripherals(frame);
 }
 
@@ -208,7 +207,9 @@ extern "C"
 void app_main()
 {
     init_peripherals();
+    vTaskDelay(100/portTICK_PERIOD_MS);
     init_nvs();
+    vTaskDelay(100/portTICK_PERIOD_MS);
 
     motor_a = std::make_unique<Motor>(LEDC_TIMER_0, LEDC_CHANNEL_0, LEDC_CHANNEL_1, GPIO_PWM0A_OUT, GPIO_PWM0B_OUT, pwm_freq);
     motor_b = std::make_unique<Motor>(LEDC_TIMER_1, LEDC_CHANNEL_2, LEDC_CHANNEL_3, GPIO_PWM1A_OUT, GPIO_PWM1B_OUT, pwm_freq);
