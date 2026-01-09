@@ -21,6 +21,12 @@ static const auto GPIO_V_BAT = GPIO_NUM_35;
 static const auto GPIO_SDA = GPIO_NUM_21;
 static const auto GPIO_SCL = GPIO_NUM_22;
 
+// I2S
+
+static const auto GPIO_I2S_DATA = GPIO_NUM_16;
+static const auto GPIO_I2S_CLK = GPIO_NUM_17;
+static const auto GPIO_I2S_WS = GPIO_NUM_27;
+
 static const auto max_radio_idle_time = 200/portTICK_PERIOD_MS;
 
 // NVS keys

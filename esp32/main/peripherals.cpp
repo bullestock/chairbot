@@ -5,6 +5,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
+#include <I2SSpeaker.h>
+
 #include "battery.h"
 #include "config.h"
 
@@ -165,11 +167,17 @@ void peripherals_do_set_pwm(int chan, uint8_t duty, uint8_t freq)
     if (ret == ESP_ERR_TIMEOUT)
         printf("Error [pwm]: Bus is busy\n");
     else if (ret != ESP_OK)
-        printf("Error [pwm]: Write failed: %d", ret);
+        printf("Error [pwm]: Write failed: %d\n", ret);
 }
+
+I2SSpeaker speaker(GPIO_I2S_DATA, GPIO_I2S_CLK, GPIO_I2S_WS);
 
 void peripherals_loop(void*)
 {
+    const auto ret = speaker.init();
+    if (ret != ESP_OK)
+        printf("Error [i2s]: init failed: %d\n", ret);
+    
     // Create a queue capable of containing 10 items.
     queue = xQueueCreate(10, sizeof(Queue_item));
 
