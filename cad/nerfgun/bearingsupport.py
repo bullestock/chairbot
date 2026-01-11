@@ -10,6 +10,10 @@ th = b_th + mount_th + 5
 rr = 4
 insert_r = 9.2/2
 insert_l = 12.5
+stepper_w = 43
+stepper_h = 43 + 10
+
+CUTOUT = True
 
 pts = [
     (0, 0),
@@ -53,14 +57,20 @@ with BuildPart() as p:
     fillet(p.edges().sort_by(Axis.Z)[1], radius=rr)
     # insert holes
     with BuildSketch(p.faces().sort_by(Axis.Y)[0]):
-        with PolarLocations(radius=25, count = 2):
-            Circle(radius=insert_r)
+        if CUTOUT:
+            with Locations((25, 0), (-37.5, 0)):
+                Circle(radius=insert_r)
+        else:
+            with PolarLocations(radius=25, count = 2):
+                Circle(radius=insert_r)
     extrude(amount=-insert_l, mode=Mode.SUBTRACT)
     # assorted holes
     with BuildSketch(p.faces().sort_by(Axis.Z)[0]):
-        Circle(radius=12.5)
-        with PolarLocations(radius=27.5, count = 4, start_angle=-120):#, angular_range=280):
-            Circle(radius=8)
+        with Locations((0, 10)):
+            if not CUTOUT:
+                Circle(radius=12.5)
+            with PolarLocations(radius=27.5, count = 4, start_angle=-110):
+                Circle(radius=6)
     extrude(amount=-th, mode=Mode.SUBTRACT)
     e = p.edges().sort_by(Axis.Z)
     s = []
@@ -68,10 +78,22 @@ with BuildPart() as p:
         s.append(e[i])
     fillet(s, radius=2)
     s = []
-    for i in range(70, 75):
-        s.append(e[i])
-    s.append(e[95])
+    if CUTOUT:
+        for i in range(70, 72):
+            s.append(e[i])
+        s.append(e[92])
+    else:
+        for i in range(70, 75):
+            s.append(e[i])
+        s.append(e[95])
     fillet(s, radius=2)
+    if CUTOUT:
+        # motor cutout
+        with BuildSketch(Plane.XY):
+            offset = 10
+            with Locations((hole_loc[0] - 1.5, stepper_h/2 - offset/2)):
+                RectangleRounded(stepper_w, stepper_h + offset, 3)
+        extrude(amount=th, mode=Mode.SUBTRACT)
 
 show(p, reset_camera=Camera.KEEP)
 
