@@ -23,9 +23,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.9336838"
-     inkscape:cx="302.53137"
-     inkscape:cy="302.27279"
+     inkscape:zoom="2.7346419"
+     inkscape:cx="4.3881432"
+     inkscape:cy="134.75256"
      inkscape:window-width="2560"
      inkscape:window-height="1382"
      inkscape:window-x="0"
@@ -42,84 +42,79 @@
     <circle
        style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.499998;stroke-linejoin:round"
        id="path1"
-       cx="-133.5"
-       cy="-117.5"
+       cx="-53.5"
+       cy="-37.5"
        r="4.25"
        transform="matrix(0,-1,-1,0,0,0)" />
     <circle
        style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.499998;stroke-linejoin:round"
        id="circle2"
-       cx="-133.5"
-       cy="-55"
+       cx="-53.5"
+       cy="25"
        r="4.25"
        transform="matrix(0,-1,-1,0,0,0)" />
     <circle
        style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.499998;stroke-linejoin:round"
        id="circle1"
-       cx="-26.5"
-       cy="-105"
+       cx="53.5"
+       cy="-25"
        r="4.25"
        transform="matrix(0,-1,-1,0,0,0)" />
     <circle
        style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.499998;stroke-linejoin:round"
        id="circle3"
-       cx="-26.5"
-       cy="-55"
+       cx="53.5"
+       cy="25"
        r="4.25"
        transform="matrix(0,-1,-1,0,0,0)" />
     <circle
        style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.5;stroke-linejoin:round"
        id="path4"
-       cx="-80"
-       cy="-80"
+       cx="0"
+       cy="0"
        r="80"
        transform="matrix(0,-1,-1,0,0,0)" />
-    <ellipse
+    <circle
        style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
        id="path2"
-       cx="-80"
-       cy="-80"
-       rx="6.2499995"
-       ry="6.25"
-       transform="matrix(0,-1,-1,0,0,0)" />
+       cx="0"
+       cy="0"
+       transform="matrix(0,-1,-1,0,0,0)"
+       r="6.375" />
     <circle
        style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.5;stroke-linejoin:round"
        id="path3"
-       cx="-87.775032"
-       cy="-75.498924"
+       cx="-7.775032"
+       cy="4.5010757"
        r="1.6"
        transform="matrix(0,-1,-1,0,0,0)" />
     <circle
        style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.5;stroke-linejoin:round"
        id="circle4"
-       cx="-80"
-       cy="-89"
+       cx="0"
+       cy="-9"
        r="1.6"
        transform="matrix(0,-1,-1,0,0,0)" />
     <circle
        style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.5;stroke-linejoin:round"
        id="circle5"
-       cx="-72.24575"
-       cy="-75.524155"
+       cx="7.7542496"
+       cy="4.4758453"
        r="1.6"
        transform="matrix(0,-1,-1,0,0,0)" />
-    <g
-       id="g1"
-       transform="translate(-0.89999998)">
-      <circle
-         style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
-         id="path5"
-         cx="115.6"
-         cy="74.5"
-         r="1.6"
-         transform="matrix(0,1,1,0,0,0)" />
-      <circle
-         style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
-         id="circle6"
-         cx="115.6"
-         cy="105.5"
-         r="1.6"
-         transform="matrix(0,1,1,0,0,0)" />
-    </g>
+    <circle
+       style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       id="path5"
+       cx="35.599998"
+       cy="-6.4000001"
+       r="1.6"
+       transform="matrix(0,1,1,0,0,0)" />
+    <circle
+       style="fill:none;fill-opacity:0.246227;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       id="circle6"
+       cx="35.599998"
+       cy="24.6"
+       r="1.6"
+       transform="matrix(0,1,1,0,0,0)" />
   </g>
 </svg>
