@@ -5,12 +5,12 @@ from ocp_vscode import *
 bearing_th = 13
 base_th = 3
 th = bearing_th + base_th
-bearing_od = 69.5
+bearing_od = 69
 base_od = 80
-slipring_d = 13.5
+slipring_d = 14
 bearing_mount_hole_radius = 50/2
 bearing_mount_insert_d = 4.4
-b_crush = 1
+b_crush = 1.2
 
 with BuildPart() as p:
     # cylinder
@@ -32,11 +32,10 @@ with BuildPart() as p:
     with BuildSketch():
         Circle(radius=slipring_d/2)
     extrude(amount=th, mode=Mode.SUBTRACT)
-    # base mount holes
-    with BuildSketch():
+    # mount holes
+    with Locations(p.faces().sort_by(Axis.Z)[0]):
         with PolarLocations(radius=bearing_mount_hole_radius, count=3, start_angle=-30):
-            Circle(bearing_mount_insert_d/2)
-    extrude(amount=th, mode=Mode.SUBTRACT)
+            CounterSinkHole(4.2/2, 8/2, th)
 
 show(p, reset_camera=Camera.KEEP)
 
