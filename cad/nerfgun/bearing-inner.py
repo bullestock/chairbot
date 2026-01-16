@@ -5,7 +5,7 @@ from ocp_vscode import *
 bearing_th = 13
 base_th = 3
 th = bearing_th + base_th
-bearing_od = 69
+bearing_id = 69
 base_od = 80
 slipring_d = 14
 bearing_mount_hole_radius = 50/2
@@ -15,7 +15,7 @@ b_crush = 1.2
 with BuildPart() as p:
     # cylinder
     with BuildSketch():
-        Circle(radius=bearing_od/2)
+        Circle(radius=bearing_id/2)
     extrude(amount=bearing_th)
     with BuildSketch(p.faces().sort_by(Axis.Z).last):
         Circle(radius=base_od/2)
@@ -25,7 +25,7 @@ with BuildPart() as p:
     fillet(e[2], 1)
     # crush ribs
     with BuildSketch(p.faces().sort_by(Axis.Z)[0].offset(-b_crush)):
-        with PolarLocations(radius=bearing_od/2 - b_crush/2 - 0.1, count=10):
+        with PolarLocations(radius=bearing_id/2 - b_crush/2 - 0.1, count=10):
             Circle(b_crush)
     extrude(amount=-bearing_th)
     # slipring hole
