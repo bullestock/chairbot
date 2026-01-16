@@ -29,21 +29,20 @@ with BuildPart() as p:
             Circle(radius=slipring_hole_d/2)
     extrude(amount=th, mode=Mode.SUBTRACT)
     # stepper mount holes
-    with BuildSketch():
-        with Locations((-8 + 3.2/2, -(34 + 3.2/2)), (23 + 3.2/2, -(34 + 3.2/2))):
-            Circle(radius=3.2/2)
-    extrude(amount=th, mode=Mode.SUBTRACT)
+    with Locations(p.faces().sort_by(Axis.Z)[0]):
+        with Locations((-8 + 3.2/2, +(34 + 3.2/2)+3), (23 + 3.2/2, +(34 + 3.2/2)+3)):
+            CounterSinkHole(radius=3.2/2, counter_sink_radius=6/2)
     with Locations(p.faces().sort_by(Axis.Z)[0]):
         # support holes
-        with GridLocations(support_x_dist, support_y_dist, 2, 2):
+        with Locations((support_x_dist/2, -support_y_dist/2),
+                       (-support_x_dist/2, -support_y_dist/2),
+                       (-support_x_dist/2, support_y_dist/2),
+                       (support_x_dist/2 + 12.5, support_y_dist/2)):
             CounterSinkHole(radius=support_hole_d/2, counter_sink_radius=18.25/2)
     with Locations(p.faces().sort_by(Axis.Z)[-1]):
         # gear mount holes
-        with PolarLocations(radius=mounting_hole_radius, count=3, start_angle=30):
+        with PolarLocations(radius=mounting_hole_radius, count=3, start_angle=90):
             CounterSinkHole(mounting_hole_d/2, 10/2)
-        #bearing support mount holes
-        with PolarLocations(radius=bearing_mount_hole_radius, count=3, start_angle=-30):
-            CounterSinkHole(bearing_mount_hole_d/2, 8/2)
 
 show(p, reset_camera=Camera.KEEP)
 
