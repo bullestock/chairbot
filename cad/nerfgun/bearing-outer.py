@@ -8,7 +8,7 @@ th = bearing_th + base_th
 bearing_od = 110
 gear_id = 118
 gear_th = 19
-b_crush = 1.2
+b_crush = 0.3 # was 0.6
 
 with BuildPart() as p:
     with BuildSketch():
