@@ -1706,6 +1706,12 @@
 		(uuid "4e495266-8196-4499-8041-650c75afb1b4")
 	)
 	(junction
+		(at 135.89 46.99)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "140a1c38-fedd-41a6-b2a2-699ffed6530c")
+	)
+	(junction
 		(at 189.23 30.48)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1797,16 +1803,6 @@
 	)
 	(wire
 		(pts
-			(xy 120.65 54.61) (xy 135.89 54.61)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0a032fe6-821e-4998-ad3e-e8230bc9c576")
-	)
-	(wire
-		(pts
 			(xy 170.18 137.16) (xy 171.45 137.16)
 		)
 		(stroke
@@ -1854,6 +1850,16 @@
 			(type default)
 		)
 		(uuid "3194563b-c20e-4e7f-a975-df3d430586a0")
+	)
+	(wire
+		(pts
+			(xy 135.89 46.99) (xy 135.89 137.16)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3379f41e-4b6d-482b-83ca-d4ef8f38a457")
 	)
 	(wire
 		(pts
@@ -1974,16 +1980,6 @@
 			(type default)
 		)
 		(uuid "7ad66877-0245-4af0-b8d5-b62b90adedc1")
-	)
-	(wire
-		(pts
-			(xy 135.89 54.61) (xy 135.89 137.16)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "84df9b57-5e67-4efa-b43f-092dd8d0a45c")
 	)
 	(wire
 		(pts
@@ -2127,6 +2123,16 @@
 	)
 	(wire
 		(pts
+			(xy 135.89 46.99) (xy 171.45 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c12bfe45-a2da-4793-a133-98736304e402")
+	)
+	(wire
+		(pts
 			(xy 179.07 127) (xy 182.88 127)
 		)
 		(stroke
@@ -2227,7 +2233,7 @@
 	)
 	(wire
 		(pts
-			(xy 120.65 46.99) (xy 171.45 46.99)
+			(xy 120.65 46.99) (xy 135.89 46.99)
 		)
 		(stroke
 			(width 0)
@@ -2343,28 +2349,6 @@
 		(uuid "a4df1cc7-c73e-488f-a181-cfffa3644130")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 120.65 33.02 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(global_label "EN"
-		(shape input)
-		(at 120.65 54.61 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "c7e1ff7f-5028-499a-a2e0-8149466908bd")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 120.65 54.61 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
