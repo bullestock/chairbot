@@ -566,7 +566,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "chairbot.net",
-      "plot": "",
+      "plot": "gerber",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "",
