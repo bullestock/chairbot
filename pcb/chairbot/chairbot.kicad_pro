@@ -70,6 +70,18 @@
           ""
         ],
         [
+          "missing_courtyard|60731400|157099000|00000000-0000-0000-0000-00005bdb1a22|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "missing_courtyard|62611000|90424000|00000000-0000-0000-0000-00005bd5bf47|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "missing_courtyard|95435155|123723232|af089e22-164b-475e-8cf0-adc8eb557698|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
           "silk_over_copper|89985155|125239899|59ea88a4-aff1-4954-99a5-7903faff669b|00000000-0000-0000-0000-000000000000",
           ""
         ],
@@ -116,14 +128,14 @@
         "malformed_courtyard": "error",
         "microvia_drill_out_of_range": "error",
         "mirrored_text_on_front_layer": "warning",
-        "missing_courtyard": "ignore",
+        "missing_courtyard": "error",
         "missing_footprint": "warning",
         "missing_tuning_profile": "warning",
         "net_conflict": "warning",
         "nonmirrored_text_on_back_layer": "warning",
-        "npth_inside_courtyard": "ignore",
+        "npth_inside_courtyard": "error",
         "padstack": "warning",
-        "pth_inside_courtyard": "ignore",
+        "pth_inside_courtyard": "error",
         "shorting_items": "error",
         "silk_edge_clearance": "warning",
         "silk_over_copper": "warning",
@@ -138,7 +150,7 @@
         "too_many_vias": "error",
         "track_angle": "error",
         "track_dangling": "warning",
-        "track_not_centered_on_via": "ignore",
+        "track_not_centered_on_via": "error",
         "track_on_post_machined_layer": "error",
         "track_segment_length": "error",
         "track_width": "error",

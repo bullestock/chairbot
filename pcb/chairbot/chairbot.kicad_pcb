@@ -139,15 +139,6 @@
 		(path "/00000000-0000-0000-0000-00005bc5ae9f")
 		(sheetname "/")
 		(sheetfile "chairbot.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "16" "35" "2" "4" "5" "21" "23" "1" "22" "33" "34" "36" "32" "14"
-					"3" "15" "30" "39" "38" "18" "19" "40" "37" "20" "13" "17" "31" "29"
-					"8" "10" "27" "25" "12" "26" "6" "24" "28" "9" "11" "7"
-				)
-			)
-		)
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
@@ -162,7 +153,7 @@
 		)
 		(fp_line
 			(start -1.8 34.81)
-			(end 29.75 34.81)
+			(end 20 34.81)
 			(stroke
 				(width 0.05)
 				(type solid)
@@ -812,15 +803,26 @@
 			(uuid "d688b44a-3834-4f3a-a573-88d3d761d749")
 		)
 		(embedded_fonts no)
-		(model "${KISYS3DMOD}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x10_P2.54mm_Vertical.step"
+		(model "${KISYS3DMOD}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x10_P2.54mm_Vertical.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 27.5 0 0)
 			)
 			(scale
 				(xyz 1 1 1)
 			)
 			(rotate
-				(xyz 0 0 0)
+				(xyz -0 -0 -0)
+			)
+		)
+		(model "${KISYS3DMOD}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x10_P2.54mm_Vertical.step"
+			(offset
+				(xyz 3 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -0 -0 -0)
 			)
 		)
 	)
@@ -1296,7 +1298,18 @@
 			(uuid "1fbc9003-d2d2-4c3f-bd80-913a154bc88c")
 		)
 		(embedded_fonts no)
-		(model "${KISYS3DMOD}/Connector_JST.3dshapes/JST_XH_B05B-XH-A_1x05_P2.50mm_Vertical.step"
+		(model "${KISYS3DMOD}/Connector_JST.3dshapes/JST_XH_B02B-XH-A_1x05_P2.50mm_Vertical.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
+		(model "${KICAD10_3DMODEL_DIR}/Connector_JST.3dshapes/JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -8825,6 +8838,17 @@
 			(uuid "28d7bb69-7793-4e68-b292-f1dd6c298ab3")
 		)
 		(embedded_fonts no)
+		(model "${KICAD10_3DMODEL_DIR}/Connector_Card.3dshapes/microSD_HC_Hirose_DM3D-SF.step"
+			(offset
+				(xyz -0.5 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -0 -0 -0)
+			)
+		)
 	)
 	(footprint "MountingHole:MountingHole_3.2mm_M3"
 		(layer "F.Cu")
@@ -9144,6 +9168,7 @@
 		(property "Reference" "TP1"
 			(at 0.7 2.5 0)
 			(layer "F.SilkS")
+			(hide yes)
 			(uuid "790e2eb3-62b8-4dd8-a4ff-0066ff4e6fd3")
 			(effects
 				(font
@@ -9570,6 +9595,28 @@
 			(uuid "2dd25167-644a-4cda-a53d-0066f1569a6a")
 		)
 		(embedded_fonts no)
+		(model "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x09_P2.54mm_Vertical.step"
+			(offset
+				(xyz -7.6 -6.5 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -0 -0 -90)
+			)
+		)
+		(model "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x06_P2.54mm_Vertical.step"
+			(offset
+				(xyz -14 6.5 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -0 -0 -0)
+			)
+		)
 	)
 	(gr_line
 		(start 36.576 80.645)
@@ -9610,6 +9657,66 @@
 		)
 		(layer "Edge.Cuts")
 		(uuid "eb7d6310-ef5d-49db-9c3c-5e5c55602095")
+	)
+	(gr_text "USB"
+		(at 74.422 123.698 0)
+		(layer "F.SilkS")
+		(uuid "8acab565-8d9a-48c9-92be-cd2dd4626475")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "24V"
+		(at 81.026 174.752 0)
+		(layer "F.SilkS")
+		(uuid "28b68a01-e92a-4a2f-9213-894a07f1b3fd")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "GND"
+		(at 86.106 179.324 0)
+		(layer "F.SilkS")
+		(uuid "fb02f398-601c-4857-810f-96b22c1bc2cd")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "I2C"
+		(at 96.012 91.44 0)
+		(layer "F.SilkS")
+		(uuid "f7a69164-db14-4c06-bf2e-aa4919f2f5dc")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
+	)
+	(gr_text "Brake"
+		(at 45.974 178.308 90)
+		(layer "F.SilkS")
+		(uuid "6d86a6cf-a3b0-4ed1-969f-47d626292a2e")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify left bottom)
+		)
 	)
 	(gr_text "https://github.com/bullestock/chairbot/"
 		(at 72.517 107.696 90)
