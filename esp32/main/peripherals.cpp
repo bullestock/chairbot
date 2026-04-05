@@ -5,6 +5,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
+#include <string.h>
+
 #include "battery.h"
 #include "config.h"
 
@@ -25,10 +27,12 @@ struct Queue_item
 {
     enum class Type
     {
-        Pwm
+        Pwm,
+        Uart,
     } type = Type::Pwm;
     int param1 = 0;
     int param2 = 0;
+    char* buffer = nullptr;
 };
 
 static bool adc_calibration_init(adc_unit_t unit, adc_channel_t channel,
@@ -168,6 +172,28 @@ void peripherals_do_set_pwm(int chan, uint8_t duty, uint8_t freq)
         printf("Error [pwm]: Write failed: %d\n", ret);
 }
 
+void peripherals_send_uart(const char* data)
+{
+    Queue_item i;
+    i.type = Queue_item::Type::Uart;
+    i.buffer = strdup(data);
+    xQueueSend(queue, &i, 0);
+}
+
+void peripherals_do_send_uart(const char* data)
+{
+    const auto size = strlen(data) + 2;
+    uint8_t* bytes = reinterpret_cast<uint8_t*>(malloc(size));
+    bytes[0] = static_cast<int>(I2c_cmd::Uart1);
+    strcpy(reinterpret_cast<char*>(bytes) + 1, data);
+    
+    const auto ret = i2c_master_transmit(i2c_handle, bytes, size, 50);
+    if (ret == ESP_ERR_TIMEOUT)
+        printf("Error [pwm]: Bus is busy\n");
+    else if (ret != ESP_OK)
+        printf("Error [pwm]: Write failed: %d\n", ret);
+}
+     
 void peripherals_loop(void*)
 {
     // Create a queue capable of containing 10 items.
@@ -184,6 +210,11 @@ void peripherals_loop(void*)
                                        i.param2 & 0xFF,
                                        (i.param2 >> 8) & 0xFF);
                 break;
+
+            case Queue_item::Type::Uart:
+                peripherals_do_send_uart(i.buffer);
+                free(i.buffer);
+                break;                
             }
 
         vTaskDelay(10/portTICK_PERIOD_MS);

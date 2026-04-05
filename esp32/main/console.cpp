@@ -200,7 +200,8 @@ int control_peripherals(int argc, char** argv)
        "Valid commands:\n"
        "sound <number>            Play sound\n"
        "volume <number>           Set volume\n"
-       "pwm <addr> <duty> <freq>  Set PWM output\n";
+       "pwm <addr> <duty> <freq>  Set PWM output\n"
+       "uart <data>               Send data via UART passthrough\n";
 
     if (argc < 2)
     {
@@ -250,6 +251,16 @@ int control_peripherals(int argc, char** argv)
         const uint8_t freq = atoi(argv[4]);
 
         peripherals_set_pwm(chan, duty, freq);
+        return 0;
+    }
+    if (!strcmp(argv[1], "uart"))
+    {
+        if (argc < 3)
+        {
+            printf("Error: Missing UART data\n");
+            return -1;
+        }
+        peripherals_send_uart(argv[2]);
         return 0;
     }
     printf("Error: Unknown command\n");
