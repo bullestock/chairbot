@@ -1,16 +1,9 @@
 #pragma once
 
+#include <string>
+
 #include <driver/i2c_master.h>
 
-enum class I2c_cmd
-{
-    Pwm1 = 10,
-    Pwm2,
-    Pwm3,
-    Pwm4,
-    Uart1 = 20,
-};
-    
 void peripherals_loop(void*);
 
 void init_peripherals();
@@ -19,6 +12,8 @@ bool peripherals_present();
 
 void peripherals_set_pwm(int chan, uint8_t duty, uint8_t freq);
 
-void peripherals_send_uart(const char* data);
+void peripherals_write_uart(const char* data);
+
+std::string peripherals_read_uart();
 
 extern i2c_master_bus_handle_t i2c_bus_handle;

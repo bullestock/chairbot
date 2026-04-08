@@ -7,6 +7,8 @@
 
 #include <string.h>
 
+#include "../../include/i2c_cmd.h"
+
 #include "battery.h"
 #include "config.h"
 
@@ -172,7 +174,7 @@ void peripherals_do_set_pwm(int chan, uint8_t duty, uint8_t freq)
         printf("Error [pwm]: Write failed: %d\n", ret);
 }
 
-void peripherals_send_uart(const char* data)
+void peripherals_write_uart(const char* data)
 {
     Queue_item i;
     i.type = Queue_item::Type::Uart;
@@ -180,18 +182,46 @@ void peripherals_send_uart(const char* data)
     xQueueSend(queue, &i, 0);
 }
 
-void peripherals_do_send_uart(const char* data)
+void peripherals_do_write_uart(const char* data)
 {
-    const auto size = strlen(data) + 2;
+    const auto size = strlen(data);
+    if (size > 255)
+    {
+        printf("Error [uart]: Too much data\n");
+        return;
+    }
     uint8_t* bytes = reinterpret_cast<uint8_t*>(malloc(size));
-    bytes[0] = static_cast<int>(I2c_cmd::Uart1);
-    strcpy(reinterpret_cast<char*>(bytes) + 1, data);
+    bytes[0] = static_cast<int>(I2c_cmd::Uart1_tx);
+    bytes[1] = static_cast<uint8_t>(size);
+    memcpy(reinterpret_cast<char*>(bytes) + 2, data, size);
     
-    const auto ret = i2c_master_transmit(i2c_handle, bytes, size, 50);
+    const auto ret = i2c_master_transmit(i2c_handle, bytes, size + 2, 50);
     if (ret == ESP_ERR_TIMEOUT)
-        printf("Error [pwm]: Bus is busy\n");
+        printf("Error [uart]: Bus is busy\n");
     else if (ret != ESP_OK)
-        printf("Error [pwm]: Write failed: %d\n", ret);
+        printf("Error [uart]: Write failed: %d\n", ret);
+}
+     
+std::string peripherals_read_uart()
+{
+    uint8_t bytes[1];
+    bytes[0] = static_cast<int>(I2c_cmd::Uart1_rx);
+    uint8_t buffer[80];
+    memset(buffer, 0, sizeof(buffer));
+    const auto ret = i2c_master_transmit_receive(i2c_handle, bytes,
+                                                 sizeof(bytes),
+                                                 buffer, sizeof(buffer), 50);
+    if (ret == ESP_ERR_TIMEOUT)
+    {
+        printf("Error [uart]: Bus is busy\n");
+        return "";
+    }
+    else if (ret != ESP_OK)
+    {
+        printf("Error [uart]: Write failed: %d\n", ret);
+        return "";
+    }
+    return std::string(reinterpret_cast<char*>(buffer));
 }
      
 void peripherals_loop(void*)
@@ -212,7 +242,7 @@ void peripherals_loop(void*)
                 break;
 
             case Queue_item::Type::Uart:
-                peripherals_do_send_uart(i.buffer);
+                peripherals_do_write_uart(i.buffer);
                 free(i.buffer);
                 break;                
             }
