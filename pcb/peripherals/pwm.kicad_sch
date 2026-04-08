@@ -1,29 +1,35 @@
 (kicad_sch
-	(version 20250114)
+	(version 20260306)
 	(generator "eeschema")
-	(generator_version "9.0")
+	(generator_version "10.0")
 	(uuid "572dbc12-cc12-4742-9ab3-ccf417c05429")
 	(paper "A4")
 	(lib_symbols
 		(symbol "peripherals-rescue:+24V-power"
-			(power)
+			(power global)
 			(pin_names
 				(offset 0)
 			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "#PWR"
 				(at 0 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Value" "power_+24V"
 				(at 0 3.556 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -32,29 +38,35 @@
 			)
 			(property "Footprint" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Datasheet" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Description" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(symbol "+24V-power_0_1"
@@ -128,8 +140,12 @@
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "C"
 				(at 0.635 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -139,6 +155,8 @@
 			)
 			(property "Value" "Device_C"
 				(at 0.635 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -148,38 +166,46 @@
 			)
 			(property "Footprint" ""
 				(at 0.9652 -3.81 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Datasheet" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Description" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "ki_fp_filters" "C_*"
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(symbol "C-Device_0_1"
@@ -212,7 +238,7 @@
 				(pin passive line
 					(at 0 3.81 270)
 					(length 2.794)
-					(name "~"
+					(name ""
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -230,7 +256,7 @@
 				(pin passive line
 					(at 0 -3.81 90)
 					(length 2.794)
-					(name "~"
+					(name ""
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -256,8 +282,12 @@
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "J"
 				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -266,6 +296,8 @@
 			)
 			(property "Value" "Connector_Generic_Conn_01x02"
 				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -274,38 +306,46 @@
 			)
 			(property "Footprint" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Datasheet" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Description" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "ki_fp_filters" "Connector*:*_1x??_*"
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(symbol "Conn_01x02-Connector_Generic_1_1"
@@ -392,8 +432,12 @@
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "D"
 				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -402,6 +446,8 @@
 			)
 			(property "Value" "Device_D"
 				(at 0 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -410,38 +456,46 @@
 			)
 			(property "Footprint" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Datasheet" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Description" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(symbol "D-Device_0_1"
@@ -523,24 +577,30 @@
 			(embedded_fonts no)
 		)
 		(symbol "peripherals-rescue:GNDPWR-power"
-			(power)
+			(power global)
 			(pin_names
 				(offset 0)
 			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "#PWR"
 				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Value" "power_GNDPWR"
 				(at 0 -3.302 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -549,29 +609,35 @@
 			)
 			(property "Footprint" ""
 				(at 0 -1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Datasheet" ""
 				(at 0 -1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Description" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(symbol "GNDPWR-power_0_1"
@@ -691,8 +757,12 @@
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "Q"
 				(at 5.08 1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -702,6 +772,8 @@
 			)
 			(property "Value" "Device_Q_NPN_BEC"
 				(at 5.08 -1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -711,29 +783,35 @@
 			)
 			(property "Footprint" ""
 				(at 5.08 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Datasheet" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Description" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(symbol "Q_NPN_BEC-Device_0_1"
@@ -817,24 +895,6 @@
 					)
 				)
 				(pin passive line
-					(at 2.54 5.08 270)
-					(length 2.54)
-					(name "C"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
 					(at 2.54 -5.08 90)
 					(length 2.54)
 					(name "E"
@@ -845,6 +905,24 @@
 						)
 					)
 					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 2.54 5.08 270)
+					(length 2.54)
+					(name "C"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -863,8 +941,12 @@
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "Q"
 				(at 5.08 1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -874,6 +956,8 @@
 			)
 			(property "Value" "Device_Q_PMOS_GDS"
 				(at 5.08 -1.27 0)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -883,29 +967,35 @@
 			)
 			(property "Footprint" ""
 				(at 5.08 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Datasheet" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Description" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(symbol "Q_PMOS_GDS-Device_0_1"
@@ -1191,8 +1281,12 @@
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "R"
 				(at 2.032 0 90)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1201,6 +1295,8 @@
 			)
 			(property "Value" "Device_R"
 				(at 0 0 90)
+				(show_name no)
+				(do_not_autoplace no)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1209,38 +1305,46 @@
 			)
 			(property "Footprint" ""
 				(at -1.778 0 90)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Datasheet" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "Description" ""
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(property "ki_fp_filters" "R_*"
 				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(hide yes)
 				)
 			)
 			(symbol "R-Device_0_1"
@@ -1260,7 +1364,7 @@
 				(pin passive line
 					(at 0 3.81 270)
 					(length 1.27)
-					(name "~"
+					(name ""
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1278,7 +1382,7 @@
 				(pin passive line
 					(at 0 -3.81 90)
 					(length 1.27)
-					(name "~"
+					(name ""
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2337,11 +2441,13 @@
 		(uuid "00ff6191-e350-4987-9229-e9ce75a424f4")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 46.99 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 	)
@@ -2357,11 +2463,13 @@
 		(uuid "50886c85-f848-4bba-b53f-4539c25ab78e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 46.99 70.485 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 	)
@@ -2377,11 +2485,13 @@
 		(uuid "50ddd427-7b44-4661-b066-f4c6c518f7eb")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 163.195 69.215 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 	)
@@ -2397,11 +2507,13 @@
 		(uuid "9dedcb06-6d2f-4797-a1f0-e71ba2b6f762")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 161.925 139.065 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 	)
@@ -2409,13 +2521,17 @@
 		(lib_id "peripherals-rescue:Conn_01x02-Connector_Generic")
 		(at 95.25 75.565 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005daba6f6")
 		(property "Reference" "J5"
 			(at 97.282 75.7682 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2425,6 +2541,8 @@
 		)
 		(property "Value" "JST XH"
 			(at 97.282 78.0796 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2434,24 +2552,30 @@
 		)
 		(property "Footprint" "Connector_JST:JST_XH_B02B-XH-A_1x02_P2.50mm_Vertical"
 			(at 95.25 75.565 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 95.25 75.565 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 95.25 75.565 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2465,7 +2589,7 @@
 			(uuid "a71c3023-b191-483d-9342-538407b21b78")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "J5")
 					(unit 1)
@@ -2477,22 +2601,28 @@
 		(lib_id "peripherals-rescue:+24V-power")
 		(at 86.36 35.56 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005daba6fc")
 		(property "Reference" "#PWR02"
 			(at 86.36 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "+24V"
 			(at 86.741 31.1658 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2501,24 +2631,30 @@
 		)
 		(property "Footprint" ""
 			(at 86.36 35.56 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 86.36 35.56 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 86.36 35.56 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2529,7 +2665,7 @@
 			(uuid "d474e7f2-2a7a-4a12-b9e3-cd3b8f98c98b")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR02")
 					(unit 1)
@@ -2541,22 +2677,28 @@
 		(lib_id "peripherals-rescue:GNDPWR-power")
 		(at 74.93 80.01 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005daba708")
 		(property "Reference" "#PWR03"
 			(at 74.93 85.09 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "GNDPWR"
 			(at 75.0316 83.9216 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2565,24 +2707,30 @@
 		)
 		(property "Footprint" ""
 			(at 74.93 81.28 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 74.93 81.28 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 74.93 80.01 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2593,7 +2741,7 @@
 			(uuid "b383cb13-876f-42ea-a01b-eef8aff68060")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR03")
 					(unit 1)
@@ -2605,13 +2753,17 @@
 		(lib_id "peripherals-rescue:D-Device")
 		(at 86.36 71.12 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005daba713")
 		(property "Reference" "D1"
 			(at 81.915 69.215 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2620,6 +2772,8 @@
 		)
 		(property "Value" "SS34"
 			(at 81.28 71.755 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2628,24 +2782,30 @@
 		)
 		(property "Footprint" "Diode_SMD:D_SMB"
 			(at 86.36 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 86.36 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 86.36 71.12 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2659,7 +2819,7 @@
 			(uuid "c125df60-5011-4fcb-ab61-5bca59a81a54")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "D1")
 					(unit 1)
@@ -2681,13 +2841,17 @@
 		(lib_id "peripherals-rescue:R-Device")
 		(at 59.69 70.485 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005daba726")
 		(property "Reference" "R1"
 			(at 58.42 67.945 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2696,6 +2860,8 @@
 		)
 		(property "Value" "1k"
 			(at 59.69 70.485 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2704,24 +2870,30 @@
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 59.69 68.707 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 59.69 70.485 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 59.69 70.485 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2735,7 +2907,7 @@
 			(uuid "5c62ab68-ff58-4f8a-8cf0-6203cc2229d8")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "R1")
 					(unit 1)
@@ -2747,13 +2919,17 @@
 		(lib_id "peripherals-rescue:C-Device")
 		(at 63.5 39.37 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005dad1068")
 		(property "Reference" "C3"
 			(at 63.5 32.9692 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2762,6 +2938,8 @@
 		)
 		(property "Value" "1u"
 			(at 63.5 35.2806 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2770,24 +2948,30 @@
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 59.69 40.3352 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 63.5 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 63.5 39.37 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2801,7 +2985,7 @@
 			(uuid "7caaac3a-4077-49bc-9533-3123805651b5")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "C3")
 					(unit 1)
@@ -2813,22 +2997,28 @@
 		(lib_id "peripherals-rescue:GNDPWR-power")
 		(at 55.88 44.45 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005dad3064")
 		(property "Reference" "#PWR010"
 			(at 55.88 49.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "GNDPWR"
 			(at 55.9816 48.3616 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2837,24 +3027,30 @@
 		)
 		(property "Footprint" ""
 			(at 55.88 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 55.88 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 55.88 44.45 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2865,7 +3061,7 @@
 			(uuid "7203a62a-a14c-4533-8c22-572418cc09f3")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR010")
 					(unit 1)
@@ -2877,13 +3073,17 @@
 		(lib_id "peripherals-rescue:Q_PMOS_GDS-Device")
 		(at 83.82 56.515 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f799899")
 		(property "Reference" "Q2"
 			(at 89.535 54.61 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2893,6 +3093,8 @@
 		)
 		(property "Value" "IRFR5505TRPBF"
 			(at 89.0524 57.658 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2902,24 +3104,30 @@
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:TO-252-3_TabPin2"
 			(at 88.9 53.975 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 83.82 56.515 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 83.82 56.515 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2936,7 +3144,7 @@
 			(uuid "82a5090b-eefe-4c26-89fa-2066961ca96c")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "Q2")
 					(unit 1)
@@ -2948,13 +3156,17 @@
 		(lib_id "peripherals-rescue:R-Device")
 		(at 74.93 50.8 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f79b41c")
 		(property "Reference" "R2"
 			(at 76.708 49.6316 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2964,6 +3176,8 @@
 		)
 		(property "Value" "10K"
 			(at 76.708 51.943 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2973,24 +3187,30 @@
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 73.152 50.8 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 74.93 50.8 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 74.93 50.8 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3004,7 +3224,7 @@
 			(uuid "d1fed042-3534-4bc4-aa59-92852cdf4545")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "R2")
 					(unit 1)
@@ -3016,13 +3236,17 @@
 		(lib_id "peripherals-rescue:Q_NPN_BEC-Device")
 		(at 72.39 70.485 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f79bc18")
 		(property "Reference" "Q1"
 			(at 66.04 74.93 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3032,6 +3256,8 @@
 		)
 		(property "Value" "MMBT3904"
 			(at 62.23 77.47 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3041,24 +3267,30 @@
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
 			(at 77.47 67.945 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 72.39 70.485 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 72.39 70.485 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3075,7 +3307,7 @@
 			(uuid "3e748372-6f05-49d6-b765-b084c7bc9848")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "Q1")
 					(unit 1)
@@ -3087,13 +3319,17 @@
 		(lib_id "peripherals-rescue:Conn_01x02-Connector_Generic")
 		(at 95.25 154.94 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa8ef")
 		(property "Reference" "J6"
 			(at 97.282 155.1432 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3103,6 +3339,8 @@
 		)
 		(property "Value" "JST XH"
 			(at 97.282 157.4546 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3112,24 +3350,30 @@
 		)
 		(property "Footprint" "Connector_JST:JST_XH_B02B-XH-A_1x02_P2.50mm_Vertical"
 			(at 95.25 154.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 95.25 154.94 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 95.25 154.94 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3143,7 +3387,7 @@
 			(uuid "391e3ffc-0ccc-4bdf-9c2b-02ac538417ed")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "J6")
 					(unit 1)
@@ -3155,22 +3399,28 @@
 		(lib_id "peripherals-rescue:+24V-power")
 		(at 86.36 114.935 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa8f9")
 		(property "Reference" "#PWR0104"
 			(at 86.36 118.745 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "+24V"
 			(at 86.741 110.5408 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3179,24 +3429,30 @@
 		)
 		(property "Footprint" ""
 			(at 86.36 114.935 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 86.36 114.935 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 86.36 114.935 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3207,7 +3463,7 @@
 			(uuid "8aeb195d-33de-48f5-9b85-7f592b075b83")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR0104")
 					(unit 1)
@@ -3219,22 +3475,28 @@
 		(lib_id "peripherals-rescue:GNDPWR-power")
 		(at 74.93 159.385 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa903")
 		(property "Reference" "#PWR0112"
 			(at 74.93 164.465 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "GNDPWR"
 			(at 75.0316 163.2966 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3243,24 +3505,30 @@
 		)
 		(property "Footprint" ""
 			(at 74.93 160.655 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 74.93 160.655 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 74.93 159.385 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3271,7 +3539,7 @@
 			(uuid "301703ca-db10-4547-8c71-a88d2ddb9deb")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR0112")
 					(unit 1)
@@ -3283,13 +3551,17 @@
 		(lib_id "peripherals-rescue:D-Device")
 		(at 86.36 150.495 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa90e")
 		(property "Reference" "D2"
 			(at 81.915 148.59 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3298,6 +3570,8 @@
 		)
 		(property "Value" "SS34"
 			(at 81.28 151.13 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3306,24 +3580,30 @@
 		)
 		(property "Footprint" "Diode_SMD:D_SMB"
 			(at 86.36 150.495 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 86.36 150.495 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 86.36 150.495 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3337,7 +3617,7 @@
 			(uuid "56fb93ee-2558-4b95-b693-607ac46a545e")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "D2")
 					(unit 1)
@@ -3359,13 +3639,17 @@
 		(lib_id "peripherals-rescue:R-Device")
 		(at 59.69 149.86 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa918")
 		(property "Reference" "R3"
 			(at 58.42 147.32 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3374,6 +3658,8 @@
 		)
 		(property "Value" "1k"
 			(at 59.69 149.86 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3382,24 +3668,30 @@
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 59.69 148.082 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 59.69 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 59.69 149.86 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3413,7 +3705,7 @@
 			(uuid "5f1b06b0-fcdb-4774-92a5-14f406b1e422")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "R3")
 					(unit 1)
@@ -3425,13 +3717,17 @@
 		(lib_id "peripherals-rescue:C-Device")
 		(at 63.5 118.745 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa925")
 		(property "Reference" "C4"
 			(at 63.5 112.3442 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3440,6 +3736,8 @@
 		)
 		(property "Value" "1u"
 			(at 63.5 114.6556 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3448,24 +3746,30 @@
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 59.69 119.7102 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 63.5 118.745 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 63.5 118.745 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3479,7 +3783,7 @@
 			(uuid "e7c93118-2903-4fbb-849f-45c7952011ee")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "C4")
 					(unit 1)
@@ -3491,22 +3795,28 @@
 		(lib_id "peripherals-rescue:GNDPWR-power")
 		(at 55.88 123.825 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa92f")
 		(property "Reference" "#PWR0113"
 			(at 55.88 128.905 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "GNDPWR"
 			(at 55.9816 127.7366 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3515,24 +3825,30 @@
 		)
 		(property "Footprint" ""
 			(at 55.88 125.095 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 55.88 125.095 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 55.88 123.825 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3543,7 +3859,7 @@
 			(uuid "70ea55ac-94a9-4654-9072-a36b4d55cca0")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR0113")
 					(unit 1)
@@ -3555,13 +3871,17 @@
 		(lib_id "peripherals-rescue:Q_PMOS_GDS-Device")
 		(at 83.82 135.89 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa93b")
 		(property "Reference" "Q4"
 			(at 89.535 133.985 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3571,6 +3891,8 @@
 		)
 		(property "Value" "IRFR5505TRPBF"
 			(at 89.0524 137.033 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3580,24 +3902,30 @@
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:TO-252-3_TabPin2"
 			(at 88.9 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 83.82 135.89 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 83.82 135.89 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3614,7 +3942,7 @@
 			(uuid "3ec6a5e2-0dec-474e-a29c-ff27c07a17f6")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "Q4")
 					(unit 1)
@@ -3626,13 +3954,17 @@
 		(lib_id "peripherals-rescue:R-Device")
 		(at 74.93 130.175 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa945")
 		(property "Reference" "R4"
 			(at 76.708 129.0066 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3642,6 +3974,8 @@
 		)
 		(property "Value" "10K"
 			(at 76.708 131.318 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3651,24 +3985,30 @@
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 73.152 130.175 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 74.93 130.175 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 74.93 130.175 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3682,7 +4022,7 @@
 			(uuid "50555467-1635-4629-af52-4d0812897ae2")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "R4")
 					(unit 1)
@@ -3694,13 +4034,17 @@
 		(lib_id "peripherals-rescue:Q_NPN_BEC-Device")
 		(at 72.39 149.86 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f7fa94f")
 		(property "Reference" "Q3"
 			(at 66.04 154.305 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3710,6 +4054,8 @@
 		)
 		(property "Value" "MMBT3904"
 			(at 62.23 156.845 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3719,24 +4065,30 @@
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
 			(at 77.47 147.32 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 72.39 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 72.39 149.86 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3753,7 +4105,7 @@
 			(uuid "3c054e3f-3739-4ed9-bcfa-1cf8e10e69a6")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "Q3")
 					(unit 1)
@@ -3765,13 +4117,17 @@
 		(lib_id "peripherals-rescue:Conn_01x02-Connector_Generic")
 		(at 211.455 74.295 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bd84")
 		(property "Reference" "J7"
 			(at 213.487 74.4982 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3781,6 +4137,8 @@
 		)
 		(property "Value" "JST XH"
 			(at 213.487 76.8096 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3790,24 +4148,30 @@
 		)
 		(property "Footprint" "Connector_JST:JST_XH_B02B-XH-A_1x02_P2.50mm_Vertical"
 			(at 211.455 74.295 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 211.455 74.295 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 211.455 74.295 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3821,7 +4185,7 @@
 			(uuid "6e1f535b-ef19-41cb-baaf-b98b12f42a35")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "J7")
 					(unit 1)
@@ -3833,22 +4197,28 @@
 		(lib_id "peripherals-rescue:+24V-power")
 		(at 202.565 34.29 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bd8e")
 		(property "Reference" "#PWR0114"
 			(at 202.565 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "+24V"
 			(at 202.946 29.8958 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3857,24 +4227,30 @@
 		)
 		(property "Footprint" ""
 			(at 202.565 34.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 202.565 34.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 202.565 34.29 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3885,7 +4261,7 @@
 			(uuid "41adfe37-6ce0-43c7-93e9-c30a6364f0c4")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR0114")
 					(unit 1)
@@ -3897,22 +4273,28 @@
 		(lib_id "peripherals-rescue:GNDPWR-power")
 		(at 191.135 78.74 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bd98")
 		(property "Reference" "#PWR0116"
 			(at 191.135 83.82 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "GNDPWR"
 			(at 191.2366 82.6516 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3921,24 +4303,30 @@
 		)
 		(property "Footprint" ""
 			(at 191.135 80.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 191.135 80.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 191.135 78.74 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3949,7 +4337,7 @@
 			(uuid "726fb3a9-1885-4d82-99f8-d7f5f737744e")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR0116")
 					(unit 1)
@@ -3961,13 +4349,17 @@
 		(lib_id "peripherals-rescue:D-Device")
 		(at 202.565 69.85 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bda3")
 		(property "Reference" "D3"
 			(at 198.12 67.945 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3976,6 +4368,8 @@
 		)
 		(property "Value" "SS34"
 			(at 197.485 70.485 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3984,24 +4378,30 @@
 		)
 		(property "Footprint" "Diode_SMD:D_SMB"
 			(at 202.565 69.85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 202.565 69.85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 202.565 69.85 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4015,7 +4415,7 @@
 			(uuid "912c834d-68f9-4920-a303-49cb04edcf31")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "D3")
 					(unit 1)
@@ -4037,13 +4437,17 @@
 		(lib_id "peripherals-rescue:R-Device")
 		(at 175.895 69.215 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bdad")
 		(property "Reference" "R5"
 			(at 174.625 66.675 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4052,6 +4456,8 @@
 		)
 		(property "Value" "1k"
 			(at 175.895 69.215 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4060,24 +4466,30 @@
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 175.895 67.437 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 175.895 69.215 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 175.895 69.215 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4091,7 +4503,7 @@
 			(uuid "20655f4c-e2af-4eb8-b5ab-ce74897bf221")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "R5")
 					(unit 1)
@@ -4103,13 +4515,17 @@
 		(lib_id "peripherals-rescue:C-Device")
 		(at 179.705 38.1 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bdba")
 		(property "Reference" "C5"
 			(at 179.705 31.6992 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4118,6 +4534,8 @@
 		)
 		(property "Value" "1u"
 			(at 179.705 34.0106 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4126,24 +4544,30 @@
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 175.895 39.0652 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 179.705 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 179.705 38.1 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4157,7 +4581,7 @@
 			(uuid "da71e356-29bc-498b-8f9b-a08883a09aa2")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "C5")
 					(unit 1)
@@ -4169,22 +4593,28 @@
 		(lib_id "peripherals-rescue:GNDPWR-power")
 		(at 172.085 43.18 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bdc4")
 		(property "Reference" "#PWR0117"
 			(at 172.085 48.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "GNDPWR"
 			(at 172.1866 47.0916 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4193,24 +4623,30 @@
 		)
 		(property "Footprint" ""
 			(at 172.085 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 172.085 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 172.085 43.18 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4221,7 +4657,7 @@
 			(uuid "fdff1b1c-40fe-4c51-94a1-60ff0a145e9e")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR0117")
 					(unit 1)
@@ -4233,13 +4669,17 @@
 		(lib_id "peripherals-rescue:Q_PMOS_GDS-Device")
 		(at 200.025 55.245 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bdd0")
 		(property "Reference" "Q6"
 			(at 205.74 53.34 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4249,6 +4689,8 @@
 		)
 		(property "Value" "IRFR5505TRPBF"
 			(at 205.2574 56.388 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4258,24 +4700,30 @@
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:TO-252-3_TabPin2"
 			(at 205.105 52.705 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 200.025 55.245 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 200.025 55.245 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4292,7 +4740,7 @@
 			(uuid "feb2062f-3882-48a1-b86d-6cf872b156bf")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "Q6")
 					(unit 1)
@@ -4304,13 +4752,17 @@
 		(lib_id "peripherals-rescue:R-Device")
 		(at 191.135 49.53 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bdda")
 		(property "Reference" "R6"
 			(at 192.913 48.3616 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4320,6 +4772,8 @@
 		)
 		(property "Value" "10K"
 			(at 192.913 50.673 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4329,24 +4783,30 @@
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 189.357 49.53 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 191.135 49.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 191.135 49.53 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4360,7 +4820,7 @@
 			(uuid "9bd99509-1b5e-41f3-93eb-216e93dae056")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "R6")
 					(unit 1)
@@ -4372,13 +4832,17 @@
 		(lib_id "peripherals-rescue:Q_NPN_BEC-Device")
 		(at 188.595 69.215 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f80bde4")
 		(property "Reference" "Q5"
 			(at 182.245 73.66 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4388,6 +4852,8 @@
 		)
 		(property "Value" "MMBT3904"
 			(at 178.435 76.2 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4397,24 +4863,30 @@
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
 			(at 193.675 66.675 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 188.595 69.215 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 188.595 69.215 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4431,7 +4903,7 @@
 			(uuid "9db0ef12-acbe-4cdf-bf63-37dec2ff0205")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "Q5")
 					(unit 1)
@@ -4443,13 +4915,17 @@
 		(lib_id "peripherals-rescue:Conn_01x02-Connector_Generic")
 		(at 210.185 144.145 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f813ff9")
 		(property "Reference" "J8"
 			(at 212.217 144.3482 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4459,6 +4935,8 @@
 		)
 		(property "Value" "JST XH"
 			(at 212.217 146.6596 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4468,24 +4946,30 @@
 		)
 		(property "Footprint" "Connector_JST:JST_XH_B02B-XH-A_1x02_P2.50mm_Vertical"
 			(at 210.185 144.145 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 210.185 144.145 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 210.185 144.145 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4499,7 +4983,7 @@
 			(uuid "d7f6c272-8ab5-4e8c-be7c-a2812416db58")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "J8")
 					(unit 1)
@@ -4511,22 +4995,28 @@
 		(lib_id "peripherals-rescue:+24V-power")
 		(at 201.295 104.14 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f814003")
 		(property "Reference" "#PWR0118"
 			(at 201.295 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "+24V"
 			(at 201.676 99.7458 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4535,24 +5025,30 @@
 		)
 		(property "Footprint" ""
 			(at 201.295 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 201.295 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 201.295 104.14 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4563,7 +5059,7 @@
 			(uuid "da9b035c-ea60-4782-b815-1df8df0bf718")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR0118")
 					(unit 1)
@@ -4575,22 +5071,28 @@
 		(lib_id "peripherals-rescue:GNDPWR-power")
 		(at 189.865 148.59 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f81400d")
 		(property "Reference" "#PWR0119"
 			(at 189.865 153.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "GNDPWR"
 			(at 189.9666 152.5016 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4599,24 +5101,30 @@
 		)
 		(property "Footprint" ""
 			(at 189.865 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 189.865 149.86 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 189.865 148.59 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4627,7 +5135,7 @@
 			(uuid "962a9ac9-c625-4f16-ba50-3f8df640e64e")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR0119")
 					(unit 1)
@@ -4639,13 +5147,17 @@
 		(lib_id "peripherals-rescue:D-Device")
 		(at 201.295 139.7 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f814018")
 		(property "Reference" "D4"
 			(at 196.85 137.795 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4654,6 +5166,8 @@
 		)
 		(property "Value" "SS34"
 			(at 196.215 140.335 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4662,24 +5176,30 @@
 		)
 		(property "Footprint" "Diode_SMD:D_SMB"
 			(at 201.295 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 201.295 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 201.295 139.7 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4693,7 +5213,7 @@
 			(uuid "0ec4bc6d-dd9d-4485-b0ec-435a499ba1c9")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "D4")
 					(unit 1)
@@ -4715,13 +5235,17 @@
 		(lib_id "peripherals-rescue:R-Device")
 		(at 174.625 139.065 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f814022")
 		(property "Reference" "R7"
 			(at 173.355 136.525 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4730,6 +5254,8 @@
 		)
 		(property "Value" "1k"
 			(at 174.625 139.065 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4738,24 +5264,30 @@
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 174.625 137.287 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 174.625 139.065 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 174.625 139.065 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4769,7 +5301,7 @@
 			(uuid "b4511bae-3eaa-45aa-9394-80cb44d81357")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "R7")
 					(unit 1)
@@ -4781,13 +5313,17 @@
 		(lib_id "peripherals-rescue:C-Device")
 		(at 178.435 107.95 270)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f81402f")
 		(property "Reference" "C6"
 			(at 178.435 101.5492 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4796,6 +5332,8 @@
 		)
 		(property "Value" "1u"
 			(at 178.435 103.8606 90)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4804,24 +5342,30 @@
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
 			(at 174.625 108.9152 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 178.435 107.95 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 178.435 107.95 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4835,7 +5379,7 @@
 			(uuid "8de0293a-00e6-4c20-9aae-d8770b1938a6")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "C6")
 					(unit 1)
@@ -4847,22 +5391,28 @@
 		(lib_id "peripherals-rescue:GNDPWR-power")
 		(at 170.815 113.03 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f814039")
 		(property "Reference" "#PWR0120"
 			(at 170.815 118.11 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Value" "GNDPWR"
 			(at 170.9166 116.9416 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4871,24 +5421,30 @@
 		)
 		(property "Footprint" ""
 			(at 170.815 114.3 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" ""
 			(at 170.815 114.3 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 170.815 113.03 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4899,7 +5455,7 @@
 			(uuid "93cb7f44-cd11-4332-ab68-16160dfb9a18")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "#PWR0120")
 					(unit 1)
@@ -4911,13 +5467,17 @@
 		(lib_id "peripherals-rescue:Q_PMOS_GDS-Device")
 		(at 198.755 125.095 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f814045")
 		(property "Reference" "Q8"
 			(at 204.47 123.19 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4927,6 +5487,8 @@
 		)
 		(property "Value" "IRFR5505TRPBF"
 			(at 203.9874 126.238 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4936,24 +5498,30 @@
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:TO-252-3_TabPin2"
 			(at 203.835 122.555 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 198.755 125.095 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 198.755 125.095 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4970,7 +5538,7 @@
 			(uuid "b6222abe-9136-4f85-b44b-017fdc58ef8c")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "Q8")
 					(unit 1)
@@ -4982,13 +5550,17 @@
 		(lib_id "peripherals-rescue:R-Device")
 		(at 189.865 119.38 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f81404f")
 		(property "Reference" "R8"
 			(at 191.643 118.2116 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4998,6 +5570,8 @@
 		)
 		(property "Value" "10K"
 			(at 191.643 120.523 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5007,24 +5581,30 @@
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 188.087 119.38 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 189.865 119.38 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 189.865 119.38 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5038,7 +5618,7 @@
 			(uuid "50c44997-fe4b-43cd-882d-b9c70582bf05")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "R8")
 					(unit 1)
@@ -5050,13 +5630,17 @@
 		(lib_id "peripherals-rescue:Q_NPN_BEC-Device")
 		(at 187.325 139.065 0)
 		(unit 1)
+		(body_style 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
+		(in_pos_files yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00005f814059")
 		(property "Reference" "Q7"
 			(at 180.975 143.51 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5066,6 +5650,8 @@
 		)
 		(property "Value" "MMBT3904"
 			(at 177.165 146.05 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5075,24 +5661,30 @@
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
 			(at 192.405 136.525 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" ""
 			(at 187.325 139.065 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Description" ""
 			(at 187.325 139.065 0)
+			(show_name no)
+			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5109,7 +5701,7 @@
 			(uuid "77f0fcbc-9213-4afe-9929-f9c3dce82cea")
 		)
 		(instances
-			(project ""
+			(project "peripherals"
 				(path "/2a4bb02f-0abe-49d9-b37a-a77526c690e1/00000000-0000-0000-0000-00005daa541c"
 					(reference "Q7")
 					(unit 1)
