@@ -24,8 +24,7 @@ int blink_interval = 0;
 int blink_count = 0;
 
 int buf_index = 0;
-const int BUF_SIZE = 200;
-char buffer[BUF_SIZE];
+char buffer[I2C_BUF_SIZE+1];
 
 void receiveData(int byteCount)
 {
@@ -71,12 +70,6 @@ void receiveData(int byteCount)
         }
         break;
 
-    case static_cast<int>(I2c_cmd::Uart1_rx):
-        for (int i = 0; i < buf_index; ++i)
-            Wire.write(buffer[i]);
-        buf_index = 0;
-        break;
-        
     default:
         digitalWrite(LED_BUILTIN, 0);
         break;
@@ -88,6 +81,9 @@ void receiveData(int byteCount)
 
 void sendData()
 {
+    buffer[buf_index++] = 0;
+    Wire.write(buffer, buf_index);
+    buf_index = 0;
 }
 
 void timer_interrupt()
@@ -130,7 +126,9 @@ void loop()
     if (Serial.available())
     {
        char c = Serial.read();
-       if (buf_index >= BUF_SIZE)
+       Serial.print("char: ");
+       Serial.println(c);
+       if (buf_index >= I2C_BUF_SIZE)
        {
            Serial.println("Error: Line too long");
            buf_index = 0;

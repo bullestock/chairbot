@@ -204,13 +204,9 @@ void peripherals_do_write_uart(const char* data)
      
 std::string peripherals_read_uart()
 {
-    uint8_t bytes[1];
-    bytes[0] = static_cast<int>(I2c_cmd::Uart1_rx);
-    uint8_t buffer[80];
+    uint8_t buffer[I2C_BUF_SIZE+1];
     memset(buffer, 0, sizeof(buffer));
-    const auto ret = i2c_master_transmit_receive(i2c_handle, bytes,
-                                                 sizeof(bytes),
-                                                 buffer, sizeof(buffer), 50);
+    const auto ret = i2c_master_receive(i2c_handle, buffer, sizeof(buffer), 50);
     if (ret == ESP_ERR_TIMEOUT)
     {
         printf("Error [uart]: Bus is busy\n");
