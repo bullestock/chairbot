@@ -2400,6 +2400,62 @@ CONFIG_WL_SECTOR_SIZE_4096=y
 # default:
 CONFIG_WL_SECTOR_SIZE=4096
 # end of Wear Levelling
+
+#
+# USB Device UAC Configuration
+#
+# default:
+CONFIG_UAC_TUSB_VID=0x303A
+# default:
+CONFIG_UAC_TUSB_PID=0x8000
+# default:
+CONFIG_UAC_TUSB_MANUFACTURER="Espressif"
+# default:
+CONFIG_UAC_TUSB_PRODUCT="ESP UAC Device"
+# default:
+CONFIG_UAC_TUSB_SERIAL_NUM="12345678"
+# default:
+CONFIG_TINYUSB_RHPORT_FS=y
+
+#
+# USB Device UAC
+#
+# default:
+# CONFIG_USB_DEVICE_UAC_AS_PART is not set
+# default:
+CONFIG_UAC_SPEAKER_CHANNEL_NUM=1
+# default:
+CONFIG_UAC_MIC_CHANNEL_NUM=1
+# default:
+CONFIG_UAC_SAMPLE_RATE=48000
+# default:
+CONFIG_UAC_SPK_INTERVAL_MS=10
+# default:
+CONFIG_UAC_MIC_INTERVAL_MS=10
+# default:
+CONFIG_UAC_SPK_NEW_PLAY_INTERVAL=100
+# default:
+# CONFIG_UAC_SUPPORT_MACOS is not set
+
+#
+# UAC Task Config
+#
+# default:
+CONFIG_UAC_TINYUSB_TASK_PRIORITY=5
+# default:
+CONFIG_UAC_TINYUSB_TASK_CORE=-1
+# default:
+CONFIG_UAC_SPK_TASK_PRIORITY=5
+# default:
+CONFIG_UAC_SPK_TASK_CORE=-1
+# default:
+CONFIG_UAC_MIC_TASK_PRIORITY=5
+# default:
+CONFIG_UAC_MIC_TASK_CORE=-1
+# end of UAC Task Config
+# end of USB Device UAC
+# end of USB Device UAC Configuration
+
 # end of Component config
 
 # CONFIG_IDF_EXPERIMENTAL_FEATURES is not set

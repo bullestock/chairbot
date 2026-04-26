@@ -5,7 +5,9 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
-#include <I2SSpeaker.h>
+#include <string.h>
+
+#include "../../include/i2c_cmd.h"
 
 #include "battery.h"
 #include "config.h"
@@ -27,10 +29,12 @@ struct Queue_item
 {
     enum class Type
     {
-        Pwm
+        Pwm,
+        Uart,
     } type = Type::Pwm;
     int param1 = 0;
     int param2 = 0;
+    char* buffer = nullptr;
 };
 
 static bool adc_calibration_init(adc_unit_t unit, adc_channel_t channel,
@@ -170,14 +174,54 @@ void peripherals_do_set_pwm(int chan, uint8_t duty, uint8_t freq)
         printf("Error [pwm]: Write failed: %d\n", ret);
 }
 
-I2SSpeaker speaker(GPIO_I2S_DATA, GPIO_I2S_CLK, GPIO_I2S_WS);
+void peripherals_write_uart(const char* data)
+{
+    Queue_item i;
+    i.type = Queue_item::Type::Uart;
+    i.buffer = strdup(data);
+    xQueueSend(queue, &i, 0);
+}
 
+void peripherals_do_write_uart(const char* data)
+{
+    const auto size = strlen(data);
+    if (size > 255)
+    {
+        printf("Error [uart]: Too much data\n");
+        return;
+    }
+    uint8_t* bytes = reinterpret_cast<uint8_t*>(malloc(size));
+    bytes[0] = static_cast<int>(I2c_cmd::Uart1_tx);
+    bytes[1] = static_cast<uint8_t>(size);
+    memcpy(reinterpret_cast<char*>(bytes) + 2, data, size);
+    
+    const auto ret = i2c_master_transmit(i2c_handle, bytes, size + 2, 50);
+    if (ret == ESP_ERR_TIMEOUT)
+        printf("Error [uart]: Bus is busy\n");
+    else if (ret != ESP_OK)
+        printf("Error [uart]: Write failed: %d\n", ret);
+}
+     
+std::string peripherals_read_uart()
+{
+    uint8_t buffer[I2C_BUF_SIZE+1];
+    memset(buffer, 0, sizeof(buffer));
+    const auto ret = i2c_master_receive(i2c_handle, buffer, sizeof(buffer), 50);
+    if (ret == ESP_ERR_TIMEOUT)
+    {
+        printf("Error [uart]: Bus is busy\n");
+        return "";
+    }
+    else if (ret != ESP_OK)
+    {
+        printf("Error [uart]: Write failed: %d\n", ret);
+        return "";
+    }
+    return std::string(reinterpret_cast<char*>(buffer));
+}
+     
 void peripherals_loop(void*)
 {
-    const auto ret = speaker.init();
-    if (ret != ESP_OK)
-        printf("Error [i2s]: init failed: %d\n", ret);
-    
     // Create a queue capable of containing 10 items.
     queue = xQueueCreate(10, sizeof(Queue_item));
 
@@ -192,6 +236,11 @@ void peripherals_loop(void*)
                                        i.param2 & 0xFF,
                                        (i.param2 >> 8) & 0xFF);
                 break;
+
+            case Queue_item::Type::Uart:
+                peripherals_do_write_uart(i.buffer);
+                free(i.buffer);
+                break;                
             }
 
         vTaskDelay(10/portTICK_PERIOD_MS);

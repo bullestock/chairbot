@@ -1,5 +1,6 @@
 #pragma once
 
+#include <driver/gpio.h>
 #include <driver/ledc.h>
 
 #include <memory>
@@ -32,3 +33,7 @@ void set_motors(float m1, float m2);
 
 extern std::unique_ptr<Motor> motor_a;
 extern std::unique_ptr<Motor> motor_b;
+
+// Local Variables:
+// compile-command: "(cd ..; idf.py build)"
+// End:

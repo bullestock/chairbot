@@ -1,0 +1,26 @@
+version: "1.2.2"
+# This component only works on targets with USB OTG: esp32s2, esp32s3, esp32p4
+# Target rules on tinyusb/cmake_utilities prevent them from being fetched on non-USB targets.
+# CMakeLists.txt also returns early for unsupported targets as a safeguard.
+
+description: USB Device UAC, Streaming audio to Host
+url: https://github.com/espressif/esp-iot-solution/tree/master/components/usb/usb_device_uac
+documentation: https://docs.espressif.com/projects/esp-iot-solution/en/latest/usb/usb_device/usb_device_uac.html
+repository: https://github.com/espressif/esp-iot-solution.git
+issues: https://github.com/espressif/esp-iot-solution/issues
+
+dependencies:
+  idf: ">=6.0"
+  espressif/tinyusb:
+    version: "^0.17.0~2"
+    rules:
+      - if: "target in [esp32s2, esp32s3, esp32p4]"
+  cmake_utilities:
+    version: "*"
+    rules:
+      - if: "target in [esp32s2, esp32s3, esp32p4]"
+examples:
+  - path: ../../../examples/usb/device/usb_uac
+sbom:
+  supplier: 'Organization: Espressif Systems (Shanghai) CO LTD'
+  originator: 'Organization: Espressif Systems (Shanghai) CO LTD'
