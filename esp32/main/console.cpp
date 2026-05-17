@@ -198,8 +198,6 @@ int control_peripherals(int argc, char** argv)
 {
     static const char* peripherals_usage =
        "Valid commands:\n"
-       "sound <number>            Play sound\n"
-       "volume <number>           Set volume\n"
        "pwm <addr> <duty> <freq>  Set PWM output\n"
        "uartwr <data>             Write data via UART passthrough\n"
        "uartrd                    Read data via UART passthrough\n";
@@ -209,28 +207,6 @@ int control_peripherals(int argc, char** argv)
         printf("Error: Missing command\n");
         printf(peripherals_usage);
         return -1;
-    }
-    if (!strcmp(argv[1], "sound"))
-    {
-        if (argc < 3)
-        {
-            printf("Error: Missing sound number\n");
-            return -1;
-        }
-        int sound = atoi(argv[2]);
-        //!!peripherals_play_sound(sound);
-        return 0;
-    }
-    if (!strcmp(argv[1], "volume"))
-    {
-        if (argc < 3)
-        {
-            printf("Error: Missing volume level\n");
-            return -1;
-        }
-        int volume = atoi(argv[2]);
-        //!!peripherals_set_volume(volume);
-        return 0;
     }
     if (!strcmp(argv[1], "pwm"))
     {
@@ -328,17 +304,10 @@ static int reboot(int, char**)
 
 void initialize_console()
 {
-    /* Disable buffering on stdin */
     setvbuf(stdin, NULL, _IONBF, 0);
-
-    /* Minicom, screen, idf_monitor send CR when ENTER key is pressed */
     uart_vfs_dev_port_set_rx_line_endings(0, ESP_LINE_ENDINGS_CR);
-    /* Move the caret to the beginning of the next line on '\n' */
     uart_vfs_dev_port_set_tx_line_endings(0, ESP_LINE_ENDINGS_CRLF);
 
-    /* Configure UART. Note that REF_TICK is used so that the baud rate remains
-     * correct while APB frequency is changing in light sleep mode.
-     */
     uart_config_t uart_config;
     memset(&uart_config, 0, sizeof(uart_config));
     uart_config.baud_rate = CONFIG_ESP_CONSOLE_UART_BAUDRATE;
@@ -348,14 +317,10 @@ void initialize_console()
     uart_config.source_clk = UART_SCLK_REF_TICK;
     ESP_ERROR_CHECK(uart_param_config((uart_port_t) CONFIG_ESP_CONSOLE_UART_NUM, &uart_config));
 
-    /* Install UART driver for interrupt-driven reads and writes */
     ESP_ERROR_CHECK(uart_driver_install((uart_port_t) CONFIG_ESP_CONSOLE_UART_NUM,
                                          256, 0, 0, NULL, 0));
-
-    /* Tell VFS to use UART driver */
     uart_vfs_dev_use_driver(CONFIG_ESP_CONSOLE_UART_NUM);
 
-    /* Initialize the console */
     esp_console_config_t console_config;
     memset(&console_config, 0, sizeof(console_config));
     console_config.max_cmdline_args = 8;
@@ -365,17 +330,9 @@ void initialize_console()
 #endif
     ESP_ERROR_CHECK(esp_console_init(&console_config));
 
-    /* Configure linenoise line completion library */
-    /* Enable multiline editing. If not set, long commands will scroll within
-     * single line.
-     */
     linenoiseSetMultiLine(1);
-
-    /* Tell linenoise where to get command completions and hints */
     linenoiseSetCompletionCallback(&esp_console_get_completion);
     linenoiseSetHintsCallback((linenoiseHintsCallback*) &esp_console_get_hint);
-
-    /* Set command history size */
     linenoiseHistorySetMaxLen(100);
 }
 
@@ -383,7 +340,6 @@ void run_console()
 {
     initialize_console();
 
-    /* Register commands */
     esp_console_register_help_command();
 
     const esp_console_cmd_t cmd1 = {
@@ -460,7 +416,6 @@ void run_console()
            "Use UP/DOWN arrows to navigate through command history.\n"
            "Press TAB when typing command name to auto-complete.\n");
 
-    /* Figure out if the terminal supports escape sequences */
     int probe_status = linenoiseProbe();
     if (probe_status)
     {
@@ -470,9 +425,6 @@ void run_console()
                "On Windows, try using Putty instead.\n");
         linenoiseSetDumbMode(1);
 #if CONFIG_LOG_COLORS
-        /* Since the terminal doesn't support escape sequences,
-         * don't use color codes in the prompt.
-         */
         prompt = "esp32> ";
 #endif //CONFIG_LOG_COLORS
     }
