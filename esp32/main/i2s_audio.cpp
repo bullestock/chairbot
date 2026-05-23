@@ -668,7 +668,8 @@ static esp_err_t audio_i2s_init()
      * When PSRAM is on the heap, plain xRingbufferCreate() may place the
      * control struct (with portMUX spinlock) in PSRAM, causing corruption
      * on Xtensa.  Use xRingbufferCreateStatic() with explicit internal alloc. */
-    if (!s_audio_ringbuf) {
+    if (!s_audio_ringbuf)
+    {
         ESP_LOGI(TAG, "Free heap before PCM buffer: %d KB internal",
                  (int)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024));
         size_t buf_size = AUDIO_RINGBUF_SIZE;
@@ -690,7 +691,8 @@ static esp_err_t audio_i2s_init()
             s_audio_ringbuf = xRingbufferCreateStatic(buf_size, RINGBUF_TYPE_BYTEBUF,
                                                        s_pcm_ringbuf_storage, s_pcm_ringbuf_struct);
         }
-        if (!s_audio_ringbuf) {
+        if (!s_audio_ringbuf)
+        {
             ESP_LOGE(TAG, "Failed to create PCM ring buffer");
             heap_caps_free(s_pcm_ringbuf_storage);
             heap_caps_free(s_pcm_ringbuf_struct);
@@ -883,7 +885,7 @@ static esp_err_t audio_reconfigure_sample_rate(uint32_t new_rate)
 static int audio_get_buffer_level();
 
 /* Forward declaration for audio_write_to_buffer (used by MP3 decoder) */
-static size_t audio_write_to_buffer(const uint8_t *data, size_t len);
+static size_t audio_write_to_buffer(const uint8_t* data, size_t len);
 
 /* ============================================================================
  * MP3 Decoder Functions
@@ -931,7 +933,7 @@ static void mp3_decode_task(void *pvParameters)
      * may return a PSRAM pointer.  MP3 decoding is CPU-intensive and accesses
      * this buffer frequently; PSRAM latency would slow decoding and the cache
      * miss handling can interfere with ISR timing. */
-    uint8_t *accum = (uint8_t*) heap_caps_malloc(MP3_ACCUM_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    uint8_t* accum = (uint8_t*) heap_caps_malloc(MP3_ACCUM_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     if (!accum) {
         ESP_LOGE(TAG, "Failed to allocate MP3 accumulation buffer");
         DECODE_TASK_SELF_DELETE();
@@ -942,21 +944,24 @@ static void mp3_decode_task(void *pvParameters)
     mp3dec_frame_info_t frame_info;
     int frames_since_yield = 0;
 
-    while (s_sd_feeding_active || (s_audio_playing && accum_fill > 0)) {
+    while (s_sd_feeding_active || (s_audio_playing && accum_fill > 0))
+    {
         /* Try to top up the accumulation buffer from the MP3 ring buffer */
-        if (accum_fill < MP3_ACCUM_SIZE) {
+        if (accum_fill < MP3_ACCUM_SIZE)
+        {
             size_t want = MP3_ACCUM_SIZE - accum_fill;
             size_t got = 0;
-            uint8_t *chunk = (uint8_t *)xRingbufferReceiveUpTo(
-                s_mp3_ringbuf, &got, pdMS_TO_TICKS(100), want);
-            if (chunk && got > 0) {
+            uint8_t* chunk = (uint8_t*) xRingbufferReceiveUpTo(s_mp3_ringbuf, &got, pdMS_TO_TICKS(100), want);
+            if (chunk && got > 0)
+            {
                 memcpy(accum + accum_fill, chunk, got);
                 accum_fill += got;
                 vRingbufferReturnItem(s_mp3_ringbuf, chunk);
             }
         }
 
-        if (accum_fill < 4) {
+        if (accum_fill < 4)
+        {
             /* Not enough data for a frame header — wait for more */
             if (!s_sd_feeding_active)
                 break;
@@ -966,36 +971,40 @@ static void mp3_decode_task(void *pvParameters)
 
         /* Decode one frame */
         int samples = mp3dec_decode_frame(&s_mp3_decoder,
-                                           accum, accum_fill,
-                                           s_mp3_pcm_buffer, &frame_info);
+                                          accum, accum_fill,
+                                          s_mp3_pcm_buffer, &frame_info);
 
-        if (frame_info.frame_bytes == 0) {
+        if (frame_info.frame_bytes == 0)
+        {
             /* Not enough data for a complete frame — need more from ring buffer */
-            if (!s_sd_feeding_active) break;
+            if (!s_sd_feeding_active)
+                break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
 
         /* Remove consumed bytes from accumulation buffer */
         size_t consumed = frame_info.frame_bytes;
-        if (consumed < accum_fill) {
+        if (consumed < accum_fill)
             memmove(accum, accum + consumed, accum_fill - consumed);
-        }
         accum_fill -= consumed;
 
-        if (samples > 0) {
+        if (samples > 0)
+        {
             /* Log first successful decode and reconfigure I2S BEFORE writing PCM */
-            if (!s_mp3_first_decode_logged) {
+            if (!s_mp3_first_decode_logged)
+            {
                 log("MP3: %d Hz, %d ch, %d kbps",
                     frame_info.hz, frame_info.channels, frame_info.bitrate_kbps);
                 s_mp3_first_decode_logged = true;
 
                 /* Reconfigure I2S if MP3 sample rate differs from configured rate */
-                if (frame_info.hz > 0 && (uint32_t)frame_info.hz != s_current_sample_rate) {
-                    esp_err_t rc = audio_reconfigure_sample_rate((uint32_t)frame_info.hz);
-                    if (rc != ESP_OK) {
+                if (frame_info.hz > 0 && (uint32_t)frame_info.hz != s_current_sample_rate)
+                {
+                    log("MP3: Reconfigure to %d", frame_info.hz);
+                    esp_err_t rc = audio_reconfigure_sample_rate((uint32_t) frame_info.hz);
+                    if (rc != ESP_OK)
                         ESP_LOGW(TAG, "I2S reconfigure failed, playback may be distorted");
-                    }
                 }
             }
 
@@ -1003,8 +1012,10 @@ static void mp3_decode_task(void *pvParameters)
 
             /* If the stream is mono but I2S is stereo, duplicate each sample
              * to both L and R channels.  Work backwards to do it in-place. */
-            if (frame_info.channels == 1) {
-                for (int i = samples - 1; i >= 0; i--) {
+            if (frame_info.channels == 1)
+            {
+                for (int i = samples - 1; i >= 0; i--)
+                {
                     mp3d_sample_t sample = s_mp3_pcm_buffer[i];
                     s_mp3_pcm_buffer[i * 2 + 1] = sample;
                     s_mp3_pcm_buffer[i * 2]     = sample;
@@ -1014,11 +1025,13 @@ static void mp3_decode_task(void *pvParameters)
 
             /* Write decoded PCM to audio ring buffer.
              * This blocks when buffer is full — natural backpressure. */
-            size_t written = audio_write_to_buffer((uint8_t *)s_mp3_pcm_buffer, pcm_bytes);
-            if (written == 0 && s_sd_feeding_active) {
+            size_t written = audio_write_to_buffer((uint8_t*)  s_mp3_pcm_buffer, pcm_bytes);
+            log("MP3: Wrote %d", (int) written);
+            if (written == 0 && s_sd_feeding_active)
+            {
                 /* Buffer full after timeout — try once more after a short wait */
                 vTaskDelay(pdMS_TO_TICKS(50));
-                audio_write_to_buffer((uint8_t *)s_mp3_pcm_buffer, pcm_bytes);
+                audio_write_to_buffer((uint8_t*) s_mp3_pcm_buffer, pcm_bytes);
             }
         }
 
@@ -1135,7 +1148,7 @@ static void aac_decode_task(void *pvParameters)
         if (accum_fill < AAC_ACCUM_SIZE) {
             size_t want = AAC_ACCUM_SIZE - accum_fill;
             size_t got = 0;
-            uint8_t *chunk = (uint8_t *)xRingbufferReceiveUpTo(
+            uint8_t *chunk = (uint8_t*) xRingbufferReceiveUpTo(
                 s_mp3_ringbuf, &got, pdMS_TO_TICKS(100), want);
             if (chunk && got > 0) {
                 memcpy(accum + accum_fill, chunk, got);
@@ -1146,7 +1159,8 @@ static void aac_decode_task(void *pvParameters)
 
         if (accum_fill < ADTS_HEADER_SIZE) {
             /* Not enough data for an ADTS header */
-            if (!s_sd_feeding_active) break;
+            if (!s_sd_feeding_active)
+                break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
@@ -1156,7 +1170,8 @@ static void aac_decode_task(void *pvParameters)
         if (sync_offset < 0) {
             /* No sync word found — discard buffer and refill */
             accum_fill = 0;
-            if (!s_sd_feeding_active) break;
+            if (!s_sd_feeding_active)
+                break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
@@ -1169,7 +1184,8 @@ static void aac_decode_task(void *pvParameters)
 
         /* Need at least 7 bytes for a complete ADTS header after sync adjustment */
         if (accum_fill < ADTS_HEADER_SIZE) {
-            if (!s_sd_feeding_active) break;
+            if (!s_sd_feeding_active)
+                break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
@@ -1193,7 +1209,8 @@ static void aac_decode_task(void *pvParameters)
             }
             if (adts_frame_len > accum_fill) {
                 /* Incomplete frame — wait for more data */
-                if (!s_sd_feeding_active) break;
+                if (!s_sd_feeding_active)
+                    break;
                 vTaskDelay(pdMS_TO_TICKS(10));
                 continue;
             }
@@ -1253,15 +1270,17 @@ static void aac_decode_task(void *pvParameters)
                 }
 
                 /* Write decoded PCM to audio ring buffer */
-                size_t written = audio_write_to_buffer((uint8_t *)s_aac_pcm_buffer, pcm_bytes);
-                if (written == 0 && s_sd_feeding_active) {
+                size_t written = audio_write_to_buffer((uint8_t*) s_aac_pcm_buffer, pcm_bytes);
+                if (written == 0 && s_sd_feeding_active)
+                {
                     vTaskDelay(pdMS_TO_TICKS(50));
-                    audio_write_to_buffer((uint8_t *)s_aac_pcm_buffer, pcm_bytes);
+                    audio_write_to_buffer((uint8_t*) s_aac_pcm_buffer, pcm_bytes);
                 }
             }
         } else if (err == ERR_AAC_INDATA_UNDERFLOW) {
             /* Need more data — wait for stream to provide more */
-            if (!s_sd_feeding_active) break;
+            if (!s_sd_feeding_active)
+                break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         } else {
@@ -1324,13 +1343,12 @@ static size_t mp3_write_to_buffer(const uint8_t *data, size_t len)
  * Applies EQ processing if enabled before writing to the buffer.
  * Returns number of bytes written
  */
-static size_t audio_write_to_buffer(const uint8_t *data, size_t len)
+static size_t audio_write_to_buffer(const uint8_t* data, size_t len)
 {
-    if (!s_audio_output_enabled || !s_audio_ringbuf) {
+    if (!s_audio_output_enabled || !s_audio_ringbuf)
         return 0;
-    }
 
-    const uint8_t *send_data = data;
+    const uint8_t* send_data = data;
     TickType_t timeout = s_sd_feeding_active ? pdMS_TO_TICKS(500) : pdMS_TO_TICKS(50);
 
     /* Apply 3-band EQ to PCM data ONLY when enabled.
@@ -1344,7 +1362,8 @@ static size_t audio_write_to_buffer(const uint8_t *data, size_t len)
     bool need_buf = (s_eq_enabled || s_volume < VOLUME_MAX) &&
                     len >= 4 && len <= (EQ_BUF_SAMPLES * sizeof(int16_t));
 
-    if (need_buf) {
+    if (need_buf)
+    {
         /* Static buffer avoids 8KB stack spike.  Thread-safe because
          * audio_write_to_buffer is only called from the single active
          * decode task (MP3 or AAC, never both concurrently). */
@@ -1352,16 +1371,13 @@ static size_t audio_write_to_buffer(const uint8_t *data, size_t len)
         size_t num_samples = len / sizeof(int16_t);
         memcpy(eq_buf, data, len);
 
-        if (s_eq_enabled) {
+        if (s_eq_enabled)
             eq_process(eq_buf, num_samples, 2 /* stereo */);
-        }
 
         /* Apply software volume scaling (linear). */
-        if (s_volume < VOLUME_MAX) {
-            for (size_t i = 0; i < num_samples; i++) {
-                eq_buf[i] = (int16_t)(((int32_t)eq_buf[i] * s_volume) / VOLUME_MAX);
-            }
-        }
+        if (s_volume < VOLUME_MAX)
+            for (size_t i = 0; i < num_samples; i++)
+                eq_buf[i] = (int16_t)(((int32_t) eq_buf[i] * s_volume) / VOLUME_MAX);
 
         BaseType_t ret = xRingbufferSend(s_audio_ringbuf, eq_buf, len, timeout);
         return (ret == pdTRUE) ? len : 0;
@@ -1412,7 +1428,7 @@ static void audio_playback_task(void *pvParameters)
     while (s_sd_feeding_active || s_audio_playing)
     {
         size_t item_size = 0;
-        uint8_t *data = (uint8_t *)xRingbufferReceiveUpTo(s_audio_ringbuf, &item_size,
+        uint8_t* data = (uint8_t*) xRingbufferReceiveUpTo(s_audio_ringbuf, &item_size,
                                                           pdMS_TO_TICKS(100), chunk_size);
 
         if (data && item_size > 0)
@@ -1423,7 +1439,7 @@ static void audio_playback_task(void *pvParameters)
              * playback to speed up because skipped PCM data shortens the
              * effective audio duration.  Loop until every byte is sent. */
             size_t total_written = 0;
-            while (total_written < item_size && s_sd_feeding_active)
+            while (total_written < item_size && s_audio_playing)
             {
                 esp_err_t ret = i2s_channel_write(s_i2s_tx_chan,
                                                   data + total_written,
@@ -1438,6 +1454,7 @@ static void audio_playback_task(void *pvParameters)
                 }
                 total_written += bytes_written;
             }
+            log("Wrote %d bytes", (int) total_written);
 
             /* Return the buffer space */
             vRingbufferReturnItem(s_audio_ringbuf, data);
@@ -1457,6 +1474,24 @@ static void audio_playback_task(void *pvParameters)
         }
     }
 
+#if 0
+    auto data = (uint8_t*) heap_caps_malloc(PLAYBACK_CHUNK_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    memset(data, 0, PLAYBACK_CHUNK_SIZE);
+    for (int i = 0; i < 10; ++i)
+    {
+        esp_err_t ret = i2s_channel_write(s_i2s_tx_chan,
+                                          data, PLAYBACK_CHUNK_SIZE, &bytes_written,
+                                          pdMS_TO_TICKS(I2S_WRITE_TIMEOUT_MS));
+        if (ret != ESP_OK || bytes_written == 0)
+        {
+            ESP_LOGW(TAG, "I2S write error: %s (wrote %u)",
+                     esp_err_to_name(ret), (unsigned) bytes_written);
+            break;
+        }
+        printf("Wrote %d zeroes\n", (int) bytes_written);
+    }
+    //vTaskDelay(pdMS_TO_TICKS(1000));
+#endif
     audio_stop();
     log("Audio playback task finished");
     vTaskDelete(NULL);
@@ -1467,14 +1502,14 @@ static void audio_playback_task(void *pvParameters)
  */
 static int audio_get_buffer_level()
 {
-    if (!s_audio_ringbuf || s_audio_ringbuf_size == 0) {
+    if (!s_audio_ringbuf || s_audio_ringbuf_size == 0)
         return 0;
-    }
 
     UBaseType_t free_size = xRingbufferGetCurFreeSize(s_audio_ringbuf);
-    int used = (int)(s_audio_ringbuf_size - free_size);
-    if (used < 0) used = 0;
-    return (used * 100) / (int)s_audio_ringbuf_size;
+    int used = (int) (s_audio_ringbuf_size - free_size);
+    if (used < 0)
+        used = 0;
+    return (used * 100) / (int) s_audio_ringbuf_size;
 }
 
 /**
@@ -1775,15 +1810,16 @@ static void sd_playback_task(void *pvParameters)
         while (s_sd_playback_active)
         {
             size_t bytes_read = fread(read_buf, 1, SD_READ_BUF_SIZE, f);
-            if (bytes_read == 0) break; /* EOF */
+            if (bytes_read == 0)
+                break; /* EOF */
             /* Write raw PCM samples directly to the audio ring buffer */
-            audio_write_to_buffer((uint8_t *)read_buf, bytes_read);
+            audio_write_to_buffer((uint8_t*) read_buf, bytes_read);
         }
 
         fclose(f);
         heap_caps_free(read_buf);
+        log("File EOF");
         s_sd_feeding_active = false;
-        s_audio_playing = false;
 
         /* Wait for playback task to finish */
         if (audio_task_handle)
@@ -1849,7 +1885,7 @@ static void sd_playback_task(void *pvParameters)
     }
 
     /* Read file and feed to compressed ring buffer */
-    char *read_buf = (char*) heap_caps_malloc(SD_READ_BUF_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    char* read_buf = (char*) heap_caps_malloc(SD_READ_BUF_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     if (!read_buf) {
         ESP_LOGE(TAG, "Failed to allocate SD read buffer");
         s_sd_feeding_active = false;
@@ -1858,13 +1894,14 @@ static void sd_playback_task(void *pvParameters)
         return;
     }
 
-    while (s_sd_playback_active) {
+    while (s_sd_playback_active)
+    {
         size_t bytes_read = fread(read_buf, 1, SD_READ_BUF_SIZE, f);
         if (bytes_read == 0) {
             /* End of file */
             break;
         }
-        mp3_write_to_buffer((uint8_t *)read_buf, bytes_read);
+        mp3_write_to_buffer((uint8_t*) read_buf, bytes_read);
     }
 
     fclose(f);
@@ -1874,18 +1911,23 @@ static void sd_playback_task(void *pvParameters)
      * decode/playback child tasks to drain remaining data and exit.
      * s_sd_playback_active stays true to keep the outer track loop going. */
     s_sd_feeding_active = false;
-    s_audio_playing = false;
 
     /* Wait for child tasks to finish */
-    if (decode_task_handle) {
-        for (int w = 0; w < 80; w++) {
-            if (eTaskGetState(decode_task_handle) == eDeleted) break;
+    if (decode_task_handle)
+    {
+        for (int w = 0; w < 80; w++)
+        {
+            if (eTaskGetState(decode_task_handle) == eDeleted)
+                break;
             vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
-    if (audio_task_handle) {
-        for (int w = 0; w < 80; w++) {
-            if (eTaskGetState(audio_task_handle) == eDeleted) break;
+    if (audio_task_handle)
+    {
+        for (int w = 0; w < 80; w++)
+        {
+            if (eTaskGetState(audio_task_handle) == eDeleted)
+                break;
             vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
@@ -1893,7 +1935,6 @@ static void sd_playback_task(void *pvParameters)
     /* Let IDLE task free deleted task stacks */
     vTaskDelay(pdMS_TO_TICKS(100));
 
-    s_sd_feeding_active = false;
     s_sd_playback_active = false;
     s_sd_task_running = false;
 
