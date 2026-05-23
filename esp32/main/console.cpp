@@ -202,14 +202,20 @@ int sound(int argc, char** argv)
 {
     static const char* sound_usage =
         "Valid commands:\n"
-        "sound           Show number of tracks\n"
+        "sound           Show tracks\n"
         "sound <index>   Play specified track\n"
         "sound random    Play a random track\n"
         "sound stop      Stop playing\n";
 
     if (argc < 2)
     {
-        printf("%d tracks on SD card\n", get_sd_track_count());
+        const auto tracks = sd_get_tracks();
+        int i = 0;
+        for (const auto& e : tracks)
+        {
+            printf("%3d: %s\n", i, e.c_str());
+            ++i;
+        }
         return 0;
     }
     if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help") || !strcmp(argv[1], "help"))

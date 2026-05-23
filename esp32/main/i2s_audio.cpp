@@ -29,6 +29,8 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "i2s_audio.h"
+
 /* MP3 decoder - minimp3 header-only library */
 #define MINIMP3_IMPLEMENTATION
 #define MINIMP3_NO_SIMD    /* Disable SIMD for ESP32 compatibility */
@@ -262,18 +264,7 @@ static const size_t s_mp3_buf_sizes[] = {
  * Global Variables
  * ============================================================================ */
 
-static const char *TAG = "wifi_audio";
-static const char *TAG_STREAM = "stream";
-static const char *TAG_AUDIO = "audio";
-
-static int s_retry_num = 0;
-
-/* Streaming statistics (protected by s_stats_spinlock for cross-task access) */
-static uint32_t s_total_bytes_received = 0;
-static uint32_t s_last_report_bytes = 0;
-static int64_t s_last_report_time = 0;
-static bool s_streaming_active = false;
-static portMUX_TYPE s_stats_spinlock = portMUX_INITIALIZER_UNLOCKED;
+static const char* TAG = "audio";
 
 /* Audio output */
 static i2s_chan_handle_t s_i2s_tx_chan = NULL;
@@ -334,39 +325,10 @@ static volatile bool s_sd_task_running = false;
  * can drain remaining data then exit — preventing orphan tasks between tracks. */
 static volatile bool s_sd_feeding_active = false;
 static int s_sd_track_index = 0;
-static int s_sd_track_count = 0;
 #define SD_MAX_TRACKS     64
 #define SD_FILENAME_MAX   128
-static char s_sd_tracks[SD_MAX_TRACKS][SD_FILENAME_MAX];
-static char s_sd_current_track[SD_FILENAME_MAX] = {0};
-typedef enum {
-    SD_REPEAT_OFF = 0,   /* Play through once, stop at end */
-    SD_REPEAT_ONE = 1,   /* Loop the current track */
-    SD_REPEAT_ALL = 2,   /* Loop back to first track after last */
-} sd_repeat_mode_t;
-static const char *const s_sd_repeat_names[] = {"Off", "One", "All"};
-/* Cached flag: true once sd_scan_music_files() has populated s_sd_tracks[].
- * Avoids re-mounting the SD card (which conflicts with the playback task's
- * mount) when the user enters the file browser a second time. */
-static bool s_sd_files_cached = false;
 
-/* --- Directory browser state (separate from playback track list) ---
- * s_sd_browse_entries[] holds one directory level at a time for the
- * interactive file browser, while s_sd_tracks[] stays untouched for
- * playback.  This lets the user navigate folders while music plays. */
-#define SD_MAX_BROWSE     32
-static char s_sd_browse_entries[SD_MAX_BROWSE][SD_FILENAME_MAX];
-static bool s_sd_browse_is_dir[SD_MAX_BROWSE];
-static int  s_sd_browse_count = 0;
-static char s_sd_browse_dir[SD_FILENAME_MAX] = "/sdcard/music";
-static bool s_sd_browse_has_parent = false;
-
-/* True when any audio source (WiFi stream or SD card) is actively feeding data.
- * Used by decode and playback tasks to decide loop/timeout behavior.
- * For SD playback, s_sd_feeding_active (not s_sd_playback_active) is used so
- * that decode/playback child tasks can exit cleanly between tracks when file
- * reading ends but the overall SD session is still active. */
-#define AUDIO_SOURCE_ACTIVE  (s_streaming_active || s_sd_feeding_active)
+static std::vector<std::string> sd_tracks;
 
 /* ============================================================================
  * 3-Band Software Equalizer
@@ -409,16 +371,11 @@ static bool s_sd_browse_has_parent = false;
 #define EQ_MID_Q         1.0f    /* Moderate peak width */
 #define EQ_TREBLE_Q      0.7f    /* Gentle shelf slope */
 
-static const char *s_eq_band_names[EQ_NUM_BANDS] = {"Bass", "Mid", "Treble"};
-
 /* EQ gain per band (dB) — 0 = flat */
 static int s_eq_gains[EQ_NUM_BANDS] = {0, 0, 0};
 
 /* EQ enabled flag */
 static bool s_eq_enabled = false;
-
-/* Currently selected EQ band in menu (persists across EQ screen redraws) */
-static int s_eq_selected_band = 0;
 
 /* Software volume control (0–100%, default 100).
  * Applied as a linear 16-bit multiply in audio_write_to_buffer. */
@@ -438,6 +395,15 @@ typedef struct {
 
 #define EQ_MAX_CHANNELS 2
 static biquad_state_t s_eq_filters[EQ_NUM_BANDS][EQ_MAX_CHANNELS];
+
+static void log(const char* msg, ...)
+{
+    va_list args;
+    va_start(args, msg);
+    char buf[80];
+    vsprintf(buf, msg, args);
+    printf("%06lu %s\n", xTaskGetTickCount(), buf);
+}
 
 /**
  * Compute proper biquad coefficients using Audio EQ Cookbook formulas.
@@ -563,6 +529,7 @@ static void eq_init()
     s_eq_enabled = false;
 }
 
+#if 0
 /**
  * Set EQ gain for a specific band and recompute coefficients.
  */
@@ -578,6 +545,7 @@ static void eq_set_gain(int band, int gain_db)
     /* Auto-enable EQ when any band is non-zero */
     s_eq_enabled = (s_eq_gains[0] != 0 || s_eq_gains[1] != 0 || s_eq_gains[2] != 0);
 }
+#endif
 
 /**
  * Apply one biquad filter to a single sample.
@@ -651,12 +619,12 @@ static void eq_process(int16_t *samples, size_t num_samples, int channels)
  */
 static esp_err_t audio_i2s_init()
 {
-    ESP_LOGI(TAG_AUDIO, "Initializing I2S audio output...");
-    ESP_LOGI(TAG_AUDIO, "I2S Config: BCLK=%d, WS=%d, DOUT=%d, Rate=%d Hz",
+    ESP_LOGI(TAG, "Initializing I2S audio output...");
+    ESP_LOGI(TAG, "I2S Config: BCLK=%d, WS=%d, DOUT=%d, Rate=%d Hz",
              I2S_BCLK_GPIO, I2S_WS_GPIO, I2S_DOUT_GPIO, AUDIO_SAMPLE_RATE);
-    ESP_LOGI(TAG_AUDIO, "I2S Format: PHILIPS (I2S), 16-bit stereo");
-    ESP_LOGI(TAG_AUDIO, "Supported DACs: MAX98357A, PCM5102, UDA1334A");
-    ESP_LOGI(TAG_AUDIO, "NOTE: PCM5102 requires FMT pin set to I2S mode (GND)");
+    ESP_LOGI(TAG, "I2S Format: PHILIPS (I2S), 16-bit stereo");
+    ESP_LOGI(TAG, "Supported DACs: MAX98357A, PCM5102, UDA1334A");
+    ESP_LOGI(TAG, "NOTE: PCM5102 requires FMT pin set to I2S mode (GND)");
 
     /* Create I2S TX channel — see I2S_DMA_DESC_NUM/I2S_DMA_FRAME_NUM defines
      * for per-target DMA buffer sizing rationale. */
@@ -666,7 +634,7 @@ static esp_err_t audio_i2s_init()
 
     esp_err_t ret = i2s_new_channel(&chan_cfg, &s_i2s_tx_chan, NULL);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG_AUDIO, "Failed to create I2S channel: %s", esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Failed to create I2S channel: %s", esp_err_to_name(ret));
         return ret;
     }
 
@@ -690,7 +658,7 @@ static esp_err_t audio_i2s_init()
 
     ret = i2s_channel_init_std_mode(s_i2s_tx_chan, &std_cfg);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG_AUDIO, "Failed to init I2S STD mode: %s", esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Failed to init I2S STD mode: %s", esp_err_to_name(ret));
         i2s_del_channel(s_i2s_tx_chan);
         s_i2s_tx_chan = NULL;
         return ret;
@@ -701,7 +669,7 @@ static esp_err_t audio_i2s_init()
      * control struct (with portMUX spinlock) in PSRAM, causing corruption
      * on Xtensa.  Use xRingbufferCreateStatic() with explicit internal alloc. */
     if (!s_audio_ringbuf) {
-        ESP_LOGI(TAG_AUDIO, "Free heap before PCM buffer: %d KB internal",
+        ESP_LOGI(TAG, "Free heap before PCM buffer: %d KB internal",
                  (int)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024));
         size_t buf_size = AUDIO_RINGBUF_SIZE;
         /* Allocate storage + control struct both in internal SRAM */
@@ -713,7 +681,7 @@ static esp_err_t audio_i2s_init()
             s_pcm_ringbuf_storage = NULL;
             s_pcm_ringbuf_struct = NULL;
             buf_size = AUDIO_RINGBUF_FALLBACK_SIZE;
-            ESP_LOGW(TAG_AUDIO, "PCM buffer %dKB failed, trying %dKB",
+            ESP_LOGW(TAG, "PCM buffer %dKB failed, trying %dKB",
                      AUDIO_RINGBUF_SIZE / 1024, buf_size / 1024);
             s_pcm_ringbuf_storage = (uint8_t*) heap_caps_malloc(buf_size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
             s_pcm_ringbuf_struct = (StaticRingbuffer_t*) heap_caps_malloc(sizeof(StaticRingbuffer_t), MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
@@ -723,7 +691,7 @@ static esp_err_t audio_i2s_init()
                                                        s_pcm_ringbuf_storage, s_pcm_ringbuf_struct);
         }
         if (!s_audio_ringbuf) {
-            ESP_LOGE(TAG_AUDIO, "Failed to create PCM ring buffer");
+            ESP_LOGE(TAG, "Failed to create PCM ring buffer");
             heap_caps_free(s_pcm_ringbuf_storage);
             heap_caps_free(s_pcm_ringbuf_struct);
             s_pcm_ringbuf_storage = NULL;
@@ -733,7 +701,7 @@ static esp_err_t audio_i2s_init()
             return ESP_ERR_NO_MEM;
         }
         s_audio_ringbuf_size = buf_size;
-        ESP_LOGI(TAG_AUDIO, "PCM ring buffer: %d KB (internal SRAM, static alloc)", buf_size / 1024);
+        ESP_LOGI(TAG, "PCM ring buffer: %d KB (internal SRAM, static alloc)", buf_size / 1024);
     }
 
     /* Create MP3 compressed data ring buffer (large).
@@ -743,7 +711,7 @@ static esp_err_t audio_i2s_init()
     if (!s_mp3_ringbuf) {
         size_t free_internal = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
         size_t free_spiram = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
-        ESP_LOGI(TAG_AUDIO, "Free heap - internal: %d KB, PSRAM: %d KB",
+        ESP_LOGI(TAG, "Free heap - internal: %d KB, PSRAM: %d KB",
                  (int)(free_internal / 1024), (int)(free_spiram / 1024));
 
         size_t mp3_buf_size = 0;
@@ -769,7 +737,7 @@ static esp_err_t audio_i2s_init()
             }
             if (s_mp3_ringbuf) {
                 mp3_buf_size = MP3_RINGBUF_SIZE;
-                ESP_LOGI(TAG_AUDIO, "MP3 buffer: %dKB in PSRAM (control struct in internal SRAM)",
+                ESP_LOGI(TAG, "MP3 buffer: %dKB in PSRAM (control struct in internal SRAM)",
                          (int)(mp3_buf_size / 1024));
             } else {
                 /* Clean up partial allocations */
@@ -787,22 +755,22 @@ static esp_err_t audio_i2s_init()
             for (int i = 1; i < (int)MP3_BUF_SIZES_COUNT; i++) {
                 mp3_buf_size = s_mp3_buf_sizes[i];
                 if (free_internal < mp3_buf_size + HEAP_HEADROOM_BYTES) {
-                    ESP_LOGW(TAG_AUDIO, "Skipping MP3 buffer %dKB (only %dKB internal free, need %dKB headroom)",
+                    ESP_LOGW(TAG, "Skipping MP3 buffer %dKB (only %dKB internal free, need %dKB headroom)",
                              (int)(mp3_buf_size / 1024), (int)(free_internal / 1024),
                              (int)(HEAP_HEADROOM_BYTES / 1024));
                     continue;
                 }
                 s_mp3_ringbuf = xRingbufferCreate(mp3_buf_size, RINGBUF_TYPE_BYTEBUF);
                 if (s_mp3_ringbuf) {
-                    ESP_LOGI(TAG_AUDIO, "MP3 buffer: %dKB allocated in internal SRAM", (int)(mp3_buf_size / 1024));
+                    ESP_LOGI(TAG, "MP3 buffer: %dKB allocated in internal SRAM", (int)(mp3_buf_size / 1024));
                     break;
                 }
-                ESP_LOGW(TAG_AUDIO, "MP3 buffer %dKB allocation failed", (int)(mp3_buf_size / 1024));
+                ESP_LOGW(TAG, "MP3 buffer %dKB allocation failed", (int)(mp3_buf_size / 1024));
             }
         }
 
         if (!s_mp3_ringbuf) {
-            ESP_LOGE(TAG_AUDIO, "Failed to create MP3 ring buffer (free: %d KB internal, %d KB PSRAM)",
+            ESP_LOGE(TAG, "Failed to create MP3 ring buffer (free: %d KB internal, %d KB PSRAM)",
                      (int)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024),
                      (int)(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024));
             i2s_del_channel(s_i2s_tx_chan);
@@ -810,16 +778,16 @@ static esp_err_t audio_i2s_init()
             return ESP_ERR_NO_MEM;
         }
         s_mp3_ringbuf_size = mp3_buf_size;
-        ESP_LOGI(TAG_AUDIO, "MP3 ring buffer: %d KB (~%d sec of 128kbps stream)",
+        ESP_LOGI(TAG, "MP3 ring buffer: %d KB (~%d sec of 128kbps stream)",
                  (int)(mp3_buf_size / 1024), (int)(mp3_buf_size / (128 * 1024 / 8)));
-        ESP_LOGI(TAG_AUDIO, "Free internal heap after buffers: %d KB (largest block: %d KB)",
+        ESP_LOGI(TAG, "Free internal heap after buffers: %d KB (largest block: %d KB)",
                  (int)(heap_caps_get_free_size(MALLOC_CAP_INTERNAL) / 1024),
                  (int)(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024));
     }
 
     s_audio_output_enabled = true;
-    ESP_LOGI(TAG_AUDIO, "I2S audio output initialized successfully");
-    ESP_LOGI(TAG_AUDIO, "Expected bit clock: ~%.2f MHz", (AUDIO_SAMPLE_RATE * 16 * 2) / 1000000.0);
+    ESP_LOGI(TAG, "I2S audio output initialized successfully");
+    ESP_LOGI(TAG, "Expected bit clock: ~%.2f MHz", (AUDIO_SAMPLE_RATE * 16 * 2) / 1000000.0);
 
     return ESP_OK;
 }
@@ -830,18 +798,18 @@ static esp_err_t audio_i2s_init()
 static esp_err_t audio_start()
 {
     if (!s_audio_output_enabled || !s_i2s_tx_chan) {
-        ESP_LOGW(TAG_AUDIO, "Audio output not initialized");
+        ESP_LOGW(TAG, "Audio output not initialized");
         return ESP_ERR_INVALID_STATE;
     }
 
     esp_err_t ret = i2s_channel_enable(s_i2s_tx_chan);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG_AUDIO, "Failed to enable I2S channel: %s", esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Failed to enable I2S channel: %s", esp_err_to_name(ret));
         return ret;
     }
 
     s_audio_playing = true;
-    ESP_LOGI(TAG_AUDIO, "Audio playback started");
+    log("Audio playback started");
     return ESP_OK;
 }
 
@@ -857,11 +825,11 @@ static esp_err_t audio_stop()
     s_audio_playing = false;
     esp_err_t ret = i2s_channel_disable(s_i2s_tx_chan);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG_AUDIO, "Failed to disable I2S channel: %s", esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Failed to disable I2S channel: %s", esp_err_to_name(ret));
         return ret;
     }
 
-    ESP_LOGI(TAG_AUDIO, "Audio playback stopped");
+    log("Audio playback stopped");
     return ESP_OK;
 }
 
@@ -880,23 +848,23 @@ static esp_err_t audio_reconfigure_sample_rate(uint32_t new_rate)
 {
     if (!s_i2s_tx_chan || new_rate == s_current_sample_rate) {
         if (new_rate == s_current_sample_rate) {
-            ESP_LOGD(TAG_AUDIO, "I2S already at %lu Hz, no reconfiguration needed", (unsigned long)new_rate);
+            ESP_LOGD(TAG, "I2S already at %lu Hz, no reconfiguration needed", (unsigned long)new_rate);
         }
         return ESP_OK;
     }
 
-    ESP_LOGI(TAG_AUDIO, "Reconfiguring I2S: %lu Hz -> %lu Hz",
+    ESP_LOGI(TAG, "Reconfiguring I2S: %lu Hz -> %lu Hz",
              (unsigned long)s_current_sample_rate, (unsigned long)new_rate);
 
     i2s_std_clk_config_t clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(new_rate);
     esp_err_t ret = i2s_channel_reconfig_std_clock(s_i2s_tx_chan, &clk_cfg);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG_AUDIO, "Failed to reconfigure I2S clock: %s", esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Failed to reconfigure I2S clock: %s", esp_err_to_name(ret));
         return ret;
     }
 
     s_current_sample_rate = new_rate;
-    ESP_LOGI(TAG_AUDIO, "I2S sample rate set to %lu Hz", (unsigned long)new_rate);
+    ESP_LOGI(TAG, "I2S sample rate set to %lu Hz", (unsigned long)new_rate);
 
     /* Recalculate EQ filter coefficients for the new sample rate */
     if (s_eq_enabled) {
@@ -905,7 +873,7 @@ static esp_err_t audio_reconfigure_sample_rate(uint32_t new_rate)
                 eq_compute_coefficients(b, s_eq_gains[b]);
             }
         }
-        ESP_LOGD(TAG_AUDIO, "EQ coefficients recalculated for %lu Hz", (unsigned long)new_rate);
+        ESP_LOGD(TAG, "EQ coefficients recalculated for %lu Hz", (unsigned long)new_rate);
     }
 
     return ESP_OK;
@@ -913,7 +881,6 @@ static esp_err_t audio_reconfigure_sample_rate(uint32_t new_rate)
 
 /* Forward declaration - defined later in audio playback section */
 static int audio_get_buffer_level();
-static int mp3_get_buffer_level();
 
 /* Forward declaration for audio_write_to_buffer (used by MP3 decoder) */
 static size_t audio_write_to_buffer(const uint8_t *data, size_t len);
@@ -930,7 +897,7 @@ static void mp3_decoder_init()
     if (!s_mp3_decoder_initialized) {
         mp3dec_init(&s_mp3_decoder);
         s_mp3_decoder_initialized = true;
-        ESP_LOGI(TAG_AUDIO, "MP3 decoder initialized");
+        ESP_LOGI(TAG, "MP3 decoder initialized");
     }
 }
 
@@ -950,7 +917,7 @@ static mp3d_sample_t s_mp3_pcm_buffer[MINIMP3_MAX_SAMPLES_PER_FRAME];
  */
 static void mp3_decode_task(void *pvParameters)
 {
-    ESP_LOGI(TAG_AUDIO, "MP3 decode task started");
+    log("MP3 decode task started");
 
     if (!s_mp3_decoder_initialized) {
         mp3_decoder_init();
@@ -966,7 +933,7 @@ static void mp3_decode_task(void *pvParameters)
      * miss handling can interfere with ISR timing. */
     uint8_t *accum = (uint8_t*) heap_caps_malloc(MP3_ACCUM_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     if (!accum) {
-        ESP_LOGE(TAG_AUDIO, "Failed to allocate MP3 accumulation buffer");
+        ESP_LOGE(TAG, "Failed to allocate MP3 accumulation buffer");
         DECODE_TASK_SELF_DELETE();
         return;
     }
@@ -975,7 +942,7 @@ static void mp3_decode_task(void *pvParameters)
     mp3dec_frame_info_t frame_info;
     int frames_since_yield = 0;
 
-    while (AUDIO_SOURCE_ACTIVE || (s_audio_playing && accum_fill > 0)) {
+    while (s_sd_feeding_active || (s_audio_playing && accum_fill > 0)) {
         /* Try to top up the accumulation buffer from the MP3 ring buffer */
         if (accum_fill < MP3_ACCUM_SIZE) {
             size_t want = MP3_ACCUM_SIZE - accum_fill;
@@ -991,7 +958,8 @@ static void mp3_decode_task(void *pvParameters)
 
         if (accum_fill < 4) {
             /* Not enough data for a frame header — wait for more */
-            if (!AUDIO_SOURCE_ACTIVE) break;
+            if (!s_sd_feeding_active)
+                break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
@@ -1003,7 +971,7 @@ static void mp3_decode_task(void *pvParameters)
 
         if (frame_info.frame_bytes == 0) {
             /* Not enough data for a complete frame — need more from ring buffer */
-            if (!AUDIO_SOURCE_ACTIVE) break;
+            if (!s_sd_feeding_active) break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
@@ -1018,15 +986,15 @@ static void mp3_decode_task(void *pvParameters)
         if (samples > 0) {
             /* Log first successful decode and reconfigure I2S BEFORE writing PCM */
             if (!s_mp3_first_decode_logged) {
-                ESP_LOGI(TAG_AUDIO, "MP3: %d Hz, %d ch, %d kbps",
-                         frame_info.hz, frame_info.channels, frame_info.bitrate_kbps);
+                log("MP3: %d Hz, %d ch, %d kbps",
+                    frame_info.hz, frame_info.channels, frame_info.bitrate_kbps);
                 s_mp3_first_decode_logged = true;
 
                 /* Reconfigure I2S if MP3 sample rate differs from configured rate */
                 if (frame_info.hz > 0 && (uint32_t)frame_info.hz != s_current_sample_rate) {
                     esp_err_t rc = audio_reconfigure_sample_rate((uint32_t)frame_info.hz);
                     if (rc != ESP_OK) {
-                        ESP_LOGW(TAG_AUDIO, "I2S reconfigure failed, playback may be distorted");
+                        ESP_LOGW(TAG, "I2S reconfigure failed, playback may be distorted");
                     }
                 }
             }
@@ -1047,7 +1015,7 @@ static void mp3_decode_task(void *pvParameters)
             /* Write decoded PCM to audio ring buffer.
              * This blocks when buffer is full — natural backpressure. */
             size_t written = audio_write_to_buffer((uint8_t *)s_mp3_pcm_buffer, pcm_bytes);
-            if (written == 0 && AUDIO_SOURCE_ACTIVE) {
+            if (written == 0 && s_sd_feeding_active) {
                 /* Buffer full after timeout — try once more after a short wait */
                 vTaskDelay(pdMS_TO_TICKS(50));
                 audio_write_to_buffer((uint8_t *)s_mp3_pcm_buffer, pcm_bytes);
@@ -1070,7 +1038,7 @@ static void mp3_decode_task(void *pvParameters)
     }
 
     heap_caps_free(accum);
-    ESP_LOGI(TAG_AUDIO, "MP3 decode task finished");
+    log("MP3 decode task finished");
     DECODE_TASK_SELF_DELETE();
 }
 
@@ -1086,18 +1054,18 @@ static void aac_decoder_init()
     if (!s_aac_decoder_initialized) {
         /* Log free heap before AAC init for diagnostics */
         size_t free_internal = heap_caps_get_free_size(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
-        ESP_LOGI(TAG_AUDIO, "Free internal heap before AAC init: %u KB", (unsigned)(free_internal / 1024));
+        ESP_LOGI(TAG, "Free internal heap before AAC init: %u KB", (unsigned)(free_internal / 1024));
 
         s_aac_decoder = AACInitDecoder();
         if (s_aac_decoder) {
             s_aac_decoder_initialized = true;
-            ESP_LOGI(TAG_AUDIO, "AAC decoder initialized (libhelix-aac)");
+            ESP_LOGI(TAG, "AAC decoder initialized (libhelix-aac)");
             /* Note: If "OOM in SBR" was printed above, the decoder will still work
              * for AAC-LC content.  HE-AAC streams will decode at base sample rate
              * (e.g., 22050 Hz instead of 44100 Hz) — still audible, just lower quality.
              * Adding PSRAM will allow full HE-AAC (SBR) decoding. */
         } else {
-            ESP_LOGE(TAG_AUDIO, "Failed to initialize AAC decoder");
+            ESP_LOGE(TAG, "Failed to initialize AAC decoder");
         }
     }
 }
@@ -1129,13 +1097,13 @@ static int16_t s_aac_pcm_buffer[AAC_MAX_PCM_SAMPLES];
  */
 static void aac_decode_task(void *pvParameters)
 {
-    ESP_LOGI(TAG_AUDIO, "AAC decode task started");
+    ESP_LOGI(TAG, "AAC decode task started");
 
     if (!s_aac_decoder_initialized) {
         aac_decoder_init();
     }
     if (!s_aac_decoder) {
-        ESP_LOGE(TAG_AUDIO, "AAC decoder not available, task exiting");
+        ESP_LOGE(TAG, "AAC decoder not available, task exiting");
         DECODE_TASK_SELF_DELETE();
         return;
     }
@@ -1152,17 +1120,17 @@ static void aac_decode_task(void *pvParameters)
         AAC_ACCUM_SIZE = AAC_ACCUM_FALLBACK;
         accum = (uint8_t*) heap_caps_malloc(AAC_ACCUM_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
         if (!accum) {
-            ESP_LOGE(TAG_AUDIO, "Failed to allocate AAC accumulation buffer");
+            ESP_LOGE(TAG, "Failed to allocate AAC accumulation buffer");
             DECODE_TASK_SELF_DELETE();
             return;
         }
-        ESP_LOGW(TAG_AUDIO, "AAC accumulation buffer reduced to %u bytes", (unsigned)AAC_ACCUM_SIZE);
+        ESP_LOGW(TAG, "AAC accumulation buffer reduced to %u bytes", (unsigned)AAC_ACCUM_SIZE);
     }
     size_t accum_fill = 0;
     int consecutive_errors = 0;
     int frames_since_yield = 0;
 
-    while (AUDIO_SOURCE_ACTIVE || (s_audio_playing && accum_fill > 0)) {
+    while (s_sd_feeding_active || (s_audio_playing && accum_fill > 0)) {
         /* Try to top up the accumulation buffer from the compressed ring buffer */
         if (accum_fill < AAC_ACCUM_SIZE) {
             size_t want = AAC_ACCUM_SIZE - accum_fill;
@@ -1178,7 +1146,7 @@ static void aac_decode_task(void *pvParameters)
 
         if (accum_fill < ADTS_HEADER_SIZE) {
             /* Not enough data for an ADTS header */
-            if (!AUDIO_SOURCE_ACTIVE) break;
+            if (!s_sd_feeding_active) break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
@@ -1188,7 +1156,7 @@ static void aac_decode_task(void *pvParameters)
         if (sync_offset < 0) {
             /* No sync word found — discard buffer and refill */
             accum_fill = 0;
-            if (!AUDIO_SOURCE_ACTIVE) break;
+            if (!s_sd_feeding_active) break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
@@ -1201,7 +1169,7 @@ static void aac_decode_task(void *pvParameters)
 
         /* Need at least 7 bytes for a complete ADTS header after sync adjustment */
         if (accum_fill < ADTS_HEADER_SIZE) {
-            if (!AUDIO_SOURCE_ACTIVE) break;
+            if (!s_sd_feeding_active) break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         }
@@ -1225,7 +1193,7 @@ static void aac_decode_task(void *pvParameters)
             }
             if (adts_frame_len > accum_fill) {
                 /* Incomplete frame — wait for more data */
-                if (!AUDIO_SOURCE_ACTIVE) break;
+                if (!s_sd_feeding_active) break;
                 vTaskDelay(pdMS_TO_TICKS(10));
                 continue;
             }
@@ -1253,7 +1221,7 @@ static void aac_decode_task(void *pvParameters)
             if (frame_info.outputSamps > 0) {
                 /* Log first successful decode and reconfigure I2S BEFORE writing PCM */
                 if (!s_aac_first_decode_logged) {
-                    ESP_LOGI(TAG_AUDIO, "AAC: %d Hz (out: %d Hz), %d ch, %d kbps, profile %d",
+                    ESP_LOGI(TAG, "AAC: %d Hz (out: %d Hz), %d ch, %d kbps, profile %d",
                              frame_info.sampRateCore, frame_info.sampRateOut,
                              frame_info.nChans, frame_info.bitRate / 1000,
                              frame_info.profile);
@@ -1265,7 +1233,7 @@ static void aac_decode_task(void *pvParameters)
                     if (out_rate > 0 && (uint32_t)out_rate != s_current_sample_rate) {
                         esp_err_t rc = audio_reconfigure_sample_rate((uint32_t)out_rate);
                         if (rc != ESP_OK) {
-                            ESP_LOGW(TAG_AUDIO, "I2S reconfigure failed, playback may be distorted");
+                            ESP_LOGW(TAG, "I2S reconfigure failed, playback may be distorted");
                         }
                     }
                 }
@@ -1286,28 +1254,28 @@ static void aac_decode_task(void *pvParameters)
 
                 /* Write decoded PCM to audio ring buffer */
                 size_t written = audio_write_to_buffer((uint8_t *)s_aac_pcm_buffer, pcm_bytes);
-                if (written == 0 && AUDIO_SOURCE_ACTIVE) {
+                if (written == 0 && s_sd_feeding_active) {
                     vTaskDelay(pdMS_TO_TICKS(50));
                     audio_write_to_buffer((uint8_t *)s_aac_pcm_buffer, pcm_bytes);
                 }
             }
         } else if (err == ERR_AAC_INDATA_UNDERFLOW) {
             /* Need more data — wait for stream to provide more */
-            if (!AUDIO_SOURCE_ACTIVE) break;
+            if (!s_sd_feeding_active) break;
             vTaskDelay(pdMS_TO_TICKS(10));
             continue;
         } else {
             /* Decode error — skip past the current sync word to find the next frame */
             consecutive_errors++;
             if (!s_audio_playing) {
-                ESP_LOGI(TAG_AUDIO, "AAC: playback stopped, exiting decoder");
+                ESP_LOGI(TAG, "AAC: playback stopped, exiting decoder");
                 break;
             }
             if (consecutive_errors > 20) {
-                ESP_LOGE(TAG_AUDIO, "AAC: too many consecutive errors (%d), giving up", consecutive_errors);
+                ESP_LOGE(TAG, "AAC: too many consecutive errors (%d), giving up", consecutive_errors);
                 break;
             }
-            ESP_LOGD(TAG_AUDIO, "AAC decode error %d, skipping to next sync", err);
+            ESP_LOGD(TAG, "AAC decode error %d, skipping to next sync", err);
 
             /* Use decoder's consumed byte count if it advanced, otherwise skip 2 bytes */
             size_t consumed = (size_t)(inbuf_ptr - accum);
@@ -1333,7 +1301,7 @@ static void aac_decode_task(void *pvParameters)
 
     heap_caps_free(accum);
     aac_decoder_free();
-    ESP_LOGI(TAG_AUDIO, "AAC decode task finished");
+    ESP_LOGI(TAG, "AAC decode task finished");
     DECODE_TASK_SELF_DELETE();
 }
 
@@ -1347,7 +1315,7 @@ static size_t mp3_write_to_buffer(const uint8_t *data, size_t len)
         return 0;
     }
     BaseType_t ret = xRingbufferSend(s_mp3_ringbuf, data, len,
-                                      AUDIO_SOURCE_ACTIVE ? pdMS_TO_TICKS(500) : pdMS_TO_TICKS(50));
+                                      s_sd_feeding_active ? pdMS_TO_TICKS(500) : pdMS_TO_TICKS(50));
     return (ret == pdTRUE) ? len : 0;
 }
 
@@ -1363,7 +1331,7 @@ static size_t audio_write_to_buffer(const uint8_t *data, size_t len)
     }
 
     const uint8_t *send_data = data;
-    TickType_t timeout = AUDIO_SOURCE_ACTIVE ? pdMS_TO_TICKS(500) : pdMS_TO_TICKS(50);
+    TickType_t timeout = s_sd_feeding_active ? pdMS_TO_TICKS(500) : pdMS_TO_TICKS(50);
 
     /* Apply 3-band EQ to PCM data ONLY when enabled.
      * When disabled, skip the processing and memcpy entirely
@@ -1410,7 +1378,7 @@ static size_t audio_write_to_buffer(const uint8_t *data, size_t len)
  */
 static void audio_playback_task(void *pvParameters)
 {
-    ESP_LOGI(TAG_AUDIO, "Audio playback task started");
+    log("Audio playback task started");
 
     const size_t chunk_size = PLAYBACK_CHUNK_SIZE;
     size_t bytes_written = 0;
@@ -1421,42 +1389,50 @@ static void audio_playback_task(void *pvParameters)
      * application core (the LP core is a coprocessor, not used by FreeRTOS). */
     int prebuf_ms = 0;
     const int PCM_PREBUF_PCT = PCM_PREBUF_THRESHOLD_PCT;
-    while (prebuf_ms < 5000 && AUDIO_SOURCE_ACTIVE) {
+    while (prebuf_ms < 5000 && s_sd_feeding_active)
+    {
         int level = audio_get_buffer_level();
-        if (level >= PCM_PREBUF_PCT) {
+        if (level >= PCM_PREBUF_PCT)
             break;
-        }
         vTaskDelay(pdMS_TO_TICKS(50));
         prebuf_ms += 50;
     }
-    ESP_LOGI(TAG_AUDIO, "PCM pre-buffered for %d ms, level: %d%%",
-             prebuf_ms, audio_get_buffer_level());
+    log("PCM pre-buffered for %d ms, level: %d%%",
+        prebuf_ms, audio_get_buffer_level());
 
     /* Start I2S playback */
-    if (audio_start() != ESP_OK) {
-        ESP_LOGE(TAG_AUDIO, "Failed to start audio, task exiting");
+    if (audio_start() != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to start audio, task exiting");
         vTaskDelete(NULL);
         return;
     }
 
-    while (AUDIO_SOURCE_ACTIVE || s_audio_playing) {
+    size_t total_bytes = 0;
+    while (s_sd_feeding_active || s_audio_playing)
+    {
         size_t item_size = 0;
         uint8_t *data = (uint8_t *)xRingbufferReceiveUpTo(s_audio_ringbuf, &item_size,
                                                           pdMS_TO_TICKS(100), chunk_size);
 
-        if (data && item_size > 0) {
+        if (data && item_size > 0)
+        {
+            total_bytes += item_size;
+            log("Received %d bytes, total %d", (int) item_size, (int) total_bytes);
             /* Write ALL data to I2S — partial writes lose audio and cause
              * playback to speed up because skipped PCM data shortens the
              * effective audio duration.  Loop until every byte is sent. */
             size_t total_written = 0;
-            while (total_written < item_size && AUDIO_SOURCE_ACTIVE) {
+            while (total_written < item_size && s_sd_feeding_active)
+            {
                 esp_err_t ret = i2s_channel_write(s_i2s_tx_chan,
-                                                   data + total_written,
-                                                   item_size - total_written,
-                                                   &bytes_written,
-                                                   pdMS_TO_TICKS(I2S_WRITE_TIMEOUT_MS));
-                if (ret != ESP_OK || bytes_written == 0) {
-                    ESP_LOGW(TAG_AUDIO, "I2S write error: %s (wrote %u/%u)",
+                                                  data + total_written,
+                                                  item_size - total_written,
+                                                  &bytes_written,
+                                                  pdMS_TO_TICKS(I2S_WRITE_TIMEOUT_MS));
+                if (ret != ESP_OK || bytes_written == 0)
+                {
+                    ESP_LOGW(TAG, "I2S write error: %s (wrote %u/%u)",
                              esp_err_to_name(ret), (unsigned)total_written, (unsigned)item_size);
                     break;
                 }
@@ -1465,21 +1441,24 @@ static void audio_playback_task(void *pvParameters)
 
             /* Return the buffer space */
             vRingbufferReturnItem(s_audio_ringbuf, data);
-        } else {
+        }
+        else
+        {
+            log("No data in ring buffer");
             /* No data available — let I2S DMA continue playing its internal
              * buffer while we wait for the decode task to produce more PCM.
              * On chips with one FreeRTOS core, stopping/restarting I2S during
              * brief underruns causes worse glitches than letting DMA drain. */
-            if (!AUDIO_SOURCE_ACTIVE) {
+            if (!s_sd_feeding_active)
                 /* Stream ended, exit playback */
                 break;
-            }
+
             vTaskDelay(pdMS_TO_TICKS(5));
         }
     }
 
     audio_stop();
-    ESP_LOGI(TAG_AUDIO, "Audio playback task finished");
+    log("Audio playback task finished");
     vTaskDelete(NULL);
 }
 
@@ -1496,21 +1475,6 @@ static int audio_get_buffer_level()
     int used = (int)(s_audio_ringbuf_size - free_size);
     if (used < 0) used = 0;
     return (used * 100) / (int)s_audio_ringbuf_size;
-}
-
-/**
- * Get MP3 compressed buffer fill level in percentage
- */
-static int mp3_get_buffer_level()
-{
-    if (!s_mp3_ringbuf || s_mp3_ringbuf_size == 0) {
-        return 0;
-    }
-
-    UBaseType_t free_size = xRingbufferGetCurFreeSize(s_mp3_ringbuf);
-    int used = (int)(s_mp3_ringbuf_size - free_size);
-    if (used < 0) used = 0;
-    return (used * 100) / (int)s_mp3_ringbuf_size;
 }
 
 /**
@@ -1531,9 +1495,8 @@ static void flush_ringbuffer(RingbufHandle_t rbuf, const char *name)
         vRingbufferReturnItem(rbuf, item);
         flushed += (int)item_size;
     }
-    if (flushed > 0) {
-        ESP_LOGI(TAG_AUDIO, "Flushed %d bytes from %s ring buffer", flushed, name);
-    }
+    if (flushed > 0)
+        log("Flushed %d bytes from %s ring buffer", flushed, name);
 }
 
 /**
@@ -1589,36 +1552,24 @@ static bool sd_is_audio_ext(const char *ext)
             strcasecmp(ext, ".wav") == 0);
 }
 
-/**
- * Helper: check if a file extension is browseable (audio + playlists).
- * Used by sd_list_directory() for the file browser view.
- */
-static bool sd_is_browse_ext(const char *ext)
-{
-    return (sd_is_audio_ext(ext) ||
-            strcasecmp(ext, ".m3u") == 0);
-}
-
-/**
- * Recursively scan a directory for supported audio/playlist files.
- * Appends results to s_sd_tracks[] starting at s_sd_track_count.
- * max_depth prevents runaway recursion (e.g. symlink loops).
- */
 static void sd_scan_dir_recursive(const char *dirpath, int max_depth)
 {
-    if (max_depth <= 0 || s_sd_track_count >= SD_MAX_TRACKS) return;
+    if (max_depth <= 0)
+        return;
 
     DIR *dir = opendir(dirpath);
-    if (!dir) {
-        ESP_LOGW(TAG_AUDIO, "Cannot open directory: %s", dirpath);
+    if (!dir)
+    {
+        ESP_LOGW(TAG, "Cannot open directory: %s", dirpath);
         return;
     }
 
-    struct dirent *entry;
-    while ((entry = readdir(dir)) && s_sd_track_count < SD_MAX_TRACKS) {
-        const char *name = entry->d_name;
+    while (struct dirent* entry = readdir(dir))
+    {
+        const char* name = entry->d_name;
         /* Skip hidden files and . / .. */
-        if (name[0] == '.') continue;
+        if (name[0] == '.')
+            continue;
 
         /* Build full path — skip entries whose combined path exceeds our
          * storage limit (avoids truncation and the associated compiler warning
@@ -1647,136 +1598,27 @@ static void sd_scan_dir_recursive(const char *dirpath, int max_depth)
         }
 
         /* Only accept files with supported audio extensions (not playlists). */
-        if (nlen_d < 5) continue;
+        if (nlen_d < 5)
+            continue;
         /* Find the last '.' to get the extension (handles variable-length names) */
         const char *dot = strrchr(name, '.');
-        if (dot && sd_is_audio_ext(dot)) {
-            snprintf(s_sd_tracks[s_sd_track_count], SD_FILENAME_MAX, "%s", fullpath);
-            s_sd_track_count++;
-        }
+        if (dot && sd_is_audio_ext(dot))
+            sd_tracks.push_back(fullpath);
     }
     closedir(dir);
 }
 
 static int sd_scan_music_files()
 {
-    s_sd_track_count = 0;
     sd_scan_dir_recursive("/sdcard/music", 4);
-    s_sd_files_cached = true;
-    ESP_LOGI(TAG_AUDIO, "SD card: found %d file(s) in /sdcard/music/", s_sd_track_count);
-    return s_sd_track_count;
+    ESP_LOGI(TAG, "SD card: found %d file(s) in /sdcard/music/", (int) sd_tracks.size());
+    return (int) sd_tracks.size();
 }
 
-/**
- * List immediate children of a directory into s_sd_browse_entries[].
- * Directories are listed first (with is_dir=true), then supported audio files.
- * If the directory is not the root (/sdcard/music), entry 0 is the parent
- * directory for "[..] Up" navigation.
- *
- * The SD card filesystem must already be mounted when this is called.
- */
-static int sd_list_directory(const char *dirpath)
+const std::vector<std::string>& sd_get_tracks()
 {
-    s_sd_browse_count = 0;
-    s_sd_browse_has_parent = false;
-
-    /* If not at root, add parent directory as first entry */
-    bool at_root = (strcmp(dirpath, "/sdcard/music") == 0);
-    if (!at_root) {
-        /* Compute parent path by stripping the last path component.
-         * Never go above /sdcard/music — that's the browser root. */
-        snprintf(s_sd_browse_entries[0], SD_FILENAME_MAX, "%s", dirpath);
-        char *last_slash = strrchr(s_sd_browse_entries[0], '/');
-        if (last_slash && last_slash != s_sd_browse_entries[0]) {
-            *last_slash = '\0';
-        }
-        /* Clamp: if we ended up above /sdcard/music, reset to root */
-        if (strlen(s_sd_browse_entries[0]) < strlen("/sdcard/music")
-            || strncmp(s_sd_browse_entries[0], "/sdcard/music", 13) != 0) {
-            snprintf(s_sd_browse_entries[0], SD_FILENAME_MAX, "/sdcard/music");
-        }
-        s_sd_browse_is_dir[0] = true;
-        s_sd_browse_has_parent = true;
-        s_sd_browse_count = 1;
-    }
-
-    /* First pass: collect sub-directories */
-    DIR *dir = opendir(dirpath);
-    if (!dir) {
-        ESP_LOGW(TAG_AUDIO, "Cannot open directory for browse: %s", dirpath);
-        return s_sd_browse_count;
-    }
-
-    struct dirent *entry;
-    while ((entry = readdir(dir)) && s_sd_browse_count < SD_MAX_BROWSE) {
-        const char *name = entry->d_name;
-        if (name[0] == '.') continue; /* skip hidden, '.', '..' */
-
-        size_t dlen = strlen(dirpath);
-        size_t nlen = strlen(name);
-        if (dlen + 1 + nlen >= SD_FILENAME_MAX) continue;
-        char fullpath[SD_FILENAME_MAX];
-        memcpy(fullpath, dirpath, dlen);
-        fullpath[dlen] = '/';
-        memcpy(fullpath + dlen + 1, name, nlen + 1);
-
-        /* d_type may be DT_UNKNOWN on some VFS implementations; fall back to stat() */
-        bool is_dir = (entry->d_type == DT_DIR);
-        if (!is_dir && entry->d_type == DT_UNKNOWN) {
-            struct stat st;
-            if (stat(fullpath, &st) == 0 && S_ISDIR(st.st_mode)) {
-                is_dir = true;
-            }
-        }
-        if (!is_dir) continue;
-
-        snprintf(s_sd_browse_entries[s_sd_browse_count], SD_FILENAME_MAX, "%s", fullpath);
-        s_sd_browse_is_dir[s_sd_browse_count] = true;
-        s_sd_browse_count++;
-    }
-    closedir(dir);
-
-    /* Second pass: collect supported files */
-    dir = opendir(dirpath);
-    if (!dir) return s_sd_browse_count;
-
-    while ((entry = readdir(dir)) && s_sd_browse_count < SD_MAX_BROWSE) {
-        const char *name = entry->d_name;
-        if (name[0] == '.') continue;
-
-        size_t dlen = strlen(dirpath);
-        size_t nlen = strlen(name);
-        if (dlen + 1 + nlen >= SD_FILENAME_MAX) continue;
-        char fullpath[SD_FILENAME_MAX];
-        memcpy(fullpath, dirpath, dlen);
-        fullpath[dlen] = '/';
-        memcpy(fullpath + dlen + 1, name, nlen + 1);
-
-        /* d_type may be DT_UNKNOWN on some VFS implementations; fall back to stat() */
-        bool is_dir = (entry->d_type == DT_DIR);
-        if (!is_dir && entry->d_type == DT_UNKNOWN) {
-            struct stat st;
-            if (stat(fullpath, &st) == 0 && S_ISDIR(st.st_mode)) {
-                is_dir = true;
-            }
-        }
-        if (is_dir) continue;
-
-        const char *dot = strrchr(name, '.');
-        if (!dot || !sd_is_browse_ext(dot)) continue;
-
-        snprintf(s_sd_browse_entries[s_sd_browse_count], SD_FILENAME_MAX, "%s", fullpath);
-        s_sd_browse_is_dir[s_sd_browse_count] = false;
-        s_sd_browse_count++;
-    }
-    closedir(dir);
-
-    ESP_LOGI(TAG_AUDIO, "Browse: listed %d entries in %s", s_sd_browse_count, dirpath);
-    return s_sd_browse_count;
+    return sd_tracks;
 }
-
-/** File browser page state */
-static int s_sd_browse_page = 0;
 
 #define SD_READ_BUF_SIZE  2048
 
@@ -1793,38 +1635,35 @@ static void abort_sd_playback()
  */
 static void sd_playback_task(void *pvParameters)
 {
-    ESP_LOGI(TAG_AUDIO, "SD playback task started");
+    log("SD playback task started");
 
-    if (s_sd_track_index < 0 || s_sd_track_index >= s_sd_track_count)
+    if (s_sd_track_index < 0 || s_sd_track_index >= sd_tracks.size())
     {
-        ESP_LOGI(TAG_AUDIO, "SD: Invalid track %d", s_sd_track_index);
+        ESP_LOGI(TAG, "SD: Invalid track %d", s_sd_track_index);
         abort_sd_playback();
         return;
     }
             
-    const char *filepath = s_sd_tracks[s_sd_track_index];
+    const char *filepath = sd_tracks[s_sd_track_index].c_str();
 
     /* Skip playlist files — they're metadata, not audio */
     {
         size_t plen = strlen(filepath);
         if (plen >= 4 && strcasecmp(filepath + plen - 4, ".m3u") == 0)
         {
-            ESP_LOGI(TAG_AUDIO, "SD: Track %d is a playlist", s_sd_track_index);
+            ESP_LOGI(TAG, "SD: Track %d is a playlist", s_sd_track_index);
             abort_sd_playback();
             return;
         }
     }
 
-    snprintf(s_sd_current_track, SD_FILENAME_MAX, "%s", filepath);
-
-    ESP_LOGI(TAG_AUDIO, "SD: Playing track %d/%d: %s",
-             s_sd_track_index + 1, s_sd_track_count, filepath);
-    printf("SD_PLAY:%d/%d %s\n", s_sd_track_index + 1, s_sd_track_count, filepath);
+    log("SD: Playing track %d/%d: %s",
+        s_sd_track_index + 1, (int) sd_tracks.size(), filepath);
     
     FILE* f = fopen(filepath, "rb");
     if (!f)
     {
-        ESP_LOGW(TAG_AUDIO, "Cannot open file: %s", filepath);
+        ESP_LOGW(TAG, "Cannot open file: %s", filepath);
         abort_sd_playback();
         return;
     }
@@ -1862,7 +1701,7 @@ static void sd_playback_task(void *pvParameters)
             memcmp(hdr, "RIFF", 4) != 0 ||
             memcmp(hdr + 8, "WAVE", 4) != 0)
         {
-            ESP_LOGW(TAG_AUDIO, "Invalid WAV header: %s", filepath);
+            ESP_LOGW(TAG, "Invalid WAV header: %s", filepath);
             fclose(f);
             abort_sd_playback();
             return;
@@ -1876,14 +1715,14 @@ static void sd_playback_task(void *pvParameters)
         if (audio_fmt != 1)
         {
             /* 1 = PCM */
-            ESP_LOGW(TAG_AUDIO, "WAV: unsupported format %d (only PCM=1)", audio_fmt);
+            ESP_LOGW(TAG, "WAV: unsupported format %d (only PCM=1)", audio_fmt);
             fclose(f);
             abort_sd_playback();
             return;
         }
         if (bits_per != 16)
         {
-            ESP_LOGW(TAG_AUDIO, "WAV: unsupported %d-bit (only 16-bit)", bits_per);
+            ESP_LOGW(TAG, "WAV: unsupported %d-bit (only 16-bit)", bits_per);
             fclose(f);
             abort_sd_playback();
             return;
@@ -1893,14 +1732,13 @@ static void sd_playback_task(void *pvParameters)
             /* I2S output is configured for stereo (I2S_SLOT_MODE_STEREO).
              * Mono or multi-channel WAVs would play distorted without a
              * conversion step, so skip them with a clear warning. */
-            ESP_LOGW(TAG_AUDIO, "WAV: unsupported %d-channel (only stereo/2ch)", num_ch);
-            printf("SD_WARN:WAV %dch unsupported (stereo only)\n", num_ch);
+            ESP_LOGW(TAG, "WAV: unsupported %d-channel (only stereo/2ch)", num_ch);
             fclose(f);
             abort_sd_playback();
             return;
         }
-        ESP_LOGI(TAG_AUDIO, "WAV: %lu Hz, %d ch, %d-bit PCM",
-                 (unsigned long)sample_rate, num_ch, bits_per);
+        printf("WAV: %lu Hz, %d ch, %d-bit PCM\n",
+               (unsigned long) sample_rate, num_ch, bits_per);
 
         /* Reconfigure I2S to the WAV sample rate */
         audio_reconfigure_sample_rate(sample_rate);
@@ -1915,7 +1753,7 @@ static void sd_playback_task(void *pvParameters)
                                           PLAYBACK_TASK_STACK_SIZE, NULL, 7, &audio_task_handle);
             if (tret != pdPASS)
             {
-                ESP_LOGW(TAG_AUDIO, "Failed to create audio playback task for WAV");
+                ESP_LOGW(TAG, "Failed to create audio playback task for WAV");
                 s_sd_feeding_active = false;
                 fclose(f);
                 abort_sd_playback();
@@ -1927,7 +1765,7 @@ static void sd_playback_task(void *pvParameters)
         char *read_buf = (char*) heap_caps_malloc(SD_READ_BUF_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
         if (!read_buf)
         {
-            ESP_LOGE(TAG_AUDIO, "Failed to allocate SD read buffer");
+            ESP_LOGE(TAG, "Failed to allocate SD read buffer");
             s_sd_feeding_active = false;
             fclose(f);
             abort_sd_playback();
@@ -1970,11 +1808,10 @@ static void sd_playback_task(void *pvParameters)
         mp3_decoder_init();
 
     /* Mark feeding active BEFORE creating decode/playback tasks.
-     * AUDIO_SOURCE_ACTIVE = (s_streaming_active || s_sd_feeding_active).
      * On dual-core chips (ESP32/S3), a higher-priority task created by
      * xTaskCreate can run immediately on the other core.  If the decode
      * task (priority 8) starts before s_sd_feeding_active is true, it sees
-     * AUDIO_SOURCE_ACTIVE == false and exits its loop immediately — no
+     * s_sd_feeding_active == false and exits its loop immediately — no
      * audio output.  Setting the flag first prevents this race. */
     s_sd_feeding_active = true;
 
@@ -1993,7 +1830,7 @@ static void sd_playback_task(void *pvParameters)
                                       DECODE_TASK_STACK_SIZE, NULL, DECODE_TASK_PRIORITY, &decode_task_handle);
 #endif
         if (tret != pdPASS) {
-            ESP_LOGW(TAG_AUDIO, "Failed to create %s decode task for SD playback", task_name);
+            ESP_LOGW(TAG, "Failed to create %s decode task for SD playback", task_name);
             s_sd_feeding_active = false;
             fclose(f);
             abort_sd_playback();
@@ -2007,14 +1844,14 @@ static void sd_playback_task(void *pvParameters)
         BaseType_t tret = xTaskCreate(audio_playback_task, "audio_playback",
                                       PLAYBACK_TASK_STACK_SIZE, NULL, 7, &audio_task_handle);
         if (tret != pdPASS) {
-            ESP_LOGW(TAG_AUDIO, "Failed to create audio playback task for SD");
+            ESP_LOGW(TAG, "Failed to create audio playback task for SD");
         }
     }
 
     /* Read file and feed to compressed ring buffer */
     char *read_buf = (char*) heap_caps_malloc(SD_READ_BUF_SIZE, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
     if (!read_buf) {
-        ESP_LOGE(TAG_AUDIO, "Failed to allocate SD read buffer");
+        ESP_LOGE(TAG, "Failed to allocate SD read buffer");
         s_sd_feeding_active = false;
         fclose(f);
         abort_sd_playback();
@@ -2033,7 +1870,7 @@ static void sd_playback_task(void *pvParameters)
     fclose(f);
     heap_caps_free(read_buf);
 
-    /* Clear feeding flag so AUDIO_SOURCE_ACTIVE goes false, allowing
+    /* Clear feeding flag so s_sd_feeding_active goes false, allowing
      * decode/playback child tasks to drain remaining data and exit.
      * s_sd_playback_active stays true to keep the outer track loop going. */
     s_sd_feeding_active = false;
@@ -2056,13 +1893,12 @@ static void sd_playback_task(void *pvParameters)
     /* Let IDLE task free deleted task stacks */
     vTaskDelay(pdMS_TO_TICKS(100));
 
-    s_sd_current_track[0] = '\0';
     s_sd_feeding_active = false;
     s_sd_playback_active = false;
     s_sd_task_running = false;
 
-    ESP_LOGI(TAG_AUDIO, "SD playback task finished");
-    printf("SD_PLAYBACK_END\n");
+    log("SD playback task finished");
+
     vTaskDelete(NULL);
 }
 
@@ -2075,7 +1911,7 @@ void stop_sd_playback()
     if (!s_sd_playback_active && !s_sd_task_running)
         return;
 
-    ESP_LOGI(TAG_AUDIO, "Stopping SD card playback...");
+    ESP_LOGI(TAG, "Stopping SD card playback...");
     s_sd_playback_active = false;
     s_sd_feeding_active = false;
     s_audio_playing = false;
@@ -2085,7 +1921,7 @@ void stop_sd_playback()
         vTaskDelay(pdMS_TO_TICKS(50));
     }
     if (s_sd_task_running) {
-        ESP_LOGW(TAG_AUDIO, "SD playback cleanup timed out");
+        ESP_LOGW(TAG, "SD playback cleanup timed out");
     }
     vTaskDelay(pdMS_TO_TICKS(100));
 }
@@ -2097,22 +1933,11 @@ void stop_sd_playback()
 void start_sd_playback(int track_index)
 {
     if (s_sd_playback_active) {
-        ESP_LOGW(TAG_AUDIO, "SD playback already active");
+        ESP_LOGW(TAG, "SD playback already active");
         return;
     }
 
     s_sd_track_index = track_index;
-
-    /* Mutual exclusivity: stop WiFi streaming before starting SD */
-    if (s_streaming_active || s_stream_task_running) {
-        ESP_LOGI(TAG_AUDIO, "Stopping WiFi stream for SD playback...");
-        s_streaming_active = false;
-        s_audio_playing = false;
-        for (int w = 0; w < 120 && s_stream_task_running; w++) {
-            vTaskDelay(pdMS_TO_TICKS(50));
-        }
-        vTaskDelay(pdMS_TO_TICKS(100));
-    }
 
     /* Flush buffers between sources — critical on C5 without PSRAM */
     flush_ringbuffer(s_mp3_ringbuf, "compressed");
@@ -2132,8 +1957,7 @@ void start_sd_playback(int track_index)
     if (ret != pdPASS) {
         s_sd_playback_active = false;
         s_sd_task_running = false;
-        ESP_LOGE(TAG_AUDIO, "Failed to create SD playback task");
-        printf("SD_ERROR:TASK_CREATE_FAILED\n");
+        ESP_LOGE(TAG, "Failed to create SD playback task");
     }
 }
 
@@ -2177,24 +2001,22 @@ bool i2s_init()
     esp_err_t bus_ret = spi_bus_initialize((spi_host_device_t) host.slot, &bus_cfg, SDSPI_DEFAULT_DMA);
     if (bus_ret != ESP_OK && bus_ret != ESP_ERR_INVALID_STATE)
     {
-        ESP_LOGE(TAG_AUDIO, "SPI bus init failed: %s", esp_err_to_name(bus_ret));
+        ESP_LOGE(TAG, "SPI bus init failed: %s", esp_err_to_name(bus_ret));
         return false;
     }
 
     esp_err_t ret = esp_vfs_fat_sdspi_mount("/sdcard", &host, &slot_config, &mount_cfg, &card);
     if (ret != ESP_OK)
     {
-        ESP_LOGE(TAG_AUDIO, "SD card mount failed: %s", esp_err_to_name(ret));
-        printf("SD_ERROR:MOUNT_FAILED\n");
+        ESP_LOGE(TAG, "SD card mount failed: %s", esp_err_to_name(ret));
         return false;
     }
 
     sd_scan_music_files();
 
-    if (s_sd_track_count == 0)
+    if (sd_tracks.empty())
     {
-        ESP_LOGW(TAG_AUDIO, "No audio files found in /sdcard/music/");
-        printf("SD_ERROR:NO_FILES\n");
+        ESP_LOGW(TAG, "No audio files found in /sdcard/music/");
         esp_vfs_fat_sdcard_unmount("/sdcard", card);
         return false;
     }
@@ -2204,7 +2026,7 @@ bool i2s_init()
 
 int get_sd_track_count()
 {
-    return s_sd_track_count;
+    return (int) sd_tracks.size();
 }
 
 // Local Variables:
