@@ -2,12 +2,16 @@
 
 #include "battery.h"
 #include "config.h"
+#include "i2s_audio.h"
 #include "motor.h"
 #include "nvs.h"
 #include "peripherals.h"
 #include "radio.h"
 
 #include <string.h>
+
+#include <chrono>
+#include <random>
 
 #include <esp_system.h>
 #include <esp_log.h>
@@ -194,6 +198,55 @@ int read_battery(int argc, char** argv)
     return 0;
 }
 
+int sound(int argc, char** argv)
+{
+    static const char* sound_usage =
+        "Valid commands:\n"
+        "sound           Show number of tracks\n"
+        "sound <index>   Play specified track\n"
+        "sound random    Play a random track\n"
+        "sound stop      Stop playing\n";
+
+    if (argc < 2)
+    {
+        printf("%d tracks on SD card\n", get_sd_track_count());
+        return 0;
+    }
+    if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help") || !strcmp(argv[1], "help"))
+    {
+        printf(sound_usage);
+        return 0;
+    }
+    if (!strcmp(argv[1], "random"))
+    {
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        std::default_random_engine generator(seed);
+        std::uniform_int_distribution<int> distribution(0, get_sd_track_count());
+        const int index = distribution(generator);
+        printf("Playing track %d\n", index);
+        start_sd_playback(index);
+        return 0;
+    }
+    if (!strcmp(argv[1], "stop"))
+    {
+        stop_sd_playback();
+        return 0;
+    }
+    if (!isdigit(argv[1][0]))
+    {
+        printf(sound_usage);
+        return 0;
+    }
+    const int index = atoi(argv[1]);
+    if (index < 0 || index >= get_sd_track_count())
+    {
+        printf("Error: Invalid track index\n");
+        return -1;
+    }
+    start_sd_playback(index);
+    return 0;
+}
+
 int control_peripherals(int argc, char** argv)
 {
     static const char* peripherals_usage =
@@ -377,6 +430,15 @@ void run_console()
         .argtable = nullptr
     };
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmd4));
+
+    const esp_console_cmd_t cmd5 = {
+        .command = "sound",
+        .help = "Play sound",
+        .hint = NULL,
+        .func = &sound,
+        .argtable = nullptr
+    };
+    ESP_ERROR_CHECK(esp_console_cmd_register(&cmd5));
 
     set_peer_mac_args.mac = arg_str1(NULL, NULL, "<mac>", "MAC");
     set_peer_mac_args.end = arg_end(2);

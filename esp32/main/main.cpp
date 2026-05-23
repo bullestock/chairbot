@@ -1,8 +1,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
-#include <chrono>
-#include <random>
 #include <utility>
 
 #include <freertos/FreeRTOS.h>
@@ -11,6 +9,7 @@
 
 #include "battery.h"
 #include "console.h"
+#include "i2s_audio.h"
 #include "motor.h"
 #include "nvs.h"
 #include "peripherals.h"
@@ -25,55 +24,6 @@ static const int POT_MAX = 3950;
 
 std::unique_ptr<Motor> motor_a;
 std::unique_ptr<Motor> motor_b;
-
-/*
-bool is_pushed(const ForwardAirFrame& frame, int button)
-{
-    return frame.pushbuttons & (1 << button);
-}
-
-bool is_toggle_up(const ForwardAirFrame& frame, int sw)
-{
-    return frame.toggles & (1 << 2*sw);
-}
-
-bool is_toggle_down(const ForwardAirFrame& frame, int sw)
-{
-    return frame.toggles & (2 << 2*sw);
-}
-
-*/
-
-const int NOF_SOUND_BANKS = 3;
-int nof_sounds_per_bank[NOF_SOUND_BANKS] = {
-    81,
-    3,
-    25
-};
-
-void play_random_sound(int bank)
-{
-    if (bank >= NOF_SOUND_BANKS)
-        return;
-    int lower_bound = 0;
-    int nof_sounds = nof_sounds_per_bank[bank];
-    int index = 0;
-    int count = bank;
-    while (count > 0)
-    {
-        lower_bound += nof_sounds_per_bank[index];
-        ++index;
-        --count;
-    }
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_int_distribution<int> distribution(lower_bound, lower_bound + nof_sounds - 1);
-    int sound = distribution(generator);
-    printf("Bank %d: [%d %d] -> Sound %d\n", bank,
-           lower_bound, lower_bound + nof_sounds - 1,
-           sound);
-    //!!peripherals_play_sound(sound);
-}
 
 const int pwm_lights = 0;
 bool is_flashing = false;
@@ -177,9 +127,15 @@ void main_loop(void* pvParameters)
         battery_readings[i] = 0.0;
     Battery battery;
 
+    peripherals_blink_led(2);
+    
     assert(init_radio());
     printf("Radio initialized\n");
 
+    peripherals_blink_led(3);
+    if (!i2s_init())
+        peripherals_blink_led(10);
+    
     while (1)
     {
         ++loopcount;
@@ -227,7 +183,11 @@ void app_main()
     }
     xTaskCreate(&peripherals_loop, "Sound loop", 10240, NULL, 1, &xSoundTask);
     if (debug)
+    {
+        printf("I2S init: %d\n", i2s_init());
+
         run_console();        // never returns
+    }
     printf("\nStarting application\n");
 
     xTaskCreate(&main_loop, "Main loop", 10240, NULL, 1, &xMainTask);

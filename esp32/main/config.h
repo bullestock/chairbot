@@ -33,6 +33,9 @@ static const auto GPIO_SD_MOSI = GPIO_NUM_16;
 static const auto GPIO_SD_SCK = GPIO_NUM_32;
 static const auto GPIO_SD_MISO = GPIO_NUM_17;
 
+// Onboard LED
+static const auto GPIO_LED = GPIO_NUM_2;
+
 static const auto max_radio_idle_time = 200/portTICK_PERIOD_MS;
 
 // NVS keys

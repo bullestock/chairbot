@@ -93,7 +93,7 @@ void init_peripherals()
     // Outputs
     io_conf.mode = GPIO_MODE_OUTPUT;
     // bit mask of the pins that you want to set
-    io_conf.pin_bit_mask = 1ULL << GPIO_ENABLE;
+    io_conf.pin_bit_mask = (1ULL << GPIO_ENABLE) | (1ULL << GPIO_LED);
     io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
     ESP_ERROR_CHECK(gpio_config(&io_conf));
@@ -142,6 +142,24 @@ void init_peripherals()
 bool peripherals_present()
 {
     return is_peripherals_present;
+}
+
+void peripherals_set_led(bool on)
+{
+    gpio_set_level(GPIO_LED, on);
+}
+
+void peripherals_blink_led(int times)
+{
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    for (int i = 0; i < times; ++i)
+    {
+        peripherals_set_led(true);
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+        peripherals_set_led(false);
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 }
 
 void peripherals_set_pwm(int chan, uint8_t duty, uint8_t freq)

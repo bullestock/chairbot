@@ -10,6 +10,10 @@ void init_peripherals();
 
 bool peripherals_present();
 
+void peripherals_set_led(bool on);
+
+void peripherals_blink_led(int times);
+
 void peripherals_set_pwm(int chan, uint8_t duty, uint8_t freq);
 
 void peripherals_write_uart(const char* data);
