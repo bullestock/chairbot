@@ -1,3 +1,5 @@
+// This code is stolen from https://github.com/FatherDivine/bt_audio-esp32 (license: Public Domain)
+
 #include <string.h>
 #include <stdlib.h>
 #include "freertos/FreeRTOS.h"
