@@ -9,7 +9,10 @@ int get_sd_track_count();
 
 const std::vector<std::string>& sd_get_tracks();
     
-void start_sd_playback(int track_index);
+bool start_sd_playback(int track_index);
+
+bool check_sd_track(int track_index,
+                    std::string& error_msg);
 
 void stop_sd_playback();
 

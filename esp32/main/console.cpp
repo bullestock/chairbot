@@ -204,6 +204,7 @@ int sound(int argc, char** argv)
         "Valid commands:\n"
         "sound           Show tracks\n"
         "sound <index>   Play specified track\n"
+        "sound check     Check sounds\n"
         "sound random    Play a random track\n"
         "sound stop      Stop playing\n";
 
@@ -221,6 +222,17 @@ int sound(int argc, char** argv)
     if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help") || !strcmp(argv[1], "help"))
     {
         printf(sound_usage);
+        return 0;
+    }
+    if (!strcmp(argv[1], "check"))
+    {
+        const auto tracks = sd_get_tracks();
+        for (int i = 0; i < tracks.size(); ++i)
+        {
+            std::string status = "OK";
+            check_sd_track(i, status);
+            printf("%3d: %s\n", i, status.c_str());
+        }
         return 0;
     }
     if (!strcmp(argv[1], "random"))

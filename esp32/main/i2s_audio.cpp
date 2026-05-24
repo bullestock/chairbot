@@ -1966,12 +1966,12 @@ void stop_sd_playback()
  * Start SD card playback.
  * Stops any active WiFi stream first, then mounts SD and starts playing.
  */
-void start_sd_playback(int track_index)
+bool start_sd_playback(int track_index)
 {
     if (s_sd_playback_active)
     {
         ESP_LOGW(TAG, "SD playback already active");
-        return;
+        return false;
     }
 
     s_sd_track_index = track_index;
@@ -1991,11 +1991,14 @@ void start_sd_playback(int track_index)
 #else
     BaseType_t ret = xTaskCreate(sd_playback_task, "sd_play", 12288, NULL, 6, NULL);
 #endif
-    if (ret != pdPASS) {
+    if (ret != pdPASS)
+    {
         s_sd_playback_active = false;
         s_sd_task_running = false;
         ESP_LOGE(TAG, "Failed to create SD playback task");
+        return false;
     }
+    return true;
 }
 
 bool i2s_init()
@@ -2064,6 +2067,72 @@ bool i2s_init()
 int get_sd_track_count()
 {
     return (int) sd_tracks.size();
+}
+
+bool check_sd_track(int track_index,
+                    std::string& error_msg)
+{
+    if (track_index < 0 || track_index >= sd_tracks.size())
+    {
+        error_msg = "Invalid track index";
+        return false;
+    }
+            
+    const std::string filepath = std::string(SDCARD_ROOT_PATH) +
+        std::string("/") +
+        sd_tracks[track_index];
+    FILE* f = fopen(filepath.c_str(), "rb");
+    if (!f)
+    {
+        error_msg = "Cannot open file";
+        return false;
+    }
+
+    bool is_wav = false;
+    const size_t plen = filepath.size();
+    if (plen >= 4)
+    {
+        const char* ext = filepath.c_str() + plen - 4;
+        if (strcasecmp(ext, ".wav") == 0)
+            is_wav = true;
+    }
+    if (!is_wav)
+    {
+        fclose(f);
+        return true;
+    }
+
+    uint8_t hdr[44];
+    size_t hdr_read = fread(hdr, 1, 44, f);
+    fclose(f);
+    if (hdr_read < 44 ||
+        memcmp(hdr, "RIFF", 4) != 0 ||
+        memcmp(hdr + 8, "WAVE", 4) != 0)
+    {
+        error_msg = "Invalid WAV header: " + std::string((const char*) hdr, 4);
+        return false;
+    }
+    uint16_t audio_fmt   = hdr[20] | (hdr[21] << 8);
+    uint16_t num_ch      = hdr[22] | (hdr[23] << 8);
+    uint16_t bits_per    = hdr[34] | (hdr[35] << 8);
+
+    if (audio_fmt != 1)
+    {
+        /* 1 = PCM */
+        error_msg = "WAV: unsupported format " + std::to_string(audio_fmt);
+        return false;
+    }
+    if (bits_per != 16)
+    {
+        error_msg = "WAV: unsupported bit depth " + std::to_string(bits_per);
+        return false;
+    }
+    if (num_ch != 2)
+    {
+        error_msg = "WAV: unsupported channels: " + std::to_string(num_ch);
+        return false;
+    }
+    return true;
 }
 
 // Local Variables:
