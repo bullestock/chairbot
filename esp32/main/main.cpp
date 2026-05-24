@@ -1,4 +1,6 @@
+#include <chrono>
 #include <inttypes.h>
+#include <random>
 #include <stdio.h>
 #include <string.h>
 #include <utility>
@@ -30,20 +32,9 @@ bool is_flashing = false;
 int flash_count = 0;
 int volume = 10;
 
-void handle_peripherals(const ForwardAirFrame& frame)
+static void handle_pwm(const ForwardAirFrame& frame)
 {
-    int i = 0;
-    for (const auto& e : frame.pwm)
-        peripherals_set_pwm(i++, e.duty, e.frequency);
-
-    /*
-    if (frame.sound == ForwardAirFrame::SOUND_RANDOM)
-        play_random_sound(0);
-    else if (frame.sound == ForwardAirFrame::SOUND_ABORT)
-        abort_sound();
-    else if (frame.sound != 0)
-        play_sound(frame.sound);
-    */
+    peripherals_set_pwm(frame.data.pwm.index, frame.data.pwm.duty, frame.data.pwm.frequency);
 }
 
 unsigned long last_packet = 0;
@@ -51,6 +42,75 @@ int64_t total_packets = 0;
 const int NOF_BATTERY_READINGS = 100;
 float battery_readings[NOF_BATTERY_READINGS];
 int battery_reading_index = 0;
+float max_power = 0.1;
+int current_track_index = 0;
+
+enum class State
+{
+    Normal,
+    TrackList,
+};
+
+static State state = State::Normal;
+
+static void handle_battery(const Battery& battery, ReturnAirFrame& ret_frame)
+{
+    battery_readings[battery_reading_index] = battery.read_voltage();
+    ++battery_reading_index;
+    if (battery_reading_index >= NOF_BATTERY_READINGS)
+        battery_reading_index = 0;
+    int n = 0;
+    float sum = 0;
+    for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
+        if (battery_readings[i])
+        {
+            sum += battery_readings[i];
+            ++n;
+        }
+    ret_frame.data.battery.mV = n ? sum/n*1000 : 0;
+}
+
+static void handle_sound(const ForwardAirFrame& frame,
+                         ReturnAirFrame& ret_frame)
+{
+    switch (frame.data.sound.sound_command)
+    {
+    case SoundCommand::ListSounds:
+        ret_frame.command = Command::Sound;
+        ret_frame.data.track.index = 0;
+        ret_frame.data.track.track_count = get_sd_track_count();
+        if (ret_frame.data.track.track_count > 0)
+        {
+            strncpy(ret_frame.data.track.track, sd_get_tracks()[0].c_str(), ReturnAirFrame::TRACK_NAME_SIZE);
+            current_track_index = 0;
+            state = State::TrackList;
+        }
+        break;
+        
+    case SoundCommand::PlaySound:
+        {
+            // TODO: Volume
+            int index = frame.data.sound.index;
+            if (index == ForwardAirFrame::SOUND_RANDOM)
+            {
+                unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+                std::default_random_engine generator(seed);
+                std::uniform_int_distribution<int> distribution(0, get_sd_track_count());
+                index = distribution(generator);
+                printf("Playing random track %d\n", index);
+            }
+            else
+                printf("Playing track %d\n", index);
+            start_sd_playback(frame.data.sound.index);
+        }
+        break;
+        
+    case SoundCommand::StopSound:
+        stop_sd_playback();
+        break;
+        
+    }
+}
 
 void handle_frame(const ForwardAirFrame& frame,
                   const Battery& battery)
@@ -71,20 +131,45 @@ void handle_frame(const ForwardAirFrame& frame,
     ReturnAirFrame ret_frame;
     ret_frame.magic = ReturnAirFrame::MAGIC_VALUE;
     ret_frame.ticks = frame.ticks;
+    ret_frame.command = Command::None;
 
-    battery_readings[battery_reading_index] = battery.read_voltage();
-    ++battery_reading_index;
-    if (battery_reading_index >= NOF_BATTERY_READINGS)
-        battery_reading_index = 0;
-    int n = 0;
-    float sum = 0;
-    for (int i = 0; i < NOF_BATTERY_READINGS; ++i)
-        if (battery_readings[i])
+    switch (frame.command)
+    {
+    case Command::None:
+        // If no other command, send remaining tracks
+        if (state == State::TrackList)
         {
-            sum += battery_readings[i];
-            ++n;
+            ++current_track_index;
+            if (current_track_index >= get_sd_track_count())
+                state = State::Normal;
+            else
+            {
+                ret_frame.command = Command::Sound;
+                ret_frame.data.track.index = current_track_index;
+                ret_frame.data.track.track_count = get_sd_track_count();
+                strncpy(ret_frame.data.track.track, sd_get_tracks()[current_track_index].c_str(), ReturnAirFrame::TRACK_NAME_SIZE);
+            }
         }
-    ret_frame.battery = n ? sum/n*1000 : 0;
+        break;
+        
+    case Command::Speed:
+        max_power = std::min(1.0, static_cast<float>(frame.data.speed.speed)/4096.0);
+        printf("Max power set to %.2f\n", max_power);
+        break;
+
+    case Command::Sound:
+        handle_sound(frame, ret_frame);
+        break;
+        
+    case Command::Pwm:
+        if (peripherals_present())
+            handle_pwm(frame);
+        break;
+        
+    case Command::Battery:
+        handle_battery(battery, ret_frame);
+        break;
+    }
     
     set_crc(ret_frame);
     send_frame(ret_frame);
@@ -95,25 +180,21 @@ void handle_frame(const ForwardAirFrame& frame,
     float power_left = 0.0;
     float power_right = 0.0;
     compute_power(frame.right_x, frame.right_y, power_left, power_right,
-                  pivot, 1.0);
+                  pivot, max_power);
     static int count = 0;
     ++count;
     if (count > 100)
     {
         count = 0;
-        // Max <maxpwr> L <left stick> R <right stick> (<right mapped>) Pot <pots>
-        printf("[%" PRId64 "] L %2.3f/%2.3f R %2.3f/%2.3f Pot %1.2f/%1.2f "
+        // Max <maxpwr> L <left stick> R <right stick> (<right mapped>)
+        printf("[%" PRId64 "] L %2.3f/%2.3f R %2.3f/%2.3f "
                "Power %2.2f/%2.2f Pivot %1.2f\n",
                total_packets,
                frame.left_x, frame.left_y, frame.right_x, frame.right_y,
-               frame.volume, frame.analog,
                power_left, power_right, pivot);
         vTaskDelay(10/portTICK_PERIOD_MS);
     }
     set_motors(power_left, power_right);
-
-    if (peripherals_present())
-        handle_peripherals(frame);
 }
 
 void main_loop(void* pvParameters)
