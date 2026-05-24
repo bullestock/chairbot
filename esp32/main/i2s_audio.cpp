@@ -2135,6 +2135,11 @@ bool check_sd_track(int track_index,
     return true;
 }
 
+void set_sd_volume(int volume)
+{
+    s_volume = volume;
+}
+
 // Local Variables:
 // compile-command: "(cd ..; idf.py build)"
 // End:

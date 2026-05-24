@@ -206,7 +206,8 @@ int sound(int argc, char** argv)
         "sound <index>   Play specified track\n"
         "sound check     Check sounds\n"
         "sound random    Play a random track\n"
-        "sound stop      Stop playing\n";
+        "sound stop      Stop playing\n"
+        "sound volume    Set volume (0-100)\n";
 
     if (argc < 2)
     {
@@ -250,6 +251,22 @@ int sound(int argc, char** argv)
     if (!strcmp(argv[1], "stop"))
     {
         stop_sd_playback();
+        return 0;
+    }
+    if (!strcmp(argv[1], "volume"))
+    {
+        if (argc < 3 || !isdigit(argv[2][0]))
+        {
+            printf(sound_usage);
+            return 0;
+        }
+        const int volume = atoi(argv[2]);
+        if (volume < 0 || volume > 100)
+        {
+            printf("Error: Invalid volume\n");
+            return -1;
+        }
+        set_sd_volume(volume);
         return 0;
     }
     if (!isdigit(argv[1][0]))

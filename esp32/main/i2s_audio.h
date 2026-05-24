@@ -16,3 +16,4 @@ bool check_sd_track(int track_index,
 
 void stop_sd_playback();
 
+void set_sd_volume(int volume);
