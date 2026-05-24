@@ -230,8 +230,10 @@ int sound(int argc, char** argv)
         for (int i = 0; i < tracks.size(); ++i)
         {
             std::string status = "OK";
-            check_sd_track(i, status);
-            printf("%3d: %s\n", i, status.c_str());
+            if (check_sd_track(i, status))
+                printf("%3d: OK\n", i);
+            else
+                printf("%3d: (%s) %s\n", i, tracks[i].c_str(), status.c_str());
         }
         return 0;
     }
