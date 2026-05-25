@@ -7,7 +7,6 @@
 enum class Command
 {
     None,
-    Speed,
     Sound,
     Pwm,
     Battery,
@@ -34,20 +33,15 @@ struct ForwardAirFrame
     int64_t ticks;              // 2
 
     // Joysticks: (-1, 1)
-    float left_x;             // 6
-    float left_y;             // 8
-    float right_x;            // 10
-    float right_y;            // 12
+    float left_x = 0.0;         // 6
+    float left_y = 0.0;         // 8
+    float right_x = 0.0;        // 10
+    float right_y = 0.0;        // 12
 
-    Command command;
+    Command command = Command::None;
 
     union
     {
-        struct
-        {
-            // 0-4095
-            uint16_t speed;
-        } speed;
         struct
         {
             SoundCommand sound_command;
