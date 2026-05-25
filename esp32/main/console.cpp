@@ -314,8 +314,18 @@ int control_peripherals(int argc, char** argv)
             printf(peripherals_usage);
             return -1;
         }
-        const uint8_t duty = atoi(argv[3]);
-        const uint8_t freq = atoi(argv[4]);
+        const int duty = atoi(argv[3]);
+        if (duty < 0 || duty > 255)
+        {
+            printf("Error: Invalid duty\n");
+            return -1;
+        }
+        const int freq = atoi(argv[4]);
+        if (freq < 0 || freq > 255)
+        {
+            printf("Error: Invalid freq\n");
+            return -1;
+        }
 
         peripherals_set_pwm(chan, duty, freq);
         return 0;
