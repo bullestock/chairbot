@@ -1,33 +1,32 @@
 // This code is stolen from https://github.com/FatherDivine/bt_audio-esp32 (license: Public Domain)
 
+#include <algorithm>
 #include <string.h>
 #include <stdlib.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/idf_additions.h"
 #include "freertos/event_groups.h"
 #include "freertos/ringbuf.h"
 #include "freertos/timers.h"
-#include "esp_system.h"
-#include "esp_event.h"
-#include "esp_log.h"
-#include "nvs_flash.h"
-#include "nvs.h"
-#ifdef CONFIG_NVS_ENCRYPT_ENABLED
-#include "esp_partition.h"
-#endif
-#include "esp_netif.h"
-#include "esp_http_client.h"
-#include "esp_crt_bundle.h"
-#include "esp_sleep.h"
-#include "esp_timer.h"
-#include "esp_chip_info.h"
-#include "esp_heap_caps.h"
-#include "driver/i2s_std.h"
-#include "driver/gpio.h"
 
+#include "driver/gpio.h"
+#include "driver/i2s_std.h"
+#include "esp_chip_info.h"
+#include "esp_crt_bundle.h"
+#include "esp_event.h"
+#include "esp_heap_caps.h"
+#include "esp_http_client.h"
+#include "esp_log.h"
+#include "esp_netif.h"
+#include "esp_sleep.h"
+#include "esp_system.h"
+#include "esp_timer.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
+#include "nvs.h"
+#include "nvs_flash.h"
 
 #include "i2s_audio.h"
 
@@ -1634,6 +1633,7 @@ static int sd_scan_music_files()
 {
     sd_scan_dir_recursive(SDCARD_ROOT_PATH, 4);
     ESP_LOGI(TAG, "SD card: found %d file(s) in " SDCARD_ROOT_PATH, (int) sd_tracks.size());
+    std::sort(sd_tracks.begin(), sd_tracks.end());
     return (int) sd_tracks.size();
 }
 
