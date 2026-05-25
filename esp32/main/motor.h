@@ -26,7 +26,7 @@ private:
     int64_t last_tick = 0;
 };
 
-void compute_power(float rx, float ry, float& power_left, float& power_right, float pivot, float max_power);
+void compute_power(float rx, float ry, float& power_left, float& power_right, float pivot);
 
 // -1.0 to 1.0
 void set_motors(float m1, float m2);

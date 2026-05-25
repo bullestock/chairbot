@@ -118,7 +118,7 @@ int apply_s_curve(int x)
     return -log(1.0/scaled - 1)*(x > 0 ? max_range/max_logit : -max_range/max_logit);
 }
 
-void compute_power(float rx, float ry, float& power_left, float& power_right, float pivot, float max_power)
+void compute_power(float rx, float ry, float& power_left, float& power_right, float pivot)
 {
     const float x = rx * pivot/1.0;
     const float y = ry;
@@ -140,13 +140,9 @@ void compute_power(float rx, float ry, float& power_left, float& power_right, fl
     right = right * sqrt(2);
 
     // clamp to (-1, 1)
-    left = std::max<float>(-1.0, std::min<float>(left, 1.0));
-    right = std::max<float>(-1.0, std::min<float>(right, 1.0));
+    power_left = std::max<float>(-1.0, std::min<float>(left, 1.0));
+    power_right = std::max<float>(-1.0, std::min<float>(right, 1.0));
 
-    // Scale by max_power
-    power_left = left*max_power;
-    power_right = right*max_power;
-    
     const float min_power = 0.02;
     if (abs(power_left) < min_power)
         power_left = 0.0;

@@ -42,7 +42,6 @@ int64_t total_packets = 0;
 const int NOF_BATTERY_READINGS = 100;
 float battery_readings[NOF_BATTERY_READINGS];
 int battery_reading_index = 0;
-float max_power = 0.1;
 
 static void handle_battery(const Battery& battery, ReturnAirFrame& ret_frame)
 {
@@ -132,11 +131,6 @@ void handle_frame(const ForwardAirFrame& frame,
     case Command::None:
         break;
         
-    case Command::Speed:
-        max_power = std::min(1.0, static_cast<float>(frame.data.speed.speed)/4096.0);
-        printf("Max power set to %.2f\n", max_power);
-        break;
-
     case Command::Sound:
         handle_sound(frame, ret_frame);
         break;
@@ -160,7 +154,7 @@ void handle_frame(const ForwardAirFrame& frame,
     float power_left = 0.0;
     float power_right = 0.0;
     compute_power(frame.right_x, frame.right_y, power_left, power_right,
-                  pivot, max_power);
+                  pivot);
     static int count = 0;
     ++count;
     if (count > 100)
