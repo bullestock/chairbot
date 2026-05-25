@@ -43,15 +43,6 @@ const int NOF_BATTERY_READINGS = 100;
 float battery_readings[NOF_BATTERY_READINGS];
 int battery_reading_index = 0;
 float max_power = 0.1;
-int current_track_index = 0;
-
-enum class State
-{
-    Normal,
-    TrackList,
-};
-
-static State state = State::Normal;
 
 static void handle_battery(const Battery& battery, ReturnAirFrame& ret_frame)
 {
@@ -76,14 +67,17 @@ static void handle_sound(const ForwardAirFrame& frame,
     switch (frame.data.sound.sound_command)
     {
     case SoundCommand::ListSounds:
-        ret_frame.command = Command::Sound;
-        ret_frame.data.track.index = 0;
-        ret_frame.data.track.track_count = get_sd_track_count();
-        if (ret_frame.data.track.track_count > 0)
         {
-            strncpy(ret_frame.data.track.track, sd_get_tracks()[0].c_str(), ReturnAirFrame::TRACK_NAME_SIZE);
-            current_track_index = 0;
-            state = State::TrackList;
+            ret_frame.command = Command::Sound;
+            ret_frame.data.track.track_count = get_sd_track_count();
+            const auto req_index = frame.data.sound.index;
+            if (req_index >= ret_frame.data.track.track_count)
+                printf("Invalid track requested: %u\n", req_index);
+            else
+            {
+                ret_frame.data.track.index = req_index;
+                strncpy(ret_frame.data.track.track, sd_get_tracks()[req_index].c_str(), ReturnAirFrame::TRACK_NAME_SIZE);
+            }
         }
         break;
         
@@ -136,20 +130,6 @@ void handle_frame(const ForwardAirFrame& frame,
     switch (frame.command)
     {
     case Command::None:
-        // If no other command, send remaining tracks
-        if (state == State::TrackList)
-        {
-            ++current_track_index;
-            if (current_track_index >= get_sd_track_count())
-                state = State::Normal;
-            else
-            {
-                ret_frame.command = Command::Sound;
-                ret_frame.data.track.index = current_track_index;
-                ret_frame.data.track.track_count = get_sd_track_count();
-                strncpy(ret_frame.data.track.track, sd_get_tracks()[current_track_index].c_str(), ReturnAirFrame::TRACK_NAME_SIZE);
-            }
-        }
         break;
         
     case Command::Speed:
