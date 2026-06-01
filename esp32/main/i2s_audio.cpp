@@ -1638,12 +1638,12 @@ static void sd_scan_files()
     char buf[SD_FILENAME_MAX];
     strcpy(buf, SDCARD_ROOT_PATH);
     strcat(buf, "/effects/");
-    sd_scan_dir_recursive(buf, 4, strlen(buf), sd_effects);
+    sd_scan_dir_recursive(buf, 4, strlen(buf)+1, sd_effects);
     ESP_LOGI(TAG, "SD card: found %d file(s) in %s",
              (int) sd_effects.size(), buf);
     strcpy(buf, SDCARD_ROOT_PATH);
     strcat(buf, "/music/");
-    sd_scan_dir_recursive(buf, 4, strlen(buf), sd_music);
+    sd_scan_dir_recursive(buf, 4, strlen(buf)+1, sd_music);
     ESP_LOGI(TAG, "SD card: found %d file(s) in %s",
              (int) sd_music.size(), buf);
 }
