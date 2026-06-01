@@ -202,21 +202,25 @@ int sound(int argc, char** argv)
 {
     static const char* sound_usage =
         "Valid commands:\n"
-        "sound           Show tracks\n"
-        "sound <index>   Play specified track\n"
-        "sound check     Check sounds\n"
-        "sound random    Play a random track\n"
-        "sound stop      Stop playing\n"
-        "sound volume    Set volume (0-100)\n";
+        "sound                   Show tracks\n"
+        "sound <effect> <index>  Play specified track\n"
+        "sound check             Check sounds\n"
+        "sound random            Play a random effect\n"
+        "sound stop              Stop playing\n"
+        "sound volume            Set volume (0-100)\n";
 
     if (argc < 2)
     {
-        const auto tracks = sd_get_tracks();
-        int i = 0;
-        for (const auto& e : tracks)
+        for (int j = 0; j < 2; ++j)
         {
-            printf("%3d: %s\n", i, e.c_str());
-            ++i;
+            printf("%s:\n", j == 0 ? "Effects" : "Music");
+            const auto tracks = sd_get_tracks(j == 0);
+            int i = 0;
+            for (const auto& e : tracks)
+            {
+                printf("%3d: %s\n", i, e.c_str());
+                ++i;
+            }
         }
         return 0;
     }
@@ -227,14 +231,18 @@ int sound(int argc, char** argv)
     }
     if (!strcmp(argv[1], "check"))
     {
-        const auto tracks = sd_get_tracks();
-        for (int i = 0; i < tracks.size(); ++i)
+        for (int j = 0; j < 2; ++j)
         {
-            std::string status = "OK";
-            if (check_sd_track(i, status))
-                printf("%3d: OK\n", i);
-            else
-                printf("%3d: (%s) %s\n", i, tracks[i].c_str(), status.c_str());
+            printf("%s:\n", j == 0 ? "Effects" : "Music");
+            const auto tracks = sd_get_tracks(j == 0);
+            for (int i = 0; i < tracks.size(); ++i)
+            {
+                std::string status = "OK";
+                if (check_sd_track(j == 0, i, status))
+                    printf("%3d: OK\n", i);
+                else
+                    printf("%3d: (%s) %s\n", i, tracks[i].c_str(), status.c_str());
+            }
         }
         return 0;
     }
@@ -242,10 +250,10 @@ int sound(int argc, char** argv)
     {
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         std::default_random_engine generator(seed);
-        std::uniform_int_distribution<int> distribution(0, get_sd_track_count());
+        std::uniform_int_distribution<int> distribution(0, get_sd_track_count(true));
         const int index = distribution(generator);
-        printf("Playing track %d\n", index);
-        start_sd_playback(index);
+        printf("Playing effect %d\n", index);
+        start_sd_playback(true, index);
         return 0;
     }
     if (!strcmp(argv[1], "stop"))
@@ -269,18 +277,19 @@ int sound(int argc, char** argv)
         set_sd_volume(volume);
         return 0;
     }
-    if (!isdigit(argv[1][0]))
+    if (argc < 3 || !isdigit(argv[2][0]))
     {
         printf(sound_usage);
         return 0;
     }
+    const auto is_effects = argv[1][0] == 'e';
     const int index = atoi(argv[1]);
-    if (index < 0 || index >= get_sd_track_count())
+    if (index < 0 || index >= get_sd_track_count(is_effects))
     {
         printf("Error: Invalid track index\n");
         return -1;
     }
-    start_sd_playback(index);
+    start_sd_playback(is_effects, index);
     return 0;
 }
 

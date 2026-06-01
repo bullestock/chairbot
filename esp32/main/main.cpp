@@ -65,17 +65,20 @@ static void handle_sound(const ForwardAirFrame& frame,
 {
     switch (frame.data.sound.sound_command)
     {
-    case SoundCommand::ListSounds:
+    case SoundCommand::ListEffects:
+    case SoundCommand::ListMusic:
         {
             ret_frame.command = Command::Sound;
-            ret_frame.data.track.track_count = get_sd_track_count();
+            ret_frame.data.track.command = frame.data.sound.sound_command;
+            const bool is_effects = frame.data.sound.sound_command == SoundCommand::ListEffects;
+            ret_frame.data.track.track_count = get_sd_track_count(is_effects);
             const auto req_index = frame.data.sound.index;
             if (req_index >= ret_frame.data.track.track_count)
                 printf("Invalid track requested: %u\n", req_index);
             else
             {
                 ret_frame.data.track.index = req_index;
-                strncpy(ret_frame.data.track.track, sd_get_tracks()[req_index].c_str(), ReturnAirFrame::TRACK_NAME_SIZE);
+                strncpy(ret_frame.data.track.track, sd_get_tracks(is_effects)[req_index].c_str(), ReturnAirFrame::TRACK_NAME_SIZE);
             }
         }
         break;
@@ -88,13 +91,13 @@ static void handle_sound(const ForwardAirFrame& frame,
             {
                 unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
                 std::default_random_engine generator(seed);
-                std::uniform_int_distribution<int> distribution(0, get_sd_track_count());
+                std::uniform_int_distribution<int> distribution(0, get_sd_track_count(true));
                 index = distribution(generator);
-                printf("Playing random track %d\n", index);
+                printf("Playing random effect %d\n", index);
             }
             else
                 printf("Playing track %d\n", index);
-            start_sd_playback(frame.data.sound.index);
+            start_sd_playback(true, index);
         }
         break;
         

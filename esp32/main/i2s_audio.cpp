@@ -324,10 +324,12 @@ static volatile bool s_sd_task_running = false;
  * can drain remaining data then exit — preventing orphan tasks between tracks. */
 static volatile bool s_sd_feeding_active = false;
 static int s_sd_track_index = 0;
+static bool track_index_is_effects = false;
 #define SD_MAX_TRACKS     64
 #define SD_FILENAME_MAX   128
 
-static std::vector<std::string> sd_tracks;
+static std::vector<std::string> sd_effects;
+static std::vector<std::string> sd_music;
 
 /* ============================================================================
  * 3-Band Software Equalizer
@@ -1573,7 +1575,9 @@ static bool sd_is_audio_ext(const char *ext)
             strcasecmp(ext, ".wav") == 0);
 }
 
-static void sd_scan_dir_recursive(const char* dirpath, int max_depth)
+static void sd_scan_dir_recursive(const char* dirpath, int max_depth,
+                                  int trim_count,
+                                  std::vector<std::string>& v)
 {
     if (max_depth <= 0)
         return;
@@ -1614,7 +1618,7 @@ static void sd_scan_dir_recursive(const char* dirpath, int max_depth)
             }
         }
         if (is_dir) {
-            sd_scan_dir_recursive(fullpath, max_depth - 1);
+            sd_scan_dir_recursive(fullpath, max_depth - 1, trim_count, v);
             continue;
         }
 
@@ -1624,22 +1628,29 @@ static void sd_scan_dir_recursive(const char* dirpath, int max_depth)
         /* Find the last '.' to get the extension (handles variable-length names) */
         const char *dot = strrchr(name, '.');
         if (dot && sd_is_audio_ext(dot))
-            sd_tracks.push_back(fullpath + strlen(SDCARD_ROOT_PATH) + 1);
+            v.push_back(fullpath + trim_count);
     }
     closedir(dir);
 }
 
-static int sd_scan_music_files()
+static void sd_scan_files()
 {
-    sd_scan_dir_recursive(SDCARD_ROOT_PATH, 4);
-    ESP_LOGI(TAG, "SD card: found %d file(s) in " SDCARD_ROOT_PATH, (int) sd_tracks.size());
-    std::sort(sd_tracks.begin(), sd_tracks.end());
-    return (int) sd_tracks.size();
+    char buf[SD_FILENAME_MAX];
+    strcpy(buf, SDCARD_ROOT_PATH);
+    strcat(buf, "/effects/");
+    sd_scan_dir_recursive(buf, 4, strlen(buf), sd_effects);
+    ESP_LOGI(TAG, "SD card: found %d file(s) in %s",
+             (int) sd_effects.size(), buf);
+    strcpy(buf, SDCARD_ROOT_PATH);
+    strcat(buf, "/music/");
+    sd_scan_dir_recursive(buf, 4, strlen(buf), sd_music);
+    ESP_LOGI(TAG, "SD card: found %d file(s) in %s",
+             (int) sd_music.size(), buf);
 }
 
-const std::vector<std::string>& sd_get_tracks()
+const std::vector<std::string>& sd_get_tracks(bool is_effects)
 {
-    return sd_tracks;
+    return is_effects ? sd_effects : sd_music;
 }
 
 #define SD_READ_BUF_SIZE  2048
@@ -1659,16 +1670,16 @@ static void sd_playback_task(void *pvParameters)
 {
     ESP_LOGI(TAG, "SD playback task started");
 
-    if (s_sd_track_index < 0 || s_sd_track_index >= sd_tracks.size())
+    if (s_sd_track_index < 0 || s_sd_track_index >= get_sd_track_count(track_index_is_effects))
     {
         ESP_LOGI(TAG, "SD: Invalid track %d", s_sd_track_index);
         abort_sd_playback();
         return;
     }
-            
+
+    const auto v = track_index_is_effects ? sd_effects : sd_music;
     const std::string filepath = std::string(SDCARD_ROOT_PATH) +
-        std::string("/") +
-        sd_tracks[s_sd_track_index];
+        std::string("/") + v[s_sd_track_index];
 
     /* Skip playlist files — they're metadata, not audio */
     {
@@ -1682,8 +1693,8 @@ static void sd_playback_task(void *pvParameters)
     }
 
     ESP_LOGI(TAG, "SD: Playing track %d/%d: %s",
-        s_sd_track_index + 1, (int) sd_tracks.size(),
-        sd_tracks[s_sd_track_index].c_str());
+        s_sd_track_index + 1, (int) v.size(),
+        v[s_sd_track_index].c_str());
     
     FILE* f = fopen(filepath.c_str(), "rb");
     if (!f)
@@ -1966,7 +1977,7 @@ void stop_sd_playback()
  * Start SD card playback.
  * Stops any active WiFi stream first, then mounts SD and starts playing.
  */
-bool start_sd_playback(int track_index)
+bool start_sd_playback(bool is_effects, int track_index)
 {
     if (s_sd_playback_active)
     {
@@ -1975,6 +1986,7 @@ bool start_sd_playback(int track_index)
     }
 
     s_sd_track_index = track_index;
+    track_index_is_effects = is_effects;
 
     /* Flush buffers between sources — critical on C5 without PSRAM */
     flush_ringbuffer(s_mp3_ringbuf, "compressed");
@@ -2052,9 +2064,9 @@ bool i2s_init()
         return false;
     }
 
-    sd_scan_music_files();
+    sd_scan_files();
 
-    if (sd_tracks.empty())
+    if (sd_effects.empty() && sd_music.empty())
     {
         ESP_LOGW(TAG, "No audio files found in " SDCARD_ROOT_PATH);
         esp_vfs_fat_sdcard_unmount("/sdcard", card);
@@ -2064,23 +2076,24 @@ bool i2s_init()
     return true;
 }
 
-int get_sd_track_count()
+int get_sd_track_count(bool is_effects)
 {
-    return (int) sd_tracks.size();
+    return (int) (is_effects ? sd_effects.size() : sd_music.size());
 }
 
-bool check_sd_track(int track_index,
+bool check_sd_track(bool is_effects,
+                    int track_index,
                     std::string& error_msg)
 {
-    if (track_index < 0 || track_index >= sd_tracks.size())
+    if (track_index < 0 || track_index >= get_sd_track_count(is_effects))
     {
         error_msg = "Invalid track index";
         return false;
     }
             
+    const auto v = is_effects ? sd_effects : sd_music;
     const std::string filepath = std::string(SDCARD_ROOT_PATH) +
-        std::string("/") +
-        sd_tracks[track_index];
+        std::string("/") + v[track_index];
     FILE* f = fopen(filepath.c_str(), "rb");
     if (!f)
     {
