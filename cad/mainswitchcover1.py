@@ -5,11 +5,11 @@ from epilogue import *
 
 # Overall w/h
 ow = 84.5
-oh = 65
+oh = 62
 th = 34
 # Cutout w/h
 cw = 47
-ch = 62
+ch = 60
 cx = 30
 # Insert 1 (M6)
 ins1_x = 25
@@ -25,18 +25,22 @@ ALIGN_MIN = (Align.MIN, Align.MIN)
 ALIGN_X = (Align.MIN, Align.CENTER)
 
 with BuildPart() as p:
+    # overall box
     with BuildSketch(Plane.XY):
         RectangleRounded(ow, oh, rr, align=ALIGN_MIN)
     extrude(amount=th)
+    # cutout
     with BuildSketch(Plane.XY):
         with Locations((cx, (ch-oh-rr)/2)):
             RectangleRounded(cw, ch+rr, rr, align=ALIGN_MIN)
     extrude(amount=th, mode=Mode.SUBTRACT)
+    # insert holes, M6
     with BuildSketch(Plane.XY):
-        with Locations((ins1_x, 30)):
+        with Locations((ins1_x, 30+0.75)):
             with GridLocations(1, ins1_cc, 1, 2):
                 Circle(radius=ins1_d/2)
     extrude(amount=th, mode=Mode.SUBTRACT)
+    # insert holes, M3
     with BuildSketch(Plane.XY):
         with Locations((ow/2, oh/2)):
             with GridLocations(ow-ins2_is, oh-ins2_is, 2, 2):
