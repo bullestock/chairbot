@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="mainswitchcover2.svg"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="2.3749"
+     inkscape:cx="88.424774"
+     inkscape:cy="149.05891"
+     inkscape:window-width="2560"
+     inkscape:window-height="1373"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="rect1"
+       style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       d="M 1.9998779 0 C 0.89187796 1.566648e-16 1.566648e-16 0.89187796 0 1.9998779 L 0 59.999955 C 1.566648e-16 61.107955 0.89187796 61.999833 1.9998779 61.999833 L 82.499874 61.999833 C 83.607874 61.999833 84.499752 61.107955 84.499752 59.999955 L 84.499752 48.749996 L 71.749626 48.749996 A 2.75 2.75 0 0 1 68.999923 46.000293 A 2.75 2.75 0 0 1 71.749626 43.250073 L 84.499752 43.250073 L 84.499752 18.74976 L 71.749626 18.74976 A 2.75 2.75 0 0 1 68.999923 16.000057 A 2.75 2.75 0 0 1 71.749626 13.249837 L 84.499752 13.249837 L 84.499752 1.9998779 C 84.499752 0.89187796 83.607874 1.566648e-16 82.499874 0 L 1.9998779 0 z " />
+    <circle
+       style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       id="path1"
+       cx="4.000001"
+       cy="4.000001"
+       r="1.6" />
+    <circle
+       style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       id="circle1"
+       cx="80.5"
+       cy="4.000001"
+       r="1.6" />
+    <circle
+       style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       id="circle2"
+       cx="80.5"
+       cy="58"
+       r="1.6" />
+    <circle
+       style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       id="circle3"
+       cx="4.000001"
+       cy="58"
+       r="1.6" />
+  </g>
+</svg>
