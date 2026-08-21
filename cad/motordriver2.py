@@ -9,6 +9,7 @@ th = 3
 
 mhole_cc = 25
 insert_d = 4.1
+insert_l = 5
 
 rr = 2
 
@@ -20,7 +21,7 @@ with BuildPart() as p:
     # bracket
     with BuildSketch(Plane.XZ):
         Rectangle(ow, 10, align=(Align.CENTER, Align.MIN))
-    extrude(amount=th)
+    extrude(amount=insert_l)
 
     filletz(p, 1)
 
@@ -29,7 +30,7 @@ with BuildPart() as p:
         with Locations((0, 5)):
             with GridLocations(mhole_cc, 1, 2, 1):
                 Circle(radius=insert_d/2-0.1) # orientation compensation
-    extrude(amount=th, mode=Mode.SUBTRACT)
+    extrude(amount=insert_l, mode=Mode.SUBTRACT)
     with BuildSketch(Plane.XY):
         with Locations((0, oh/2)):
             Circle(radius=8.5/2)

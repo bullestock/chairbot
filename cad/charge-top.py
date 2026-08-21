@@ -18,7 +18,7 @@ h = 17.9
 outer_h = h + bth
 
 mhole_cc = 150
-mhole_d = 8
+mhole_d = 8.5
 
 # compute outer dimensions
 
