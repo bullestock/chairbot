@@ -1592,7 +1592,7 @@ static void sd_scan_dir_recursive(const char* dirpath, int max_depth,
     while (struct dirent* entry = readdir(dir))
     {
         const char* name = entry->d_name;
-        /* Skip hidden files and . / .. */
+        // Skip hidden files and . / ..
         if (name[0] == '.')
             continue;
 
@@ -1611,13 +1611,14 @@ static void sd_scan_dir_recursive(const char* dirpath, int max_depth,
          * d_type may be DT_UNKNOWN on some VFS/filesystem implementations,
          * so fall back to stat() when needed. */
         bool is_dir = (entry->d_type == DT_DIR);
-        if (!is_dir && entry->d_type == DT_UNKNOWN) {
+        if (!is_dir && entry->d_type == DT_UNKNOWN)
+        {
             struct stat st;
-            if (stat(fullpath, &st) == 0 && S_ISDIR(st.st_mode)) {
+            if (stat(fullpath, &st) == 0 && S_ISDIR(st.st_mode))
                 is_dir = true;
-            }
         }
-        if (is_dir) {
+        if (is_dir)
+        {
             sd_scan_dir_recursive(fullpath, max_depth - 1, trim_count, v);
             continue;
         }
@@ -1626,9 +1627,9 @@ static void sd_scan_dir_recursive(const char* dirpath, int max_depth,
         if (nlen_d < 5)
             continue;
         /* Find the last '.' to get the extension (handles variable-length names) */
-        const char *dot = strrchr(name, '.');
+        const char* dot = strrchr(name, '.');
         if (dot && sd_is_audio_ext(dot))
-            v.push_back(fullpath + trim_count);
+            v.push_back(std::string(fullpath + trim_count).substr(0, dot - name));
     }
     closedir(dir);
 }
