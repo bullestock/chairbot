@@ -79,7 +79,8 @@ with BuildPart() as p:
             Circle(radius=mhole_d/2)
     extrude(amount=outer_h, mode=Mode.SUBTRACT)
 
-print("Overall dimensions", ow, "x", oh)
+print("Overall dimensions", mhole_cc + 2*mhole_d, "x", oh)
+print("Lid", ow, "x", oh)
 print("Insert holes c/c", ow-2*ins_is, oh-2*ins_is)
 
 epilogue(p)
