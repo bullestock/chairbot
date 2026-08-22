@@ -24,12 +24,12 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="2.3749"
-     inkscape:cx="88.424774"
+     inkscape:cx="88.214241"
      inkscape:cy="149.05891"
-     inkscape:window-width="2560"
-     inkscape:window-height="1373"
+     inkscape:window-width="1920"
+     inkscape:window-height="1029"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
@@ -41,27 +41,27 @@
     <path
        id="rect1"
        style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
-       d="M 1.9998779 0 C 0.89187796 1.566648e-16 1.566648e-16 0.89187796 0 1.9998779 L 0 59.999955 C 1.566648e-16 61.107955 0.89187796 61.999833 1.9998779 61.999833 L 82.499874 61.999833 C 83.607874 61.999833 84.499752 61.107955 84.499752 59.999955 L 84.499752 48.749996 L 71.749626 48.749996 A 2.75 2.75 0 0 1 68.999923 46.000293 A 2.75 2.75 0 0 1 71.749626 43.250073 L 84.499752 43.250073 L 84.499752 18.74976 L 71.749626 18.74976 A 2.75 2.75 0 0 1 68.999923 16.000057 A 2.75 2.75 0 0 1 71.749626 13.249837 L 84.499752 13.249837 L 84.499752 1.9998779 C 84.499752 0.89187796 83.607874 1.566648e-16 82.499874 0 L 1.9998779 0 z " />
+       d="M 1.9998779 0 C 0.89187802 1.566648e-16 7.8332402e-16 0.89187802 0 1.9998779 L 0 59.999955 C 1.566648e-16 61.107955 0.89187802 61.999833 1.9998779 61.999833 L 82.499874 61.999833 C 83.607874 61.999833 84.499752 61.107955 84.499752 59.999955 L 84.499752 48.749996 L 80.458138 48.749996 C 79.63666 49.815734 78.347094 50.49976 76.891431 50.49976 L 67.891463 50.49976 C 65.398463 50.49976 63.391479 48.492776 63.391479 45.999776 C 63.391479 43.506776 65.398463 41.499792 67.891463 41.499792 L 76.891431 41.499792 C 78.347125 41.499792 79.63718 42.184295 80.458655 43.250073 L 84.499752 43.250073 L 84.499752 18.74976 L 80.523767 18.74976 C 79.706297 19.864991 78.386231 20.58634 76.891431 20.58634 L 67.891463 20.58634 C 65.398463 20.58634 63.391479 18.579357 63.391479 16.086357 C 63.391479 13.593357 65.398463 11.586373 67.891463 11.586373 L 76.891431 11.586373 C 78.307221 11.586373 79.566208 12.233838 80.389925 13.249837 L 84.499752 13.249837 L 84.499752 1.9998779 C 84.499752 0.89187802 83.607874 7.8332402e-16 82.499874 0 L 1.9998779 0 z " />
     <circle
-       style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       style="fill:none;stroke:#cf0000;stroke-width:0.499999;stroke-linejoin:round;stroke-opacity:1"
        id="path1"
        cx="4.000001"
        cy="4.000001"
        r="1.6" />
     <circle
-       style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       style="fill:none;stroke:#cf0000;stroke-width:0.499999;stroke-linejoin:round;stroke-opacity:1"
        id="circle1"
        cx="80.5"
        cy="4.000001"
        r="1.6" />
     <circle
-       style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       style="fill:none;stroke:#cf0000;stroke-width:0.499999;stroke-linejoin:round;stroke-opacity:1"
        id="circle2"
        cx="80.5"
        cy="58"
        r="1.6" />
     <circle
-       style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
+       style="fill:none;stroke:#cf0000;stroke-width:0.499999;stroke-linejoin:round;stroke-opacity:1"
        id="circle3"
        cx="4.000001"
        cy="58"
