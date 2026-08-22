@@ -4,15 +4,15 @@ from ocp_vscode import *
 from epilogue import *
 
 # Overall w/h
-ow = 84.5
+ow = 70
 oh = 62
 th = 34
 # Cutout w/h
 cw = 47
 ch = 60
-cx = 30
+cx = 15
 # Insert 1 (M6)
-ins1_x = 25
+ins1_x = 10
 ins1_cc = 20
 ins1_d = 7.1
 # Insert 2 (M3)
