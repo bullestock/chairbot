@@ -5,7 +5,7 @@ from epilogue import *
 
 iw = 124.5
 h = 18
-arc_ir = 17.75
+arc_ir = 20
 th = 3
 
 ALIGN_MIN = (Align.MIN, Align.MIN)
