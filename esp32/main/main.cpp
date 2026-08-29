@@ -151,8 +151,8 @@ void handle_frame(const ForwardAirFrame& frame,
     set_crc(ret_frame);
     send_frame(ret_frame);
 
-    const float MIN_PIVOT = 0.2;
-    const float MAX_PIVOT = 1.0;
+    // const float MIN_PIVOT = 0.2;
+    // const float MAX_PIVOT = 1.0;
     const float pivot = 0.5;
     float power_left = 0.0;
     float power_right = 0.0;

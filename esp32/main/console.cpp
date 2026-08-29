@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include <chrono>
+#include <limits>
 #include <random>
 
 #include <esp_system.h>
@@ -27,59 +28,84 @@
 int motor_test(int argc, char** argv)
 {
     int count = 1;
+    bool only_a = false;
+    bool only_b = false;
     if (argc > 1)
-        count = atoi(argv[1]);
+    {
+        if (isdigit(argv[1][0]))
+            count = atoi(argv[1]);
+        else if (!strcmp(argv[1], "a"))
+            only_a = true;
+        else if (!strcmp(argv[1], "b"))
+            only_b = true;
+        else if (!strcmp(argv[1], "A"))
+        {
+            only_a = true;
+            count = std::numeric_limits<int>::max();
+        }
+        else if (!strcmp(argv[1], "B"))
+        {
+            only_b = true;
+            count = std::numeric_limits<int>::max();
+        }
+    }
 
     printf("Running motor test (%d)\n", count);
     for (int j = 0; j < count; ++j)
     {
         set_motors(0, 0);
-        for (int i = 10; i <= 100; ++i)
+        if (!only_b)
         {
-            if (!(i % 10))
-                printf("A %d\n", i);
-            set_motors(i/100.0, 0);
-            vTaskDelay(50/portTICK_PERIOD_MS);
+            for (int i = 10; i <= 100; ++i)
+            {
+                if (!(i % 10))
+                    printf("A %d\n", i);
+                set_motors(i/100.0, 0);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            }
+            for (int i = 100; i >= -100; --i)
+            {
+                if (!(i % 10))
+                    printf("A %d\n", i);
+                set_motors(i/100.0, 0);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            }
+            for (int i = -100; i <= 0; ++i)
+            {
+                if (!(i % 10))
+                    printf("A %d\n", i);
+                set_motors(i/100.0, 0);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            }
+            set_motors(0, 0);
+            vTaskDelay(1000/portTICK_PERIOD_MS);
         }
-        for (int i = 100; i >= -100; --i)
+        if (!only_a)
         {
-            if (!(i % 10))
-                printf("A %d\n", i);
-            set_motors(i/100.0, 0);
-            vTaskDelay(50/portTICK_PERIOD_MS);
+            for (int i = 10; i <= 100; ++i)
+            {
+                if (!(i % 10))
+                    printf("B %d\n", i);
+                set_motors(0, i/100.0);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            }
+            for (int i = 100; i >= -100; --i)
+            {
+                if (!(i % 10))
+                    printf("B %d\n", i);
+                set_motors(0, i/100.0);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            }
+            for (int i = -100; i <= 0; ++i)
+            {
+                if (!(i % 10))
+                    printf("B %d\n", i);
+                set_motors(0, i/100.0);
+                vTaskDelay(50/portTICK_PERIOD_MS);
+            }
+            set_motors(0, 0);
+            vTaskDelay(1000/portTICK_PERIOD_MS);
         }
-        for (int i = -100; i <= 0; ++i)
-        {
-            if (!(i % 10))
-                printf("A %d\n", i);
-            set_motors(i/100.0, 0);
-            vTaskDelay(50/portTICK_PERIOD_MS);
-        }
-        set_motors(0, 0);
-        vTaskDelay(1000/portTICK_PERIOD_MS);
-        for (int i = 10; i <= 100; ++i)
-        {
-            if (!(i % 10))
-                printf("B %d\n", i);
-            set_motors(0, i/100.0);
-            vTaskDelay(50/portTICK_PERIOD_MS);
-        }
-        for (int i = 100; i >= -100; --i)
-        {
-            if (!(i % 10))
-                printf("B %d\n", i);
-            set_motors(0, i/100.0);
-            vTaskDelay(50/portTICK_PERIOD_MS);
-        }
-        for (int i = -100; i <= 0; ++i)
-        {
-            if (!(i % 10))
-                printf("B %d\n", i);
-            set_motors(0, i/100.0);
-            vTaskDelay(50/portTICK_PERIOD_MS);
-        }
-        set_motors(0, 0);
-        vTaskDelay(1000/portTICK_PERIOD_MS);
     }
     return 0;
 }
