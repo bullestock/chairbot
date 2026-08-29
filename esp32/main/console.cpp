@@ -48,6 +48,19 @@ int motor_test(int argc, char** argv)
             only_b = true;
             count = std::numeric_limits<int>::max();
         }
+        else if (!strcmp(argv[1], "brake"))
+        {
+            printf("Running brake test\n");
+            set_motors(0, 0);
+            for (int j = 0; j < 5; ++j)
+            {
+                gpio_set_level(GPIO_ENABLE, 1);
+                vTaskDelay(5000/portTICK_PERIOD_MS);
+                gpio_set_level(GPIO_ENABLE, 0);
+                vTaskDelay(5000/portTICK_PERIOD_MS);
+            }
+            return 0;
+        }
     }
 
     printf("Running motor test (%d)\n", count);
