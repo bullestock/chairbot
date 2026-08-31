@@ -78,7 +78,7 @@ static void handle_sound(const ForwardAirFrame& frame,
             else
             {
                 ret_frame.data.track.index = req_index;
-                strncpy(ret_frame.data.track.track, sd_get_tracks(is_effects)[req_index].c_str(), ReturnAirFrame::TRACK_NAME_SIZE);
+                strlcpy(ret_frame.data.track.track, sd_get_tracks(is_effects)[req_index].c_str(), ReturnAirFrame::TRACK_NAME_SIZE);
             }
         }
         break;
@@ -200,11 +200,9 @@ void main_loop(void* pvParameters)
         if (loopcount >= 100)
             loopcount = 0;
 
-#if 0
         if (is_halted())
             set_motors(0, 0);
         else
-#endif
         {
             const auto frame = get_received_frame();
             handle_frame(frame, battery);

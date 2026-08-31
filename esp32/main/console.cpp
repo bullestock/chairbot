@@ -59,6 +59,7 @@ int motor_test(int argc, char** argv)
                 gpio_set_level(GPIO_ENABLE, 0);
                 vTaskDelay(5000/portTICK_PERIOD_MS);
             }
+            printf("done\n");
             return 0;
         }
     }

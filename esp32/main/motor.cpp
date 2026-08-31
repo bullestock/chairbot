@@ -143,7 +143,7 @@ void compute_power(float rx, float ry, float& power_left, float& power_right, fl
     power_left = std::max<float>(-1.0, std::min<float>(left, 1.0));
     power_right = std::max<float>(-1.0, std::min<float>(right, 1.0));
 
-    const float min_power = 0.02;
+    const float min_power = 0.06; // TODO
     if (abs(power_left) < min_power)
         power_left = 0.0;
     if (abs(power_right) < min_power)
