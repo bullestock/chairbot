@@ -24,8 +24,8 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="0.99597363"
-     inkscape:cx="397.09887"
-     inkscape:cy="561.25984"
+     inkscape:cx="399.10695"
+     inkscape:cy="562.26388"
      inkscape:window-width="2560"
      inkscape:window-height="1369"
      inkscape:window-x="0"
@@ -65,18 +65,20 @@
     </g>
     <g
        id="g6"
-       transform="translate(2.5)">
+       transform="matrix(0.99087353,0,0,1,2.5524772,-3.75)"
+       style="stroke-width:1.00459">
       <g
          id="g3"
-         transform="translate(5.75,120.75)">
+         transform="translate(5.75,120.75)"
+         style="stroke-width:1.00459">
         <circle
-           style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linejoin:round"
+           style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
            id="path1"
            cx="4.25"
            cy="4.25"
            r="4.25" />
         <circle
-           style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linejoin:round"
+           style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
            id="circle3"
            cx="4.25"
            cy="34.25"
@@ -84,15 +86,16 @@
       </g>
       <g
          id="g5"
-         transform="translate(380.75,120.75)">
+         transform="translate(380.75,120.75)"
+         style="stroke-width:1.00459">
         <circle
-           style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linejoin:round"
+           style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
            id="circle4"
            cx="4.25"
            cy="4.25"
            r="4.25" />
         <circle
-           style="fill:none;stroke:#000000;stroke-width:0.5;stroke-linejoin:round"
+           style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
            id="circle5"
            cx="4.25"
            cy="34.25"
