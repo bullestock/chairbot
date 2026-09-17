@@ -23,15 +23,16 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="0.99597363"
-     inkscape:cx="399.10695"
-     inkscape:cy="562.26388"
+     inkscape:zoom="0.70425971"
+     inkscape:cx="-48.98761"
+     inkscape:cy="546.67333"
      inkscape:window-width="2560"
      inkscape:window-height="1369"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     showgrid="false" />
   <defs
      id="defs1" />
   <g
@@ -64,43 +65,38 @@
          r="4.25" />
     </g>
     <g
-       id="g6"
-       transform="matrix(0.99087353,0,0,1,2.5524772,-3.75)"
+       id="g3"
+       transform="matrix(0.99087353,0,0,1,8.25,117)"
        style="stroke-width:1.00459">
-      <g
-         id="g3"
-         transform="translate(5.75,120.75)"
-         style="stroke-width:1.00459">
-        <circle
-           style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
-           id="path1"
-           cx="4.25"
-           cy="4.25"
-           r="4.25" />
-        <circle
-           style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
-           id="circle3"
-           cx="4.25"
-           cy="34.25"
-           r="4.25" />
-      </g>
-      <g
-         id="g5"
-         transform="translate(380.75,120.75)"
-         style="stroke-width:1.00459">
-        <circle
-           style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
-           id="circle4"
-           cx="4.25"
-           cy="4.25"
-           r="4.25" />
-        <circle
-           style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
-           id="circle5"
-           cx="4.25"
-           cy="34.25"
-           r="4.25" />
-      </g>
+      <circle
+         style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
+         id="path1"
+         cx="4.25"
+         cy="4.25"
+         r="4.25" />
+      <circle
+         style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
+         id="circle3"
+         cx="4.25"
+         cy="34.25"
+         r="4.25" />
+    </g>
+    <g
+       id="g5"
+       transform="matrix(0.99087353,0,0,1,382.25,117)"
+       style="stroke-width:1.00459">
+      <circle
+         style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
+         id="circle4"
+         cx="4.25"
+         cy="4.25"
+         r="4.25" />
+      <circle
+         style="fill:none;stroke:#000000;stroke-width:0.502297;stroke-linejoin:round"
+         id="circle5"
+         cx="4.25"
+         cy="34.25"
+         r="4.25" />
     </g>
     <circle
        style="fill:none;stroke:#000000;stroke-width:0.499999;stroke-linejoin:round"
