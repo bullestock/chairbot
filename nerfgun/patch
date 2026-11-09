@@ -1,0 +1,48 @@
+diff --git a/config.h b/config.h
+index ba1f836..56fb32e 100644
+--- a/config.h
++++ b/config.h
+@@ -46,7 +46,7 @@ specific needs, i.e. performance tuning or adjusting to non-typical machines.
+ If more than 3 axes are configured a compliant driver and board map file is needed.
+  */
+ #ifndef N_AXIS
+-#define N_AXIS 3 // Number of axes
++#define N_AXIS 4 // Number of axes
+ #endif
+ 
+ /*! \def AXIS_REMAP_ABC2UVW
+diff --git a/grbl b/grbl
+--- a/grbl
++++ b/grbl
+@@ -1 +1 @@
+-Subproject commit ffbb587ad527ca7caef2c2ec219a4f755dbd348e
++Subproject commit ffbb587ad527ca7caef2c2ec219a4f755dbd348e-dirty
+diff --git a/my_machine.h b/my_machine.h
+index 14b5f8b..d177da9 100644
+--- a/my_machine.h
++++ b/my_machine.h
+@@ -22,7 +22,7 @@
+ // NOTE: Only one board may be enabled!
+ // If none is enabled pin mappings from generic_map.h will be used.
+ //#define BOARD_BOLANGSK //change PICO_BOARD to pimoroni_pga2350 in CMakeLists.txt for this to compile
+-//#define BOARD_BTT_SKR_PICO_10
++#define BOARD_BTT_SKR_PICO_10
+ //#define BOARD_BTT_SKR_PICO_10_HOTWIRE // Swaps spindle PWM and coolant outputs to utilize the bed heater (HB) output to control the hotwire. 
+ //#define BOARD_PICOBOB
+ //#define BOARD_PICOBOB_G540
+@@ -67,7 +67,7 @@
+ //#define WEBUI_AUTH_ENABLE       1 // Enable ESP3D-WEBUI authentication.
+ //#define WEBUI_INFLASH           0 // Uncomment to store WebUI files on SD card instead of in flash (littlefs).
+ //#define SDCARD_ENABLE           2 // Run gcode programs from SD card. Set to 2 to enable YModem upload.
+-//#define MPG_ENABLE              2 // Enable MPG interface. Requires a serial stream and means to switch between normal and MPG mode.
++#define MPG_ENABLE              2 // Enable MPG interface. Requires a serial stream and means to switch between normal and MPG mode.
+                                     // 1: Mode switching is by handshake pin.
+                                     // 2: Mode switching is by the CMD_MPG_MODE_TOGGLE (0x8B) command character.
+ //#define KEYPAD_ENABLE           1 // 1: uses a I2C keypad for input.
+@@ -171,3 +171,6 @@
+ #endif // WIFI_ENABLE
+ 
+ /**/
++
++#define N_AXIS 4
++                                    
