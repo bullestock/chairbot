@@ -1,0 +1,525 @@
+$0: Step pulse time in microseconds, min: 1.0
+
+Step pulse length in microseconds.
+Minimum depends on the processor and is typically in the range of 1 - 2.5.
+
+The length has to be reduced from the default value of 5 when max. step rate exceed approximately 140 kHz.
+
+$1: Step idle delay in milliseconds, max: 65535
+
+Sets a short hold delay when stopping to let dynamics settle before disabling steppers. Value 255 keeps motors enabled.
+
+$2: Step pulse invert as axismask
+
+Inverts the step signals (active low).
+
+$3: Step direction invert as axismask
+
+Inverts the direction signals (active low).
+
+$4: Invert stepper enable output(s) as axismask
+
+Inverts the stepper driver enable signals. Most drivers uses active low enable requiring inversion.
+
+NOTE: If the stepper drivers shares the same enable signal only X is used.
+
+$5: Invert limit inputs as axismask
+
+Inverts the axis limit input signals.
+
+$6: Invert probe inputs as bitfield:
+    0 - Probe (1)
+
+Inverts the probe input signal(s).
+
+$9: PWM spindle options as bitfield where setting bit 0 enables the rest:
+    0 - Enable (1)
+    1 - RPM controls spindle enable signal (2)
+    2 - Disable laser mode capability (4)
+    3 - Enable ramping (8)
+
+Enable controls PWM output availability.
+When `RPM controls spindle enable signal` is checked and M3 or M4 is active S0 switches it off and S > 0 switches it on.
+When 'Ramping enable' is checked spin up and spin down time is calculated from $394 and $539 respectively.
+
+$10: Status report options as bitfield:
+    0 - Position in machine coordinate (1)
+    1 - Buffer state (2)
+    2 - Line numbers (4)
+    3 - Feed & speed (8)
+    4 - Pin state (16)
+    5 - Work coordinate offset (32)
+    6 - Overrides (64)
+    7 - Probe coordinates (128)
+    8 - Buffer sync on WCO change (256)
+    9 - Parser state (512)
+    10 - Alarm substatus (1024)
+    11 - Run substatus (2048)
+    12 - Enable when homing (4096)
+    13 - Distance-to-go (8192)
+    14 - Extended (16384)
+
+Specifies optional data included in status reports and if report is sent when homing.
+If Run substatus is enabled it may be used for simple probe protection.
+
+NOTE: Parser state will be sent separately after the status report and only on changes.
+
+$11: Junction deviation in mm
+
+Sets how fast grblHAL travels through consecutive motions. Lower value slows it down.
+
+$12: Arc tolerance in mm
+
+Sets the G2 and G3 arc tracing accuracy based on radial error. Beware: A very small value may effect performance.
+
+$13: Report in inches as boolean
+
+Enables inch units when returning any position and rate value that is not a settings value.
+
+$14: Invert control inputs as bitfield:
+    6 - EStop (64)
+
+Inverts the control signals (active low).
+NOTE: Block delete, Optional stop, EStop and Probe connected are optional signals, availability is driver dependent.
+
+$15: Invert coolant outputs as bitfield:
+    0 - Flood (1)
+    1 - Mist (2)
+
+Inverts the coolant and mist signals (active low).
+
+$16: Invert spindle signals as bitfield:
+    0 - Spindle enable (1)
+    1 - Spindle direction (2)
+    2 - PWM (4)
+
+Reboot required.
+
+Inverts the spindle on, counterclockwise and PWM signals (active low).
+
+NOTE: A hard reset of the controller is required after changing this setting.
+
+$17: Pullup disable control inputs as bitfield:
+    6 - EStop (64)
+
+Disable the control signals pullup resistors. Potentially enables pulldown resistor if available.
+NOTE: Block delete, Optional stop and EStop are optional signals, availability is driver dependent.
+
+$18: Pullup disable limit inputs as axismask
+
+Disable the limit signals pullup resistors. Potentially enables pulldown resistors if available.
+
+$19: Pullup disable probe inputs as bitfield:
+    0 - Probe (1)
+
+Disable the probe signal pullup resistor(s). Potentially enables pulldown resistor(s) if available.
+
+$20: Soft limits enable as boolean
+
+Enables soft limits checks within machine travel and sets alarm when exceeded. Requires homing.
+
+$21: Hard limits enable as bitfield where setting bit 0 enables the rest:
+    0 - Enable (1)
+    1 - Strict mode (2)
+
+When enabled immediately halts motion and throws an alarm when a limit switch is triggered. In strict mode only homing is possible when a switch is engaged.
+
+$22: Homing cycle as bitfield where setting bit 0 enables the rest:
+    0 - Enable (1)
+    1 - Enable single axis commands (2)
+    2 - Homing on startup required (4)
+    3 - Set machine origin to 0 (8)
+    4 - Two switches shares one input (16)
+    5 - Allow manual (32)
+    6 - Override locks (64)
+    9 - Per axis feedrates (512)
+    10 - Run startup scripts only on homing completed (1024)
+
+Enables homing cycle. Requires limit switches on axes to be automatically homed.
+
+When `Enable single axis commands` is checked, single axis homing can be performed by $H<axis letter> commands.
+
+When `Allow manual` is checked, axes not homed automatically may be homed manually by $H or $H<axis letter> commands.
+
+`Override locks` is for allowing a soft reset to disable `Homing on startup required`.
+
+$23: Homing direction invert as axismask
+
+Homing searches for a switch in the positive direction. Set axis bit to search in negative direction.
+
+$24: Homing locate feed rate in mm/min
+
+Feed rate to slowly engage limit switch to determine its location accurately.
+
+$25: Homing search seek rate in mm/min
+
+Seek rate to quickly find the limit switch before the slower locating phase.
+
+$26: Homing switch debounce delay in milliseconds
+
+Sets a short delay between phases of homing cycle to let a switch debounce.
+
+$27: Homing switch pull-off distance in mm
+
+Retract distance after triggering switch to disengage it. Homing will fail if switch isn't cleared.
+
+$28: G73 Retract distance in mm
+
+G73 retract distance (for chip breaking drilling).
+
+$29: Pulse delay in microseconds, max: 20
+
+Step pulse delay.
+
+When set > 0 and less than 2 the value is rounded up to 2 microseconds.
+
+$30: Maximum spindle speed in RPM
+
+Maximum spindle speed, can be overridden by spindle plugins.
+
+$31: Minimum spindle speed in RPM
+
+Minimum spindle speed, can be overridden by spindle plugins.
+
+When set > 0 $35 (PWM min value) may have to be set to get the configured RPM.
+
+$32: Mode of operation:
+    0 - Normal
+    1 - Laser mode
+    2 - Lathe mode
+
+Laser mode: consecutive G1/2/3 commands will not halt when spindle speed is changed.
+Lathe mode: allows use of G7, G8, G96 and G97.
+
+$33: Spindle PWM frequency in Hz
+
+Spindle PWM frequency.
+
+$34: Spindle PWM off value in percent, max: 100
+
+Spindle PWM off value in percent (duty cycle).
+
+$35: Spindle PWM min value in percent, max: 100
+
+Spindle PWM min value in percent (duty cycle).
+
+$36: Spindle PWM max value in percent, max: 100
+
+Spindle PWM max value in percent (duty cycle).
+
+$37: Steppers to keep enabled as axismask
+
+Specifies which steppers not to disable when stopped.
+
+$39: Enable legacy RT commands as boolean
+
+Enables "normal" processing of ?, ! and ~ characters when part of $-setting or comment. If disabled then they are added to the input string instead.
+
+$40: Limit jog commands as boolean
+
+Limit jog commands to machine workspace for homed axes.
+
+$41: Parking cycle as bitfield where setting bit 0 enables the rest:
+    0 - Enable (1)
+    1 - Deactivate upon init (2)
+    2 - Enable parking override control (4)
+
+Enables parking cycle, requires parking axis homed.
+
+$42: Parking axis:
+    0 - X
+    1 - Y
+    2 - Z
+
+Define which axis that performs the parking motion.
+
+$43: Homing passes, range: 1 - 128
+
+Number of homing passes. Minimum 1, maximum 128.
+
+$44: Axes homing, first phase as axismask
+
+Axes to home in first phase.
+
+$45: Axes homing, second phase as axismask
+
+Axes to home in second phase.
+
+$46: Axes homing, third phase as axismask
+
+Axes to home in third phase.
+
+$56: Parking pull-out distance in mm
+
+Spindle pull-out and plunge distance in mm.Incremental distance.
+
+$57: Parking pull-out rate in mm/min
+
+Spindle pull-out/plunge slow feed rate in mm/min.
+
+$58: Parking target in mm, min: -100000
+
+Parking axis target. In mm, as machine coordinate [-max_travel, 0].
+
+$59: Parking fast rate in mm/min
+
+Parking fast rate to target after pull-out in mm/min.
+
+$60: End program actions as bitfield:
+    0 - Restore overrides (1)
+    1 - Restore G54 (2)
+
+Controls restore overrides and coordinate system to default values at program end (M2, M30).
+
+$61: Safety door options as bitfield:
+    1 - Keep coolant state on door open (2)
+
+Ignore when idle: disregard door signal in IDLE state to allow jogging etc. Available when controller has door input.
+Keep coolant state on open: do not turn off coolant if on.
+
+$62: Sleep enable as boolean
+
+Enable sleep mode.
+
+$63: Feed hold actions as bitfield:
+    0 - Disable laser during hold (1)
+    1 - Restore spindle and coolant state on resume (2)
+    2 - Set RPM to minimum (except for laser M4) (4)
+
+Actions taken during feed hold and on resume from feed hold.
+
+$64: Force init alarm as boolean
+
+Start in alarm mode after a cold reset.
+
+$65: Probing options as bitfield:
+    0 - Allow feed override (1)
+    1 - Apply soft limits (2)
+
+Allow feed override during probing and/or limit probing commands to machine workspace for homed axes.
+
+$100: X-axis travel resolution in step/mm
+
+Travel resolution in steps per millimeter.
+
+$101: Y-axis travel resolution in step/mm
+
+Travel resolution in steps per millimeter.
+
+$102: Z-axis travel resolution in step/mm
+
+Travel resolution in steps per millimeter.
+
+$110: X-axis maximum rate in mm/min
+
+Maximum rate. Used as G0 rapid rate.
+
+$111: Y-axis maximum rate in mm/min
+
+Maximum rate. Used as G0 rapid rate.
+
+$112: Z-axis maximum rate in mm/min
+
+Maximum rate. Used as G0 rapid rate.
+
+$120: X-axis acceleration in mm/sec^2
+
+Acceleration. Used for motion planning to not exceed motor torque and lose steps.
+
+$121: Y-axis acceleration in mm/sec^2
+
+Acceleration. Used for motion planning to not exceed motor torque and lose steps.
+
+$122: Z-axis acceleration in mm/sec^2
+
+Acceleration. Used for motion planning to not exceed motor torque and lose steps.
+
+$130: X-axis maximum travel in mm
+
+Maximum axis travel distance from homing switch. Determines valid machine space for soft-limits and homing search distances.
+
+$131: Y-axis maximum travel in mm
+
+Maximum axis travel distance from homing switch. Determines valid machine space for soft-limits and homing search distances.
+
+$132: Z-axis maximum travel in mm
+
+Maximum axis travel distance from homing switch. Determines valid machine space for soft-limits and homing search distances.
+
+$140: X-axis motor current in mA, range:  - 
+
+Motor current in mA (RMS).
+
+$141: Y-axis motor current in mA, range:  - 
+
+Motor current in mA (RMS).
+
+$142: Z-axis motor current in mA, range:  - 
+
+Motor current in mA (RMS).
+
+$150: X-axis microsteps in steps, range: 1 - 256
+
+Microsteps per fullstep.
+
+$151: Y-axis microsteps in steps, range: 1 - 256
+
+Microsteps per fullstep.
+
+$152: Z-axis microsteps in steps, range: 1 - 256
+
+Microsteps per fullstep.
+
+$200: X-axis StallGuard4 fast threshold, range: 0 - 255
+
+StallGuard threshold for fast (seek) homing phase.
+
+$201: Y-axis StallGuard4 fast threshold, range: 0 - 255
+
+StallGuard threshold for fast (seek) homing phase.
+
+$202: Z-axis StallGuard4 fast threshold, range: 0 - 255
+
+StallGuard threshold for fast (seek) homing phase.
+
+$210: X-axis hold current in %, range: 5 - 100
+
+Motor current at standstill as a percentage of full current.
+
+$211: Y-axis hold current in %, range: 5 - 100
+
+Motor current at standstill as a percentage of full current.
+
+$212: Z-axis hold current in %, range: 5 - 100
+
+Motor current at standstill as a percentage of full current.
+
+$220: X-axis StallGuard4 slow threshold, range: 0 - 255
+
+StallGuard threshold for slow (feed) homing phase.
+
+$221: Y-axis StallGuard4 slow threshold, range: 0 - 255
+
+StallGuard threshold for slow (feed) homing phase.
+
+$222: Z-axis StallGuard4 slow threshold, range: 0 - 255
+
+StallGuard threshold for slow (feed) homing phase.
+
+$339: Sensorless homing as axismask
+
+Enable sensorless homing for axes. Requires SPI or UART controlled Trinamic drivers.
+
+$341: Tool change mode:
+    0 - Normal
+    1 - Manual touch off
+    2 - Manual touch off @ G59.3
+    3 - Automatic touch off @ G59.3
+    4 - Ignore M6
+
+Normal: allows jogging for manual touch off. Set new position manually.
+
+Manual touch off: rapids to tool change position, use jogging or $TPW for touch off.
+
+Manual touch off @ G59.3: rapids to tool change position, after change to G59.3 position for manual touch off. Use jogging or $TPW for touch off.
+
+Automatic touch off @ G59.3: rapids to tool change position, after change to G59.3 position for automatic touch off.
+
+Depending on settings the tool (controlled point) will be moved back to the to original position after touch off. "tool change position" is either tool axis home, G59.3 or G30 position depending on settings.
+
+$342: Tool change probing distance in mm
+
+Maximum probing distance for automatic or $TPW touch off.
+
+$343: Tool change locate feed rate in mm/min
+
+Feed rate to slowly engage tool change sensor to determine the tool offset accurately.
+
+$344: Tool change search seek rate in mm/min
+
+Seek rate to quickly find the tool change sensor before the slower locating phase.
+
+$345: Tool change probe pull-off rate in mm/min
+
+Pull-off rate for the retract move before the slower locating phase.
+
+$346: Tool change options as bitfield:
+    0 - Restore position after M6 (1)
+    1 - Change tool at G30 (2)
+    2 - Fast probe pull off (4)
+
+Restore position after M6: when set the spindle is moved so that the controlled point (tool tip) is the same as before the M6 command,if not the spindle is only moved to the Z home position.
+
+Change tool at G30: when set rapids to the G30 position via tool axis home. Requires axes to be homed.
+
+Fast probe pulloff: use G38.4 style probing for faster touch off.
+
+$384: Disable G92 persistence as boolean
+
+Disables save/restore of G92 offset to non-volatile storage (NVS).
+
+$392: Spindle on delay in s, range: 0.5 - 60
+
+Delay to allow spindle to spin up after safety door is closed or on resume from park.
+
+$393: Coolant on delay in s, range: 0.5 - 20
+
+Delay to allow coolant to restart after safety door is closed or on resume from park.
+
+$394: Spindle on delay in s, range: 0.5 - 60
+
+Delay to allow spindle to spin up. 0 or 0.5 - 20s
+If spindle supports "at speed" functionality it is the time to wait before alarm 14 is raised.
+
+$398: Planner buffer blocks, range: 30 - 1000, reboot required
+
+Number of blocks in the planner buffer.
+
+NOTE: A hard reset of the controller is required after changing this setting.
+
+$481: Autoreport interval in ms, range: 100 - 1000, reboot required
+
+Interval the real time report will be sent, set to 0 to disable.
+
+NOTE: A hard reset of the controller is required after changing this setting.
+
+$484: Unlock required after E-Stop as boolean
+
+If set unlock (by sending $X) is required after resetting a cleared E-Stop condition.
+
+$485: Keep tool number over reboot as boolean
+
+$486: Lock coordinate systems as bitfield:
+    0 - G59.1 (1)
+    1 - G59.2 (2)
+    2 - G59.3 (4)
+
+Lock coordinate systems against accidental changes.
+
+$539: Spindle off delay in s, range: 0.5 - 60
+
+Delay to allow spindle to spin down. 0 or 0.5 - 20s
+If spindle supports "at speed" functionality it is the time to wait before alarm 14 is raised.
+
+$673: Coolant on delay in s, range: 0.5 - 20
+
+Delay to allow coolant to start. 0 or 0.5 - 20s.
+
+$676: Reset actions as bitfield:
+    0 - Clear homed status if position was lost (1)
+    1 - Clear offsets (except G92) (2)
+    2 - Clear rapids override (4)
+    3 - Clear feed override (8)
+
+Controls actions taken on a soft reset.
+
+$680: Stepper enable delay in ms, max: 500
+
+Delay from stepper enable to first step output. The driver typically adds ~2ms to this.
+
+$703: MPG autoreport interval in ms, range: 25 - 1000, reboot required
+
+Interval the real time report will be sent to MPG/pendant, set to 0 to disable.
+
+NOTE: A hard reset of the controller is required after changing this setting.
+ok
