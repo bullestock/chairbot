@@ -1,0 +1,36 @@
+diff --git a/grbl b/grbl
+--- a/grbl
++++ b/grbl
+@@ -1 +1 @@
+-Subproject commit ffbb587ad527ca7caef2c2ec219a4f755dbd348e
++Subproject commit ffbb587ad527ca7caef2c2ec219a4f755dbd348e-dirty
+diff --git a/my_machine.h b/my_machine.h
+index 14b5f8b..152d61f 100644
+--- a/my_machine.h
++++ b/my_machine.h
+@@ -22,7 +22,7 @@
+ // NOTE: Only one board may be enabled!
+ // If none is enabled pin mappings from generic_map.h will be used.
+ //#define BOARD_BOLANGSK //change PICO_BOARD to pimoroni_pga2350 in CMakeLists.txt for this to compile
+-//#define BOARD_BTT_SKR_PICO_10
++#define BOARD_BTT_SKR_PICO_10
+ //#define BOARD_BTT_SKR_PICO_10_HOTWIRE // Swaps spindle PWM and coolant outputs to utilize the bed heater (HB) output to control the hotwire. 
+ //#define BOARD_PICOBOB
+ //#define BOARD_PICOBOB_G540
+@@ -42,7 +42,7 @@
+ // Uncomment to enable.
+ 
+ #ifndef USB_SERIAL_CDC
+-#define USB_SERIAL_CDC          1 // Serial communication via native USB.
++#define USB_SERIAL_CDC          0 // Serial communication via UART
+ #endif
+ //#define BLUETOOTH_ENABLE        2 // Set to 2 for HC-05 module, enable in CMakeLists.txt if for Pico W Bluetooth.
+ // Spindle selection:
+@@ -171,3 +171,7 @@
+ #endif // WIFI_ENABLE
+ 
+ /**/
++
++#define N_AXIS 4
++                                    
++#define SERIAL_STREAM       0
